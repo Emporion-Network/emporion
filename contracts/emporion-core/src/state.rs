@@ -13,11 +13,13 @@ use crate::{
     error::ContractError,
     if_test,
     msg::{
-        CreateOrderExecuteMsg, CreateProductExecuteMessage, InfoResponse, InstantiateMsg, ReviewProductExecuteMsg, ReviewUserExecuteMsg, TotalPowerAtHeightResponse, VotingPowerAtHeightResponse
+        CreateOrderExecuteMsg, CreateProductExecuteMessage, InfoResponse, InstantiateMsg,
+        ReviewProductExecuteMsg, ReviewUserExecuteMsg, TotalPowerAtHeightResponse,
+        VotingPowerAtHeightResponse,
     },
 };
 
-pub(crate) const CONTRACT_NAME: &str = "crates.io:crzx-store";
+pub(crate) const CONTRACT_NAME: &str = "crates.io:emporion-core";
 pub(crate) const CONTRACT_VERSION: &str = env!("CARGO_PKG_VERSION");
 pub const MAX_ITEMS_PER_PAGE: usize = if_test!(2, 10);
 pub const MAX_MESSAGE_LEN: usize = 3000; // bytes
@@ -77,6 +79,7 @@ pub struct DistributionAssets {
 #[cw_serde]
 pub struct ContractParams {
     pub admin: Addr,
+    pub dev: Addr,
     pub fee_distribution: Distribution,
     pub investment_distribution: Distribution,
     pub fee: (u64, u64),
@@ -100,7 +103,7 @@ pub struct User {
     pub nb_orders: u64,
     pub nb_rejected_orders: u64,
     pub nb_disputed_orders: u64,
-    pub nb_fulfilled_orders:u64,
+    pub nb_fulfilled_orders: u64,
     pub generated_fees: AssetList,
     pub invested: AssetList,
     pub unbonding: Vec<(Asset, Expiration)>,
@@ -139,7 +142,7 @@ pub struct Order {
     pub products: Vec<u64>,
     pub status: OrderStatus,
     pub buyer_risk_share: (u64, u64),
-    pub expected_delivery:Expiration,
+    pub expected_delivery: Expiration,
 }
 
 ///////////////////////
@@ -154,7 +157,7 @@ pub struct Product {
     pub rating: (u64, u64),
     pub meta: String,
     pub is_listed: bool,
-    pub delivery_time:Duration,
+    pub delivery_time: Duration,
 }
 
 ///////////////////////
@@ -217,6 +220,10 @@ impl ContractParams {
         Ok(CONTRACT_PARAMS.load(deps.storage)?)
     }
 
+    pub fn save(&self, deps: &mut DepsMut) -> Result<(), ContractError> {
+        Ok(CONTRACT_PARAMS.save(deps.storage, &self)?)
+    }
+
     pub fn loaded_get_asset_wheight(&self, asset_info: &AssetInfo) -> u64 {
         self.weighted_accepted_assets
             .iter()
@@ -236,9 +243,22 @@ impl ContractParams {
         Err(ContractError::Unauthorized {})
     }
 
+    pub fn loaded_is_dev(&self, addr: &Addr) -> Result<(), ContractError> {
+        if self.dev == addr {
+            return Ok(());
+        }
+        Err(ContractError::Unauthorized {})
+    }
+
     pub fn is_admin(deps: Deps, addr: &Addr) -> Result<(), ContractError> {
         let params = ContractParams::load(deps)?;
         params.loaded_is_admin(addr)
+    }
+
+    pub fn is_dev(deps: Deps, addr: &Addr) -> Result<(), ContractError> {
+        let params = ContractParams::load(deps)?;
+        params.loaded_is_dev(addr)?;
+        Ok(())
     }
 
     pub fn check_assets(deps: Deps, list: &AssetList) -> Result<(), ContractError> {
@@ -260,10 +280,13 @@ impl ContractParams {
 
     pub fn check(deps: Deps, msg: InstantiateMsg) -> Result<ContractParams, ContractError> {
         let admin = deps.api.addr_validate(&msg.admin)?;
+        let dev = deps.api.addr_validate(&msg.dev)?;
         msg.fee_distribution.check()?;
         msg.investment_distribution.check()?;
         msg.publication_fee_distribution.check()?;
-        if msg.fee.numerator() > msg.fee.denominator() || msg.fee.denominator() == 0 {
+        if msg.fee_ratio.numerator() > msg.fee_ratio.denominator()
+            || msg.fee_ratio.denominator() == 0
+        {
             return Err(ContractError::InvalidFee {});
         }
         if msg.max_contract_risk_share.denominator() == 0 {
@@ -290,8 +313,9 @@ impl ContractParams {
 
         Ok(ContractParams {
             admin,
+            dev,
             weighted_accepted_assets,
-            fee: msg.fee,
+            fee: msg.fee_ratio,
             publication_fee: msg.publication_fee.check(deps.api, None)?,
             publication_fee_distribution: msg.publication_fee_distribution,
             fee_distribution: msg.fee_distribution,
@@ -305,7 +329,7 @@ impl ContractParams {
     pub fn msg_instantiate(
         deps: &mut DepsMut,
         env: Env,
-        _info: MessageInfo,
+        info: MessageInfo,
         msg: InstantiateMsg,
     ) -> Result<Response, ContractError> {
         set_contract_version(deps.storage, CONTRACT_NAME, CONTRACT_VERSION)?;
@@ -318,16 +342,47 @@ impl ContractParams {
         let next_dist = params.reward_rate.after(&env.block);
         NEXT_DISTRIBUTION.save(deps.storage, &next_dist)?;
 
-        Ok(Response::new())
+        Ok(Response::new()
+            .add_attribute("action", "instantiate")
+            .add_attribute("sender", info.sender))
+    }
+
+    pub fn msg_update(
+        deps: &mut DepsMut,
+        _env: Env,
+        info: MessageInfo,
+        msg: InstantiateMsg,
+    ) -> Result<Response, ContractError> {
+        ContractParams::is_admin(deps.as_ref(), &info.sender)?;
+        let params = ContractParams::check(deps.as_ref(), msg)?;
+        CONTRACT_PARAMS.save(deps.storage, &params)?;
+        Ok(Response::new()
+            .add_attribute("action", "update-params")
+            .add_attribute("sender", info.sender))
+    }
+
+    pub fn msg_update_admin(
+        deps: &mut DepsMut,
+        _env: Env,
+        info: MessageInfo,
+        new_admin: String,
+    ) -> Result<Response, ContractError> {
+        let mut params = ContractParams::load(deps.as_ref())?;
+        let new_admin = deps.api.addr_validate(&new_admin)?;
+        params.loaded_is_admin(&info.sender)?;
+        params.admin = new_admin.clone();
+        params.save(deps)?;
+        Ok(Response::new()
+        .add_attribute("action", "update-admin")
+        .add_attribute("sender", info.sender)
+        .add_attribute("new-admin", new_admin)
+        )
     }
 
     pub fn msg_query_info(deps: Deps) -> Result<QueryResponse, ContractError> {
         let info = get_contract_version(deps.storage)?;
-        
-        
-        Ok(to_json_binary(&InfoResponse{
-            info,
-        })?)
+
+        Ok(to_json_binary(&InfoResponse { info })?)
     }
 
     pub fn msg_query_params(deps: Deps) -> Result<QueryResponse, ContractError> {
@@ -550,7 +605,7 @@ impl Bank {
         amount: AssetListUnchecked,
         to: String,
     ) -> Result<Response, ContractError> {
-        ContractParams::is_admin(deps.as_ref(), &info.sender)?;
+        ContractParams::is_dev(deps.as_ref(), &info.sender)?;
         let to = deps.api.addr_validate(&to)?;
         let mut bnk = Bank::load(deps.as_ref())?;
         let amount = amount.check(deps.api, None)?;
@@ -808,7 +863,7 @@ impl User {
                     nb_orders: 0,
                     nb_rejected_orders: 0,
                     nb_disputed_orders: 0,
-                    nb_fulfilled_orders:0,
+                    nb_fulfilled_orders: 0,
                     generated_fees: AssetList::new(),
                     invested: AssetList::new(),
                     unbonding: vec![],
@@ -845,7 +900,7 @@ impl Product {
         Ok(PRODUCTS.save(deps.storage, self.id, &self)?)
     }
 
-    pub fn msg_query_by_id(deps: Deps, id: u64) -> Result<QueryResponse, ContractError>{
+    pub fn msg_query_by_id(deps: Deps, id: u64) -> Result<QueryResponse, ContractError> {
         Ok(to_json_binary(&Product::load(deps, id)?)?)
     }
 
@@ -861,7 +916,7 @@ impl Product {
         prms.loaded_check_assets(&price)?;
         prms.loaded_check_assets(&sent_publication_fee)?;
         if let Duration::Height(_) = msg.delivery_time {
-            return  Err(ContractError::InvalidDuration{});
+            return Err(ContractError::InvalidDuration {});
         }
         if !prms.publication_fee.is_empty() {
             let mut bnk = Bank::load(deps.as_ref())?;
@@ -894,7 +949,7 @@ impl Product {
             seller,
             is_listed: msg.is_listed,
             rating: (0, 0),
-            delivery_time:msg.delivery_time,
+            delivery_time: msg.delivery_time,
         };
         prd.save(deps)?;
         User::load_or_new(deps, prd.seller.clone())?;
@@ -1028,7 +1083,7 @@ impl Product {
 impl Order {
     pub fn create(
         deps: &mut DepsMut,
-        env:Env,
+        env: Env,
         order: CreateOrder,
         sent_assets: AssetList,
     ) -> Result<Order, ContractError> {
@@ -1063,7 +1118,7 @@ impl Order {
             })
             .collect::<Result<Vec<_>, _>>()?;
         let (products, checked_cart, expected_delivery) =
-            Order::check_cart(deps.as_ref(),env, &seller.addr, cart, &sent_assets)?;
+            Order::check_cart(deps.as_ref(), env, &seller.addr, cart, &sent_assets)?;
 
         let odr = Order {
             id,
@@ -1073,7 +1128,7 @@ impl Order {
             status: order.status,
             buyer_risk_share: order.buyer_risk_share,
             products,
-            expected_delivery
+            expected_delivery,
         };
         SELLER_TO_ORDER.save(deps.storage, (odr.seller.clone(), odr.id), &Empty {})?;
         BUYER_TO_ORDER.save(deps.storage, (odr.buyer.clone(), odr.id), &Empty {})?;
@@ -1086,13 +1141,13 @@ impl Order {
 
     pub fn check_cart(
         deps: Deps,
-        env:Env,
+        env: Env,
         seller: &Addr,
         cart: Vec<(u64, AssetInfo)>,
         sent_assets: &AssetList,
     ) -> Result<(Vec<u64>, AssetList, Expiration), ContractError> {
         if cart.len() == 0 {
-            return  Err(ContractError::InvalidCart{})
+            return Err(ContractError::InvalidCart {});
         }
         let mut assets = sent_assets.clone();
         let mut checked_cart = AssetList::new();
@@ -1125,7 +1180,7 @@ impl Order {
 
     pub fn update(
         deps: &mut DepsMut,
-        env:Env,
+        env: Env,
         order_id: u64,
         buyer: &Addr,
         cart: Vec<(u64, AssetInfoUnchecked)>,
@@ -1154,7 +1209,7 @@ impl Order {
             .collect::<Result<Vec<_>, _>>()?;
 
         let (mut prducts, checked_assets, expected_delivery) =
-            Order::check_cart(deps.as_ref(),env, &ord.seller, cart, &sent_assets)?;
+            Order::check_cart(deps.as_ref(), env, &ord.seller, cart, &sent_assets)?;
 
         ord.products.append(&mut prducts);
         ord.cart.add_many(&checked_assets)?;
@@ -1167,13 +1222,13 @@ impl Order {
 
     pub fn add_products(
         deps: &mut DepsMut,
-        env:Env,
+        env: Env,
         info: MessageInfo,
         order_id: u64,
         cart: Vec<(u64, AssetInfoUnchecked)>,
     ) -> Result<Response, ContractError> {
         let sent_assets = AssetList::from(info.funds);
-        let order = Order::update(deps,env, order_id, &info.sender, cart, sent_assets)?;
+        let order = Order::update(deps, env, order_id, &info.sender, cart, sent_assets)?;
         Ok(Response::new()
             .add_attribute("action", "order_updated")
             .add_attribute("sender", info.sender)
@@ -1182,7 +1237,7 @@ impl Order {
 
     pub fn msg_cw20_add_products(
         deps: &mut DepsMut,
-        env:Env,
+        env: Env,
         info: MessageInfo,
         sender: String,
         order_id: u64,
@@ -1191,7 +1246,7 @@ impl Order {
     ) -> Result<Response, ContractError> {
         let sent_assets = AssetList::from(vec![Asset::cw20(info.sender, amount)]);
         let buyer = deps.api.addr_validate(&sender)?;
-        let order = Order::update(deps,env, order_id, &buyer, cart, sent_assets)?;
+        let order = Order::update(deps, env, order_id, &buyer, cart, sent_assets)?;
 
         Ok(Response::new()
             .add_attribute("action", "order_updated")
@@ -1243,7 +1298,7 @@ impl Order {
         if ordr.status == OrderStatus::Pending {
             usr.nb_rejected_orders += 1;
         }
-        
+
         ordr.status = OrderStatus::Rejected;
         ordr.save(deps)?;
         usr.save(deps)?;
@@ -1258,7 +1313,7 @@ impl Order {
 
     pub fn msg_fulfill(
         deps: &mut DepsMut,
-        env:Env,
+        env: Env,
         info: MessageInfo,
         order_id: u64,
     ) -> Result<Response, ContractError> {
@@ -1270,8 +1325,8 @@ impl Order {
         // 4. update generated fees for both users
         // 5. update order status
         let mut ord = Order::load(deps.as_ref(), order_id)?;
-        if info.sender != ord.buyer &&
-        !(ord.seller == info.sender && ord.expected_delivery.is_expired(&env.block)) 
+        if info.sender != ord.buyer
+            && !(ord.seller == info.sender && ord.expected_delivery.is_expired(&env.block))
         {
             return Err(ContractError::Unauthorized {});
         }
@@ -1381,7 +1436,6 @@ impl Order {
                 .unwrap_or(&default_asset_amount);
             // bank should have enaugh to provide the complement
             if in_bnk_asset.amount > asset.amount {
-               
                 let to_buyer_asset = to_buyer
                     .find(&asset.info)
                     .unwrap_or(&default_asset_amount)
@@ -1503,7 +1557,7 @@ impl Order {
 
     pub fn msg_create(
         deps: &mut DepsMut,
-        env:Env,
+        env: Env,
         info: MessageInfo,
         msg: CreateOrderExecuteMsg,
     ) -> Result<Response, ContractError> {
@@ -1521,7 +1575,7 @@ impl Order {
             buyer_risk_share: msg.buyer_risk_share,
             status,
         };
-        let order = Order::create(deps,env, order, sent_assets)?;
+        let order = Order::create(deps, env, order, sent_assets)?;
         Ok(Response::new()
             .add_attribute("action", "order_created")
             .add_attribute("sender", info.sender)
@@ -1530,7 +1584,7 @@ impl Order {
 
     pub fn msg_cw20_create(
         deps: &mut DepsMut,
-        env:Env,
+        env: Env,
         info: MessageInfo,
         sender: String,
         amount: Uint128,
@@ -1552,7 +1606,7 @@ impl Order {
             buyer_risk_share: msg.buyer_risk_share,
             status,
         };
-        let order = Order::create(deps,env, order, sent_assets)?;
+        let order = Order::create(deps, env, order, sent_assets)?;
         Ok(Response::new()
             .add_attribute("action", "order_created")
             .add_attribute("sender", buyer)
@@ -1617,15 +1671,10 @@ impl Order {
         Ok(to_json_binary(&(res, start_from))?)
     }
 
-
-    pub fn msg_query_by_id(
-        deps: Deps,
-        order_id: u64,
-    ) -> Result<QueryResponse, ContractError> {
+    pub fn msg_query_by_id(deps: Deps, order_id: u64) -> Result<QueryResponse, ContractError> {
         let res = Order::load(deps, order_id)?;
         Ok(to_json_binary(&res)?)
     }
-
 
     pub fn load(deps: Deps, id: u64) -> Result<Order, ContractError> {
         Ok(ORDERS.load(deps.storage, id)?)

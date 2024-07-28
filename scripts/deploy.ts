@@ -7,9 +7,10 @@ import { appendFile } from "node:fs/promises";
 import * as DAOCore from '../DAO/types/DaoDaoCore';
 import * as DAOProposalSingle from '../DAO/types/DaoProposalSingle.v2';
 import * as DAOPreProposeSingle from '../DAO/types/DaoPreProposeSingle';
-
-
 import { Secp256k1HdWallet } from "@cosmjs/amino";
+import { loadEnvFile, envToString, assert } from "./utils";
+
+
 
 const encodeMessage = (message: any) => {
     return btoa(JSON.stringify(message))
@@ -30,28 +31,9 @@ let signer = await SigningCosmWasmClient.connectWithSigner(ENDPOINT, adminClient
 });
 
 
-const loadEnvFile = (txt: string) => {
-    return txt.split('\n').reduce((acc, l) => {
-        if (l.trim().length > 0) {
-            let [key, value] = l.split('=').map(e => e.trim());
-            acc[key] = value.startsWith('"') ? value.replaceAll('"', '') :
-                value.startsWith("'") ? value.replaceAll("'", '') : value;
-        }
-        return acc;
-    }, {} as Record<string, string>)
-}
-
-const envToString = (env: Record<string, string>) => {
-    let ret = "";
-    Object.entries(env).forEach(([k, v]) => {
-        ret += `${k}=${JSON.stringify(v)}\n`
-    });
-    return ret;
-}
-
 const deploy = async () => {
     const DAY = 24 * 60 * 60;
-    let emporion_store_wasm = new Uint8Array(await Bun.file('artifacts/store.wasm').arrayBuffer());
+    let emporion_store_wasm = new Uint8Array(await Bun.file('artifacts/emporion_core.wasm').arrayBuffer());
     let dao_core_wasm = new Uint8Array(await Bun.file('DAO/dao_dao_core.wasm').arrayBuffer());
     let dao_proposal_single_wasm = new Uint8Array(await Bun.file('DAO/dao_proposal_single.wasm').arrayBuffer());
     let dao_pre_propose_single_wasm = new Uint8Array(await Bun.file('DAO/dao_pre_propose_single.wasm').arrayBuffer());
@@ -63,7 +45,8 @@ const deploy = async () => {
 
     let instantiate_store: InstantiateMsg = {
         admin: adminAddress,
-        fee: [1, 100],
+        dev:adminAddress,
+        fee_ratio: [1, 100],
         investment_distribution: {
             to_claim_reserve: [80, 100],
             to_investors: [0, 100],
@@ -183,6 +166,11 @@ const deploy = async () => {
     env['STORE_ADDRESS'] = STORE_ADDRESS;
     env['DAO_ADDRESS'] = DAO_ADDRESS;
 
+
+    await new EmporionClient(signer, adminAddress, STORE_ADDRESS).updateAdmin({
+        newAdmin:DAO_ADDRESS,
+    });
+
     await Bun.write(`.env.${Bun.env.NODE_ENV}`, envToString(env))
     return {
         STORE_ADDRESS,
@@ -191,7 +179,8 @@ const deploy = async () => {
 }
 
 const testDeployement = async ({ DAO_ADDRESS, STORE_ADDRESS }: { DAO_ADDRESS: string, STORE_ADDRESS: string }) => {
-    await new EmporionClient(signer, adminAddress, STORE_ADDRESS).params();
+    let params = await new EmporionClient(signer, adminAddress, STORE_ADDRESS).params();
+    assert(params.admin === DAO_ADDRESS, "DAO should be the admin");
     await signer.queryContractSmart(DAO_ADDRESS, {
         voting_power_at_height: {
             address: adminAddress
@@ -199,6 +188,7 @@ const testDeployement = async ({ DAO_ADDRESS, STORE_ADDRESS }: { DAO_ADDRESS: st
     });
     console.log('✅ Deployement is ready!')
 }
+
 
 await testDeployement(await deploy())
 

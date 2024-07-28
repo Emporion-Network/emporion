@@ -190,6 +190,8 @@ pub enum ExecuteMsg {
     },
     Receive(Cw20ReceiveMsg),
     DistributeRewards {},
+    UpdateParams(InstantiateMsg),
+    UpdateAdmin{new_admin:String},
     WithdrawToDev{
         amount:AssetListUnchecked,
         to:String,
@@ -203,9 +205,10 @@ pub enum ExecuteMsg {
 #[cw_serde]
 pub struct InstantiateMsg {
     pub admin: String,
+    pub dev:String,
     pub fee_distribution: Distribution,
     pub investment_distribution: Distribution,
-    pub fee: (u64, u64),
+    pub fee_ratio: (u64, u64),
     pub publication_fee: AssetListUnchecked,
     pub publication_fee_distribution: Distribution,
     pub weighted_accepted_assets: Vec<(AssetInfoUnchecked, u64)>,

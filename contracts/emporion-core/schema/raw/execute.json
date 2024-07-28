@@ -358,6 +358,39 @@
     {
       "type": "object",
       "required": [
+        "update_params"
+      ],
+      "properties": {
+        "update_params": {
+          "$ref": "#/definitions/InstantiateMsg"
+        }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": [
+        "update_admin"
+      ],
+      "properties": {
+        "update_admin": {
+          "type": "object",
+          "required": [
+            "new_admin"
+          ],
+          "properties": {
+            "new_admin": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": [
         "withdraw_to_dev"
       ],
       "properties": {
@@ -547,6 +580,69 @@
       },
       "additionalProperties": false
     },
+    "Distribution": {
+      "description": "Distribution   ///",
+      "type": "object",
+      "required": [
+        "to_claim_reserve",
+        "to_dev",
+        "to_investors"
+      ],
+      "properties": {
+        "to_claim_reserve": {
+          "type": "array",
+          "items": [
+            {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0.0
+            },
+            {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0.0
+            }
+          ],
+          "maxItems": 2,
+          "minItems": 2
+        },
+        "to_dev": {
+          "type": "array",
+          "items": [
+            {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0.0
+            },
+            {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0.0
+            }
+          ],
+          "maxItems": 2,
+          "minItems": 2
+        },
+        "to_investors": {
+          "type": "array",
+          "items": [
+            {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0.0
+            },
+            {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0.0
+            }
+          ],
+          "maxItems": 2,
+          "minItems": 2
+        }
+      },
+      "additionalProperties": false
+    },
     "Duration": {
       "description": "Duration is a delta of time. You can add it to a BlockInfo or Expiration to move that further in the future. Note that an height-based Duration and a time-based Expiration cannot be combined",
       "oneOf": [
@@ -580,6 +676,102 @@
           "additionalProperties": false
         }
       ]
+    },
+    "InstantiateMsg": {
+      "description": "InstantiateMsg  ///",
+      "type": "object",
+      "required": [
+        "admin",
+        "dev",
+        "fee_distribution",
+        "fee_ratio",
+        "investment_distribution",
+        "max_contract_risk_share",
+        "publication_fee",
+        "publication_fee_distribution",
+        "reward_rate",
+        "unbounding_duration",
+        "weighted_accepted_assets"
+      ],
+      "properties": {
+        "admin": {
+          "type": "string"
+        },
+        "dev": {
+          "type": "string"
+        },
+        "fee_distribution": {
+          "$ref": "#/definitions/Distribution"
+        },
+        "fee_ratio": {
+          "type": "array",
+          "items": [
+            {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0.0
+            },
+            {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0.0
+            }
+          ],
+          "maxItems": 2,
+          "minItems": 2
+        },
+        "investment_distribution": {
+          "$ref": "#/definitions/Distribution"
+        },
+        "max_contract_risk_share": {
+          "type": "array",
+          "items": [
+            {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0.0
+            },
+            {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0.0
+            }
+          ],
+          "maxItems": 2,
+          "minItems": 2
+        },
+        "publication_fee": {
+          "$ref": "#/definitions/AssetListBase_for_String"
+        },
+        "publication_fee_distribution": {
+          "$ref": "#/definitions/Distribution"
+        },
+        "reward_rate": {
+          "$ref": "#/definitions/Duration"
+        },
+        "unbounding_duration": {
+          "$ref": "#/definitions/Duration"
+        },
+        "weighted_accepted_assets": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": [
+              {
+                "$ref": "#/definitions/AssetInfoBase_for_String"
+              },
+              {
+                "type": "integer",
+                "format": "uint64",
+                "minimum": 0.0
+              }
+            ],
+            "maxItems": 2,
+            "minItems": 2
+          }
+        }
+      },
+      "additionalProperties": false
     },
     "ReviewProductExecuteMsg": {
       "type": "object",

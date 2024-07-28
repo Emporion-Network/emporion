@@ -384,6 +384,36 @@ export interface EmporionInterface extends EmporionReadOnlyInterface {
     sender: string;
   }, fee?: number | StdFee | "auto", memo?: string, _funds?: Coin[]) => Promise<ExecuteResult>;
   distributeRewards: (fee?: number | StdFee | "auto", memo?: string, _funds?: Coin[]) => Promise<ExecuteResult>;
+  updateParams: ({
+    admin,
+    dev,
+    feeDistribution,
+    feeRatio,
+    investmentDistribution,
+    maxContractRiskShare,
+    publicationFee,
+    publicationFeeDistribution,
+    rewardRate,
+    unboundingDuration,
+    weightedAcceptedAssets
+  }: {
+    admin: string;
+    dev: string;
+    feeDistribution: Distribution;
+    feeRatio: number[][];
+    investmentDistribution: Distribution;
+    maxContractRiskShare: number[][];
+    publicationFee: AssetListBaseForString;
+    publicationFeeDistribution: Distribution;
+    rewardRate: Duration;
+    unboundingDuration: Duration;
+    weightedAcceptedAssets: AssetInfoBaseForString[][];
+  }, fee?: number | StdFee | "auto", memo?: string, _funds?: Coin[]) => Promise<ExecuteResult>;
+  updateAdmin: ({
+    newAdmin
+  }: {
+    newAdmin: string;
+  }, fee?: number | StdFee | "auto", memo?: string, _funds?: Coin[]) => Promise<ExecuteResult>;
   withdrawToDev: ({
     amount,
     to
@@ -420,6 +450,8 @@ export class EmporionClient extends EmporionQueryClient implements EmporionInter
     this.unListProduct = this.unListProduct.bind(this);
     this.receive = this.receive.bind(this);
     this.distributeRewards = this.distributeRewards.bind(this);
+    this.updateParams = this.updateParams.bind(this);
+    this.updateAdmin = this.updateAdmin.bind(this);
     this.withdrawToDev = this.withdrawToDev.bind(this);
   }
   blacklist = async (fee: number | StdFee | "auto" = "auto", memo?: string, _funds?: Coin[]): Promise<ExecuteResult> => {
@@ -641,6 +673,58 @@ export class EmporionClient extends EmporionQueryClient implements EmporionInter
   distributeRewards = async (fee: number | StdFee | "auto" = "auto", memo?: string, _funds?: Coin[]): Promise<ExecuteResult> => {
     return await this.client.execute(this.sender, this.contractAddress, {
       distribute_rewards: {}
+    }, fee, memo, _funds);
+  };
+  updateParams = async ({
+    admin,
+    dev,
+    feeDistribution,
+    feeRatio,
+    investmentDistribution,
+    maxContractRiskShare,
+    publicationFee,
+    publicationFeeDistribution,
+    rewardRate,
+    unboundingDuration,
+    weightedAcceptedAssets
+  }: {
+    admin: string;
+    dev: string;
+    feeDistribution: Distribution;
+    feeRatio: number[][];
+    investmentDistribution: Distribution;
+    maxContractRiskShare: number[][];
+    publicationFee: AssetListBaseForString;
+    publicationFeeDistribution: Distribution;
+    rewardRate: Duration;
+    unboundingDuration: Duration;
+    weightedAcceptedAssets: AssetInfoBaseForString[][];
+  }, fee: number | StdFee | "auto" = "auto", memo?: string, _funds?: Coin[]): Promise<ExecuteResult> => {
+    return await this.client.execute(this.sender, this.contractAddress, {
+      update_params: {
+        admin,
+        dev,
+        fee_distribution: feeDistribution,
+        fee_ratio: feeRatio,
+        investment_distribution: investmentDistribution,
+        max_contract_risk_share: maxContractRiskShare,
+        publication_fee: publicationFee,
+        publication_fee_distribution: publicationFeeDistribution,
+        reward_rate: rewardRate,
+        unbounding_duration: unboundingDuration,
+        weighted_accepted_assets: weightedAcceptedAssets
+      }
+    }, fee, memo, _funds);
+  };
+  updateAdmin = async ({
+    newAdmin
+  }: {
+    newAdmin: string;
+  }, fee: number | StdFee | "auto" = "auto", memo?: string, _funds?: Coin[]): Promise<ExecuteResult> => {
+    return await this.client.execute(this.sender, this.contractAddress, {
+      update_admin: {
+        new_admin: newAdmin
+      }
     }, fee, memo, _funds);
   };
   withdrawToDev = async ({

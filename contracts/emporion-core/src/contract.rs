@@ -90,6 +90,8 @@ pub fn execute(
         ExecuteMsg::WithdrawToDev { amount, to } => {
             Bank::msg_withdraw_dev_to(&mut deps, info, amount, to)
         }
+        ExecuteMsg::UpdateParams(msg) => ContractParams::msg_update(&mut deps, env, info, msg),
+        ExecuteMsg::UpdateAdmin { new_admin } => ContractParams::msg_update_admin(&mut deps, env, info, new_admin),
         ExecuteMsg::Receive(wrpr) => {
             let msg: ReceiverExecuteMsg = from_json(wrpr.msg)?;
             let sender = wrpr.sender;

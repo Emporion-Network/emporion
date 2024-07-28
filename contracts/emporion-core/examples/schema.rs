@@ -1,5 +1,5 @@
 use cosmwasm_schema::write_api;
-use store::msg::{ExecuteMsg, InstantiateMsg, MigrateMsg, QueryMsg};
+use emporion_core::msg::{ExecuteMsg, InstantiateMsg, MigrateMsg, QueryMsg};
 
 fn main() {
     write_api! {

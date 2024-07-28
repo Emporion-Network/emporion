@@ -90,13 +90,14 @@ mod tests {
             weighted_accepted_assets.push((AssetInfoUnchecked::native(denom), 1))
         });
         let init_params = init_params.unwrap_or(InstantiateMsg {
+            dev:admin.to_string(),
             admin: admin.to_string(),
             fee_distribution: Distribution {
                 to_dev: (1, 4),
                 to_investors: (1, 4),
                 to_claim_reserve: (2, 4),
             },
-            fee: (1, 100),
+            fee_ratio: (1, 100),
             publication_fee: AssetList::from(vec![
                 Asset::cw20(cash_addr.clone(), 9u128),
                 Asset::native("atom", 9u128),
@@ -573,6 +574,21 @@ mod tests {
             user.clone(),
             store_addr.clone(),
             &ExecuteMsg::ReviewProduct(msg),
+            &[],
+        )?;
+        Ok(())
+    }
+
+    fn exec_update_params(
+        app: &mut App,
+        store_addr: &Addr,
+        sender: &Addr,
+        params: InstantiateMsg,
+    ) -> Result<(), AnyError>{
+        app.execute_contract(
+            sender.clone(),
+            store_addr.clone(),
+            &ExecuteMsg::UpdateParams(params),
             &[],
         )?;
         Ok(())
@@ -1331,6 +1347,7 @@ mod tests {
             ],
             Some(InstantiateMsg {
                 admin: admin.to_string(),
+                dev:admin.to_string(),
                 fee_distribution: Distribution {
                     to_dev: (1, 2),
                     to_claim_reserve: (1, 2),
@@ -1341,7 +1358,7 @@ mod tests {
                     to_claim_reserve: (1, 2),
                     to_investors: (0, 1),
                 },
-                fee: (1, 100),
+                fee_ratio: (1, 100),
                 publication_fee: AssetListBase::new().into(),
                 publication_fee_distribution: Distribution {
                     to_dev: (1, 2),
@@ -2186,6 +2203,7 @@ mod tests {
             ],
             Some(InstantiateMsg {
                 admin: admin.to_string(),
+                dev:admin.to_string(),
                 fee_distribution: Distribution {
                     to_dev: (1, 5),
                     to_claim_reserve: (2, 6),
@@ -2196,7 +2214,7 @@ mod tests {
                     to_claim_reserve: (2, 6),
                     to_investors: (1, 1),
                 },
-                fee: (1, 100),
+                fee_ratio: (1, 100),
                 publication_fee: AssetListBase::new().into(),
                 publication_fee_distribution: Distribution {
                     to_dev: (1, 5),
@@ -2240,6 +2258,7 @@ mod tests {
             ],
             Some(InstantiateMsg {
                 admin: admin.to_string(),
+                dev:admin.to_string(),
                 fee_distribution: Distribution {
                     to_dev: (1, 2),
                     to_claim_reserve: (1, 2),
@@ -2250,7 +2269,7 @@ mod tests {
                     to_claim_reserve: (1, 2),
                     to_investors: (0, 1),
                 },
-                fee: (100, 0),
+                fee_ratio: (100, 0),
                 publication_fee: AssetListBase::new().into(),
                 publication_fee_distribution: Distribution {
                     to_dev: (1, 2),
@@ -2293,6 +2312,7 @@ mod tests {
                 },
             ],
             Some(InstantiateMsg {
+                dev:admin.to_string(),
                 admin: admin.to_string(),
                 fee_distribution: Distribution {
                     to_dev: (1, 2),
@@ -2304,7 +2324,7 @@ mod tests {
                     to_claim_reserve: (1, 2),
                     to_investors: (0, 1),
                 },
-                fee: (1, 100),
+                fee_ratio: (1, 100),
                 publication_fee: AssetListBase::new().into(),
                 publication_fee_distribution: Distribution {
                     to_dev: (1, 2),
@@ -2352,6 +2372,7 @@ mod tests {
             ],
             Some(InstantiateMsg {
                 admin: admin.to_string(),
+                dev:admin.to_string(),
                 fee_distribution: Distribution {
                     to_dev: (1, 2),
                     to_claim_reserve: (1, 2),
@@ -2362,7 +2383,7 @@ mod tests {
                     to_claim_reserve: (1, 2),
                     to_investors: (0, 1),
                 },
-                fee: (1, 100),
+                fee_ratio: (1, 100),
                 publication_fee: AssetListBase::new().into(),
                 publication_fee_distribution: Distribution {
                     to_dev: (1, 2),
@@ -2378,7 +2399,45 @@ mod tests {
         assert!(should_error.is_err());
 
         let info = query_info(&app, &store_addr)?;
-        assert_eq!(info.info.contract, "crates.io:crzx-store");
+        assert_eq!(info.info.contract, "crates.io:emporion-core");
+        let params = query_params(&app, &store_addr)?;
+        let weighted_accepted_assets = params.weighted_accepted_assets.iter()
+        .map(|a|(AssetInfoUnchecked::from(a.0.clone()), a.1 ) ).collect();
+        let msg = InstantiateMsg {
+            dev:admin.to_string(),
+            admin: admin.to_string(),
+            fee_distribution: Distribution {
+                to_dev: (1, 4),
+                to_investors: (1, 4),
+                to_claim_reserve: (2, 4),
+            },
+            fee_ratio: (2, 100),
+            publication_fee: AssetList::from(vec![
+                Asset::cw20(cash_addr.clone(), 9u128),
+                Asset::native("atom", 9u128),
+            ])
+            .into(),
+            investment_distribution: Distribution {
+                to_dev: (1, 4),
+                to_investors: (0, 4),
+                to_claim_reserve: (3, 4),
+            },
+            publication_fee_distribution: Distribution {
+                to_dev: (0, 3),
+                to_investors: (2, 3),
+                to_claim_reserve: (1, 3),
+            },
+            weighted_accepted_assets,
+            reward_rate: Duration::Height(5),
+            unbounding_duration: Duration::Height(10),
+            max_contract_risk_share: (1, 2),
+        };
+        
+        assert!(exec_update_params(&mut app, &store_addr, &buyer, msg.clone()).is_err());
+        assert!(exec_update_params(&mut app, &store_addr, &admin, msg).is_ok());
+
+        let params = query_params(&app, &store_addr)?;
+        assert_eq!(params.fee, (2, 100));
 
         Ok(())
     }

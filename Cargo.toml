@@ -1,6 +1,6 @@
 [workspace]
 
 members = [
-    "contracts/store-contract"
+    "contracts/emporion-core"
 ]
 resolver = "2"

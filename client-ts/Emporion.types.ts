@@ -18,8 +18,9 @@ export type Duration = {
 };
 export interface InstantiateMsg {
   admin: string;
-  fee: [number, number];
+  dev: string;
   fee_distribution: Distribution;
+  fee_ratio: [number, number];
   investment_distribution: Distribution;
   max_contract_risk_share: [number, number];
   publication_fee: AssetListBaseForString;
@@ -94,6 +95,12 @@ export type ExecuteMsg = {
   receive: Cw20ReceiveMsg;
 } | {
   distribute_rewards: {};
+} | {
+  update_params: InstantiateMsg;
+} | {
+  update_admin: {
+    new_admin: string;
+  };
 } | {
   withdraw_to_dev: {
     amount: AssetListBaseForString;
@@ -239,6 +246,7 @@ export interface Order {
 export type TupleOfArrayOfOrderAndNullableUint64 = [Order[], number | null];
 export interface ContractParams {
   admin: Addr;
+  dev: Addr;
   fee: [number, number];
   fee_distribution: Distribution;
   investment_distribution: Distribution;

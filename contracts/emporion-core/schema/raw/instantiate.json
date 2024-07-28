@@ -1,12 +1,13 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "ContractParams",
-  "description": "ContractParams  ///",
+  "title": "InstantiateMsg",
+  "description": "InstantiateMsg  ///",
   "type": "object",
   "required": [
     "admin",
-    "fee",
+    "dev",
     "fee_distribution",
+    "fee_ratio",
     "investment_distribution",
     "max_contract_risk_share",
     "publication_fee",
@@ -17,9 +18,15 @@
   ],
   "properties": {
     "admin": {
-      "$ref": "#/definitions/Addr"
+      "type": "string"
     },
-    "fee": {
+    "dev": {
+      "type": "string"
+    },
+    "fee_distribution": {
+      "$ref": "#/definitions/Distribution"
+    },
+    "fee_ratio": {
       "type": "array",
       "items": [
         {
@@ -35,9 +42,6 @@
       ],
       "maxItems": 2,
       "minItems": 2
-    },
-    "fee_distribution": {
-      "$ref": "#/definitions/Distribution"
     },
     "investment_distribution": {
       "$ref": "#/definitions/Distribution"
@@ -60,7 +64,7 @@
       "minItems": 2
     },
     "publication_fee": {
-      "$ref": "#/definitions/AssetListBase_for_Addr"
+      "$ref": "#/definitions/AssetListBase_for_String"
     },
     "publication_fee_distribution": {
       "$ref": "#/definitions/Distribution"
@@ -77,7 +81,7 @@
         "type": "array",
         "items": [
           {
-            "$ref": "#/definitions/AssetInfoBase_for_Addr"
+            "$ref": "#/definitions/AssetInfoBase_for_String"
           },
           {
             "type": "integer",
@@ -92,11 +96,7 @@
   },
   "additionalProperties": false,
   "definitions": {
-    "Addr": {
-      "description": "A human readable address.\n\nIn Cosmos, this is typically bech32 encoded. But for multi-chain smart contracts no assumptions should be made other than being UTF-8 encoded and of reasonable length.\n\nThis type represents a validated address. It can be created in the following ways 1. Use `Addr::unchecked(input)` 2. Use `let checked: Addr = deps.api.addr_validate(input)?` 3. Use `let checked: Addr = deps.api.addr_humanize(canonical_addr)?` 4. Deserialize from JSON. This must only be done from JSON that was validated before such as a contract's state. `Addr` must not be used in messages sent by the user because this would result in unvalidated instances.\n\nThis type is immutable. If you really need to mutate it (Really? Are you sure?), create a mutable copy using `let mut mutable = Addr::to_string()` and operate on that `String` instance.",
-      "type": "string"
-    },
-    "AssetBase_for_Addr": {
+    "AssetBase_for_String": {
       "description": "Represents a fungible asset with a known amount\n\nEach asset instance contains two values: `info`, which specifies the asset's type (CW20 or native), and its `amount`, which specifies the asset's amount.",
       "type": "object",
       "required": [
@@ -116,14 +116,14 @@
           "description": "Specifies the asset's type (CW20 or native)",
           "allOf": [
             {
-              "$ref": "#/definitions/AssetInfoBase_for_Addr"
+              "$ref": "#/definitions/AssetInfoBase_for_String"
             }
           ]
         }
       },
       "additionalProperties": false
     },
-    "AssetInfoBase_for_Addr": {
+    "AssetInfoBase_for_String": {
       "description": "Represents the type of an fungible asset.\n\nEach **asset info** instance can be one of three variants:\n\n- Native SDK coins. To create an **asset info** instance of this type, provide the denomination. - CW20 tokens. To create an **asset info** instance of this type, provide the contract address.",
       "oneOf": [
         {
@@ -145,18 +145,18 @@
           ],
           "properties": {
             "cw20": {
-              "$ref": "#/definitions/Addr"
+              "type": "string"
             }
           },
           "additionalProperties": false
         }
       ]
     },
-    "AssetListBase_for_Addr": {
+    "AssetListBase_for_String": {
       "description": "Represents a list of fungible tokens, each with a known amount",
       "type": "array",
       "items": {
-        "$ref": "#/definitions/AssetBase_for_Addr"
+        "$ref": "#/definitions/AssetBase_for_String"
       }
     },
     "Distribution": {
