@@ -1,5 +1,5 @@
 TN:
-SF:/Users/oussama/Documents/crzx/store/src/contract.rs
+SF:/Users/oussama/Documents/crzx/contracts/store-contract/src/contract.rs
 FN:12,instantiate
 FN:23,query
 FN:61,execute
@@ -73,7 +73,7 @@ LF:62
 LH:62
 end_of_record
 TN:
-SF:/Users/oussama/Documents/crzx/store/src/state.rs
+SF:/Users/oussama/Documents/crzx/contracts/store-contract/src/state.rs
 FN:207,get_index
 FN:216,ContractParams::load
 FN:220,ContractParams::loaded_get_asset_wheight

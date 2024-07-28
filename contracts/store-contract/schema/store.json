@@ -1,0 +1,3414 @@
+{
+  "contract_name": "store",
+  "contract_version": "0.1.0",
+  "idl_version": "1.0.0",
+  "instantiate": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "InstantiateMsg",
+    "description": "InstantiateMsg  ///",
+    "type": "object",
+    "required": [
+      "admin",
+      "fee",
+      "fee_distribution",
+      "investment_distribution",
+      "max_contract_risk_share",
+      "publication_fee",
+      "publication_fee_distribution",
+      "reward_rate",
+      "unbounding_duration",
+      "weighted_accepted_assets"
+    ],
+    "properties": {
+      "admin": {
+        "type": "string"
+      },
+      "fee": {
+        "type": "array",
+        "items": [
+          {
+            "type": "integer",
+            "format": "uint64",
+            "minimum": 0.0
+          },
+          {
+            "type": "integer",
+            "format": "uint64",
+            "minimum": 0.0
+          }
+        ],
+        "maxItems": 2,
+        "minItems": 2
+      },
+      "fee_distribution": {
+        "$ref": "#/definitions/Distribution"
+      },
+      "investment_distribution": {
+        "$ref": "#/definitions/Distribution"
+      },
+      "max_contract_risk_share": {
+        "type": "array",
+        "items": [
+          {
+            "type": "integer",
+            "format": "uint64",
+            "minimum": 0.0
+          },
+          {
+            "type": "integer",
+            "format": "uint64",
+            "minimum": 0.0
+          }
+        ],
+        "maxItems": 2,
+        "minItems": 2
+      },
+      "publication_fee": {
+        "$ref": "#/definitions/AssetListBase_for_String"
+      },
+      "publication_fee_distribution": {
+        "$ref": "#/definitions/Distribution"
+      },
+      "reward_rate": {
+        "$ref": "#/definitions/Duration"
+      },
+      "unbounding_duration": {
+        "$ref": "#/definitions/Duration"
+      },
+      "weighted_accepted_assets": {
+        "type": "array",
+        "items": {
+          "type": "array",
+          "items": [
+            {
+              "$ref": "#/definitions/AssetInfoBase_for_String"
+            },
+            {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0.0
+            }
+          ],
+          "maxItems": 2,
+          "minItems": 2
+        }
+      }
+    },
+    "additionalProperties": false,
+    "definitions": {
+      "AssetBase_for_String": {
+        "description": "Represents a fungible asset with a known amount\n\nEach asset instance contains two values: `info`, which specifies the asset's type (CW20 or native), and its `amount`, which specifies the asset's amount.",
+        "type": "object",
+        "required": [
+          "amount",
+          "info"
+        ],
+        "properties": {
+          "amount": {
+            "description": "Specifies the asset's amount",
+            "allOf": [
+              {
+                "$ref": "#/definitions/Uint128"
+              }
+            ]
+          },
+          "info": {
+            "description": "Specifies the asset's type (CW20 or native)",
+            "allOf": [
+              {
+                "$ref": "#/definitions/AssetInfoBase_for_String"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "AssetInfoBase_for_String": {
+        "description": "Represents the type of an fungible asset.\n\nEach **asset info** instance can be one of three variants:\n\n- Native SDK coins. To create an **asset info** instance of this type, provide the denomination. - CW20 tokens. To create an **asset info** instance of this type, provide the contract address.",
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "native"
+            ],
+            "properties": {
+              "native": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "required": [
+              "cw20"
+            ],
+            "properties": {
+              "cw20": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        ]
+      },
+      "AssetListBase_for_String": {
+        "description": "Represents a list of fungible tokens, each with a known amount",
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/AssetBase_for_String"
+        }
+      },
+      "Distribution": {
+        "description": "Distribution   ///",
+        "type": "object",
+        "required": [
+          "to_claim_reserve",
+          "to_dev",
+          "to_investors"
+        ],
+        "properties": {
+          "to_claim_reserve": {
+            "type": "array",
+            "items": [
+              {
+                "type": "integer",
+                "format": "uint64",
+                "minimum": 0.0
+              },
+              {
+                "type": "integer",
+                "format": "uint64",
+                "minimum": 0.0
+              }
+            ],
+            "maxItems": 2,
+            "minItems": 2
+          },
+          "to_dev": {
+            "type": "array",
+            "items": [
+              {
+                "type": "integer",
+                "format": "uint64",
+                "minimum": 0.0
+              },
+              {
+                "type": "integer",
+                "format": "uint64",
+                "minimum": 0.0
+              }
+            ],
+            "maxItems": 2,
+            "minItems": 2
+          },
+          "to_investors": {
+            "type": "array",
+            "items": [
+              {
+                "type": "integer",
+                "format": "uint64",
+                "minimum": 0.0
+              },
+              {
+                "type": "integer",
+                "format": "uint64",
+                "minimum": 0.0
+              }
+            ],
+            "maxItems": 2,
+            "minItems": 2
+          }
+        },
+        "additionalProperties": false
+      },
+      "Duration": {
+        "description": "Duration is a delta of time. You can add it to a BlockInfo or Expiration to move that further in the future. Note that an height-based Duration and a time-based Expiration cannot be combined",
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "height"
+            ],
+            "properties": {
+              "height": {
+                "type": "integer",
+                "format": "uint64",
+                "minimum": 0.0
+              }
+            },
+            "additionalProperties": false
+          },
+          {
+            "description": "Time in seconds",
+            "type": "object",
+            "required": [
+              "time"
+            ],
+            "properties": {
+              "time": {
+                "type": "integer",
+                "format": "uint64",
+                "minimum": 0.0
+              }
+            },
+            "additionalProperties": false
+          }
+        ]
+      },
+      "Uint128": {
+        "description": "A thin wrapper around u128 that is using strings for JSON encoding/decoding, such that the full u128 range can be used for clients that convert JSON numbers to floats, like JavaScript and jq.\n\n# Examples\n\nUse `from` to create instances of this and `u128` to get the value out:\n\n``` # use cosmwasm_std::Uint128; let a = Uint128::from(123u128); assert_eq!(a.u128(), 123);\n\nlet b = Uint128::from(42u64); assert_eq!(b.u128(), 42);\n\nlet c = Uint128::from(70u32); assert_eq!(c.u128(), 70); ```",
+        "type": "string"
+      }
+    }
+  },
+  "execute": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "ExecuteMsg",
+    "oneOf": [
+      {
+        "type": "object",
+        "required": [
+          "blacklist"
+        ],
+        "properties": {
+          "blacklist": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "required": [
+          "unblacklist"
+        ],
+        "properties": {
+          "unblacklist": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "required": [
+          "invest"
+        ],
+        "properties": {
+          "invest": {
+            "type": "object",
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "required": [
+          "divest"
+        ],
+        "properties": {
+          "divest": {
+            "type": "object",
+            "required": [
+              "to_divest"
+            ],
+            "properties": {
+              "to_divest": {
+                "$ref": "#/definitions/AssetListBase_for_String"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "required": [
+          "withdraw"
+        ],
+        "properties": {
+          "withdraw": {
+            "type": "object",
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "required": [
+          "create_order"
+        ],
+        "properties": {
+          "create_order": {
+            "$ref": "#/definitions/CreateOrderExecuteMsg"
+          }
+        },
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "required": [
+          "accept_order"
+        ],
+        "properties": {
+          "accept_order": {
+            "type": "object",
+            "required": [
+              "order_id"
+            ],
+            "properties": {
+              "order_id": {
+                "type": "integer",
+                "format": "uint64",
+                "minimum": 0.0
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "required": [
+          "finalize_order"
+        ],
+        "properties": {
+          "finalize_order": {
+            "type": "object",
+            "required": [
+              "order_id"
+            ],
+            "properties": {
+              "order_id": {
+                "type": "integer",
+                "format": "uint64",
+                "minimum": 0.0
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "required": [
+          "add_products_to_order"
+        ],
+        "properties": {
+          "add_products_to_order": {
+            "type": "object",
+            "required": [
+              "cart",
+              "order_id"
+            ],
+            "properties": {
+              "cart": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": [
+                    {
+                      "type": "integer",
+                      "format": "uint64",
+                      "minimum": 0.0
+                    },
+                    {
+                      "$ref": "#/definitions/AssetInfoBase_for_String"
+                    }
+                  ],
+                  "maxItems": 2,
+                  "minItems": 2
+                }
+              },
+              "order_id": {
+                "type": "integer",
+                "format": "uint64",
+                "minimum": 0.0
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "required": [
+          "reject_order"
+        ],
+        "properties": {
+          "reject_order": {
+            "type": "object",
+            "required": [
+              "order_id"
+            ],
+            "properties": {
+              "order_id": {
+                "type": "integer",
+                "format": "uint64",
+                "minimum": 0.0
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "required": [
+          "fulfill_order"
+        ],
+        "properties": {
+          "fulfill_order": {
+            "type": "object",
+            "required": [
+              "order_id"
+            ],
+            "properties": {
+              "order_id": {
+                "type": "integer",
+                "format": "uint64",
+                "minimum": 0.0
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "required": [
+          "dispute_order"
+        ],
+        "properties": {
+          "dispute_order": {
+            "type": "object",
+            "required": [
+              "order_id"
+            ],
+            "properties": {
+              "order_id": {
+                "type": "integer",
+                "format": "uint64",
+                "minimum": 0.0
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "required": [
+          "review_user"
+        ],
+        "properties": {
+          "review_user": {
+            "$ref": "#/definitions/ReviewUserExecuteMsg"
+          }
+        },
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "required": [
+          "review_product"
+        ],
+        "properties": {
+          "review_product": {
+            "$ref": "#/definitions/ReviewProductExecuteMsg"
+          }
+        },
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "required": [
+          "create_product"
+        ],
+        "properties": {
+          "create_product": {
+            "$ref": "#/definitions/CreateProductExecuteMessage"
+          }
+        },
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "required": [
+          "list_product"
+        ],
+        "properties": {
+          "list_product": {
+            "type": "object",
+            "required": [
+              "product_id"
+            ],
+            "properties": {
+              "product_id": {
+                "type": "integer",
+                "format": "uint64",
+                "minimum": 0.0
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "required": [
+          "un_list_product"
+        ],
+        "properties": {
+          "un_list_product": {
+            "type": "object",
+            "required": [
+              "product_id"
+            ],
+            "properties": {
+              "product_id": {
+                "type": "integer",
+                "format": "uint64",
+                "minimum": 0.0
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "required": [
+          "receive"
+        ],
+        "properties": {
+          "receive": {
+            "$ref": "#/definitions/Cw20ReceiveMsg"
+          }
+        },
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "required": [
+          "distribute_rewards"
+        ],
+        "properties": {
+          "distribute_rewards": {
+            "type": "object",
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "required": [
+          "withdraw_to_dev"
+        ],
+        "properties": {
+          "withdraw_to_dev": {
+            "type": "object",
+            "required": [
+              "amount",
+              "to"
+            ],
+            "properties": {
+              "amount": {
+                "$ref": "#/definitions/AssetListBase_for_String"
+              },
+              "to": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    ],
+    "definitions": {
+      "AssetBase_for_String": {
+        "description": "Represents a fungible asset with a known amount\n\nEach asset instance contains two values: `info`, which specifies the asset's type (CW20 or native), and its `amount`, which specifies the asset's amount.",
+        "type": "object",
+        "required": [
+          "amount",
+          "info"
+        ],
+        "properties": {
+          "amount": {
+            "description": "Specifies the asset's amount",
+            "allOf": [
+              {
+                "$ref": "#/definitions/Uint128"
+              }
+            ]
+          },
+          "info": {
+            "description": "Specifies the asset's type (CW20 or native)",
+            "allOf": [
+              {
+                "$ref": "#/definitions/AssetInfoBase_for_String"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "AssetInfoBase_for_String": {
+        "description": "Represents the type of an fungible asset.\n\nEach **asset info** instance can be one of three variants:\n\n- Native SDK coins. To create an **asset info** instance of this type, provide the denomination. - CW20 tokens. To create an **asset info** instance of this type, provide the contract address.",
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "native"
+            ],
+            "properties": {
+              "native": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "required": [
+              "cw20"
+            ],
+            "properties": {
+              "cw20": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        ]
+      },
+      "AssetListBase_for_String": {
+        "description": "Represents a list of fungible tokens, each with a known amount",
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/AssetBase_for_String"
+        }
+      },
+      "Binary": {
+        "description": "Binary is a wrapper around Vec<u8> to add base64 de/serialization with serde. It also adds some helper methods to help encode inline.\n\nThis is only needed as serde-json-{core,wasm} has a horrible encoding for Vec<u8>. See also <https://github.com/CosmWasm/cosmwasm/blob/main/docs/MESSAGE_TYPES.md>.",
+        "type": "string"
+      },
+      "CreateOrderExecuteMsg": {
+        "type": "object",
+        "required": [
+          "buyer_risk_share",
+          "cart",
+          "ready",
+          "seller"
+        ],
+        "properties": {
+          "buyer_risk_share": {
+            "type": "array",
+            "items": [
+              {
+                "type": "integer",
+                "format": "uint64",
+                "minimum": 0.0
+              },
+              {
+                "type": "integer",
+                "format": "uint64",
+                "minimum": 0.0
+              }
+            ],
+            "maxItems": 2,
+            "minItems": 2
+          },
+          "cart": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "integer",
+                  "format": "uint64",
+                  "minimum": 0.0
+                },
+                {
+                  "$ref": "#/definitions/AssetInfoBase_for_String"
+                }
+              ],
+              "maxItems": 2,
+              "minItems": 2
+            }
+          },
+          "ready": {
+            "type": "boolean"
+          },
+          "seller": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreateProductExecuteMessage": {
+        "type": "object",
+        "required": [
+          "delivery_time",
+          "is_listed",
+          "meta",
+          "price"
+        ],
+        "properties": {
+          "delivery_time": {
+            "$ref": "#/definitions/Duration"
+          },
+          "is_listed": {
+            "type": "boolean"
+          },
+          "meta": {
+            "type": "string"
+          },
+          "price": {
+            "$ref": "#/definitions/AssetListBase_for_String"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Cw20ReceiveMsg": {
+        "description": "Cw20ReceiveMsg should be de/serialized under `Receive()` variant in a ExecuteMsg",
+        "type": "object",
+        "required": [
+          "amount",
+          "msg",
+          "sender"
+        ],
+        "properties": {
+          "amount": {
+            "$ref": "#/definitions/Uint128"
+          },
+          "msg": {
+            "$ref": "#/definitions/Binary"
+          },
+          "sender": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Duration": {
+        "description": "Duration is a delta of time. You can add it to a BlockInfo or Expiration to move that further in the future. Note that an height-based Duration and a time-based Expiration cannot be combined",
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "height"
+            ],
+            "properties": {
+              "height": {
+                "type": "integer",
+                "format": "uint64",
+                "minimum": 0.0
+              }
+            },
+            "additionalProperties": false
+          },
+          {
+            "description": "Time in seconds",
+            "type": "object",
+            "required": [
+              "time"
+            ],
+            "properties": {
+              "time": {
+                "type": "integer",
+                "format": "uint64",
+                "minimum": 0.0
+              }
+            },
+            "additionalProperties": false
+          }
+        ]
+      },
+      "ReviewProductExecuteMsg": {
+        "type": "object",
+        "required": [
+          "message",
+          "order_id",
+          "product_id",
+          "rating"
+        ],
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "order_id": {
+            "type": "integer",
+            "format": "uint64",
+            "minimum": 0.0
+          },
+          "product_id": {
+            "type": "integer",
+            "format": "uint64",
+            "minimum": 0.0
+          },
+          "rating": {
+            "type": "integer",
+            "format": "uint8",
+            "minimum": 0.0
+          }
+        },
+        "additionalProperties": false
+      },
+      "ReviewUserExecuteMsg": {
+        "type": "object",
+        "required": [
+          "message",
+          "order_id",
+          "rating"
+        ],
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "order_id": {
+            "type": "integer",
+            "format": "uint64",
+            "minimum": 0.0
+          },
+          "rating": {
+            "type": "integer",
+            "format": "uint8",
+            "minimum": 0.0
+          }
+        },
+        "additionalProperties": false
+      },
+      "Uint128": {
+        "description": "A thin wrapper around u128 that is using strings for JSON encoding/decoding, such that the full u128 range can be used for clients that convert JSON numbers to floats, like JavaScript and jq.\n\n# Examples\n\nUse `from` to create instances of this and `u128` to get the value out:\n\n``` # use cosmwasm_std::Uint128; let a = Uint128::from(123u128); assert_eq!(a.u128(), 123);\n\nlet b = Uint128::from(42u64); assert_eq!(b.u128(), 42);\n\nlet c = Uint128::from(70u32); assert_eq!(c.u128(), 70); ```",
+        "type": "string"
+      }
+    }
+  },
+  "query": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "QueryMsg",
+    "description": "QueryMsg     ///",
+    "oneOf": [
+      {
+        "type": "object",
+        "required": [
+          "info"
+        ],
+        "properties": {
+          "info": {
+            "type": "object",
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "required": [
+          "total_power_at_height"
+        ],
+        "properties": {
+          "total_power_at_height": {
+            "type": "object",
+            "properties": {
+              "height": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "uint64",
+                "minimum": 0.0
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "required": [
+          "params"
+        ],
+        "properties": {
+          "params": {
+            "type": "object",
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "required": [
+          "bank"
+        ],
+        "properties": {
+          "bank": {
+            "type": "object",
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "required": [
+          "voting_power_at_height"
+        ],
+        "properties": {
+          "voting_power_at_height": {
+            "type": "object",
+            "required": [
+              "address"
+            ],
+            "properties": {
+              "address": {
+                "type": "string"
+              },
+              "height": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "uint64",
+                "minimum": 0.0
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "required": [
+          "user_stats"
+        ],
+        "properties": {
+          "user_stats": {
+            "type": "object",
+            "required": [
+              "addr"
+            ],
+            "properties": {
+              "addr": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "required": [
+          "orders_from_buyer"
+        ],
+        "properties": {
+          "orders_from_buyer": {
+            "type": "object",
+            "required": [
+              "addr"
+            ],
+            "properties": {
+              "addr": {
+                "type": "string"
+              },
+              "start_from": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "uint64",
+                "minimum": 0.0
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "required": [
+          "order"
+        ],
+        "properties": {
+          "order": {
+            "type": "object",
+            "required": [
+              "order_id"
+            ],
+            "properties": {
+              "order_id": {
+                "type": "integer",
+                "format": "uint64",
+                "minimum": 0.0
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "required": [
+          "orders_for_seller"
+        ],
+        "properties": {
+          "orders_for_seller": {
+            "type": "object",
+            "required": [
+              "addr"
+            ],
+            "properties": {
+              "addr": {
+                "type": "string"
+              },
+              "start_from": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "uint64",
+                "minimum": 0.0
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "required": [
+          "reviews_of_product"
+        ],
+        "properties": {
+          "reviews_of_product": {
+            "type": "object",
+            "required": [
+              "product_id"
+            ],
+            "properties": {
+              "product_id": {
+                "type": "integer",
+                "format": "uint64",
+                "minimum": 0.0
+              },
+              "start_from": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "uint64",
+                "minimum": 0.0
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "required": [
+          "reviews_of_reviewed"
+        ],
+        "properties": {
+          "reviews_of_reviewed": {
+            "type": "object",
+            "required": [
+              "addr"
+            ],
+            "properties": {
+              "addr": {
+                "type": "string"
+              },
+              "start_from": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "uint64",
+                "minimum": 0.0
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "required": [
+          "reviews_from_reviewer"
+        ],
+        "properties": {
+          "reviews_from_reviewer": {
+            "type": "object",
+            "required": [
+              "addr"
+            ],
+            "properties": {
+              "addr": {
+                "type": "string"
+              },
+              "start_from": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "uint64",
+                "minimum": 0.0
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "required": [
+          "products_of_seller"
+        ],
+        "properties": {
+          "products_of_seller": {
+            "type": "object",
+            "required": [
+              "addr"
+            ],
+            "properties": {
+              "addr": {
+                "type": "string"
+              },
+              "start_from": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "uint64",
+                "minimum": 0.0
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "required": [
+          "product_all"
+        ],
+        "properties": {
+          "product_all": {
+            "type": "object",
+            "properties": {
+              "start_from": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "uint64",
+                "minimum": 0.0
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "required": [
+          "product_by_id"
+        ],
+        "properties": {
+          "product_by_id": {
+            "type": "object",
+            "required": [
+              "product_id"
+            ],
+            "properties": {
+              "product_id": {
+                "type": "integer",
+                "format": "uint64",
+                "minimum": 0.0
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    ]
+  },
+  "migrate": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "MigrateMsg",
+    "description": "MigrateMsg    ///",
+    "type": "object",
+    "additionalProperties": false
+  },
+  "sudo": null,
+  "responses": {
+    "bank": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Bank",
+      "description": "Bank       ///",
+      "type": "object",
+      "required": [
+        "to_claim_reserve",
+        "to_dev",
+        "to_investors",
+        "total_invested"
+      ],
+      "properties": {
+        "to_claim_reserve": {
+          "$ref": "#/definitions/AssetListBase_for_Addr"
+        },
+        "to_dev": {
+          "$ref": "#/definitions/AssetListBase_for_Addr"
+        },
+        "to_investors": {
+          "$ref": "#/definitions/AssetListBase_for_Addr"
+        },
+        "total_invested": {
+          "$ref": "#/definitions/AssetListBase_for_Addr"
+        }
+      },
+      "additionalProperties": false,
+      "definitions": {
+        "Addr": {
+          "description": "A human readable address.\n\nIn Cosmos, this is typically bech32 encoded. But for multi-chain smart contracts no assumptions should be made other than being UTF-8 encoded and of reasonable length.\n\nThis type represents a validated address. It can be created in the following ways 1. Use `Addr::unchecked(input)` 2. Use `let checked: Addr = deps.api.addr_validate(input)?` 3. Use `let checked: Addr = deps.api.addr_humanize(canonical_addr)?` 4. Deserialize from JSON. This must only be done from JSON that was validated before such as a contract's state. `Addr` must not be used in messages sent by the user because this would result in unvalidated instances.\n\nThis type is immutable. If you really need to mutate it (Really? Are you sure?), create a mutable copy using `let mut mutable = Addr::to_string()` and operate on that `String` instance.",
+          "type": "string"
+        },
+        "AssetBase_for_Addr": {
+          "description": "Represents a fungible asset with a known amount\n\nEach asset instance contains two values: `info`, which specifies the asset's type (CW20 or native), and its `amount`, which specifies the asset's amount.",
+          "type": "object",
+          "required": [
+            "amount",
+            "info"
+          ],
+          "properties": {
+            "amount": {
+              "description": "Specifies the asset's amount",
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Uint128"
+                }
+              ]
+            },
+            "info": {
+              "description": "Specifies the asset's type (CW20 or native)",
+              "allOf": [
+                {
+                  "$ref": "#/definitions/AssetInfoBase_for_Addr"
+                }
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        "AssetInfoBase_for_Addr": {
+          "description": "Represents the type of an fungible asset.\n\nEach **asset info** instance can be one of three variants:\n\n- Native SDK coins. To create an **asset info** instance of this type, provide the denomination. - CW20 tokens. To create an **asset info** instance of this type, provide the contract address.",
+          "oneOf": [
+            {
+              "type": "object",
+              "required": [
+                "native"
+              ],
+              "properties": {
+                "native": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": [
+                "cw20"
+              ],
+              "properties": {
+                "cw20": {
+                  "$ref": "#/definitions/Addr"
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "AssetListBase_for_Addr": {
+          "description": "Represents a list of fungible tokens, each with a known amount",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AssetBase_for_Addr"
+          }
+        },
+        "Uint128": {
+          "description": "A thin wrapper around u128 that is using strings for JSON encoding/decoding, such that the full u128 range can be used for clients that convert JSON numbers to floats, like JavaScript and jq.\n\n# Examples\n\nUse `from` to create instances of this and `u128` to get the value out:\n\n``` # use cosmwasm_std::Uint128; let a = Uint128::from(123u128); assert_eq!(a.u128(), 123);\n\nlet b = Uint128::from(42u64); assert_eq!(b.u128(), 42);\n\nlet c = Uint128::from(70u32); assert_eq!(c.u128(), 70); ```",
+          "type": "string"
+        }
+      }
+    },
+    "info": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "InfoResponse",
+      "description": "QueryResponses  ///",
+      "type": "object",
+      "required": [
+        "info"
+      ],
+      "properties": {
+        "info": {
+          "$ref": "#/definitions/ContractVersion"
+        }
+      },
+      "additionalProperties": false,
+      "definitions": {
+        "ContractVersion": {
+          "type": "object",
+          "required": [
+            "contract",
+            "version"
+          ],
+          "properties": {
+            "contract": {
+              "description": "contract is the crate name of the implementing contract, eg. `crate:cw20-base` we will use other prefixes for other languages, and their standard global namespacing",
+              "type": "string"
+            },
+            "version": {
+              "description": "version is any string that this implementation knows. It may be simple counter \"1\", \"2\". or semantic version on release tags \"v0.7.0\", or some custom feature flag list. the only code that needs to understand the version parsing is code that knows how to migrate from the given contract (and is tied to it's implementation somehow)",
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      }
+    },
+    "order": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Order",
+      "type": "object",
+      "required": [
+        "buyer",
+        "buyer_risk_share",
+        "cart",
+        "expected_delivery",
+        "id",
+        "products",
+        "seller",
+        "status"
+      ],
+      "properties": {
+        "buyer": {
+          "$ref": "#/definitions/Addr"
+        },
+        "buyer_risk_share": {
+          "type": "array",
+          "items": [
+            {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0.0
+            },
+            {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0.0
+            }
+          ],
+          "maxItems": 2,
+          "minItems": 2
+        },
+        "cart": {
+          "$ref": "#/definitions/AssetListBase_for_Addr"
+        },
+        "expected_delivery": {
+          "$ref": "#/definitions/Expiration"
+        },
+        "id": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0.0
+        },
+        "products": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "uint64",
+            "minimum": 0.0
+          }
+        },
+        "seller": {
+          "$ref": "#/definitions/Addr"
+        },
+        "status": {
+          "$ref": "#/definitions/OrderStatus"
+        }
+      },
+      "additionalProperties": false,
+      "definitions": {
+        "Addr": {
+          "description": "A human readable address.\n\nIn Cosmos, this is typically bech32 encoded. But for multi-chain smart contracts no assumptions should be made other than being UTF-8 encoded and of reasonable length.\n\nThis type represents a validated address. It can be created in the following ways 1. Use `Addr::unchecked(input)` 2. Use `let checked: Addr = deps.api.addr_validate(input)?` 3. Use `let checked: Addr = deps.api.addr_humanize(canonical_addr)?` 4. Deserialize from JSON. This must only be done from JSON that was validated before such as a contract's state. `Addr` must not be used in messages sent by the user because this would result in unvalidated instances.\n\nThis type is immutable. If you really need to mutate it (Really? Are you sure?), create a mutable copy using `let mut mutable = Addr::to_string()` and operate on that `String` instance.",
+          "type": "string"
+        },
+        "AssetBase_for_Addr": {
+          "description": "Represents a fungible asset with a known amount\n\nEach asset instance contains two values: `info`, which specifies the asset's type (CW20 or native), and its `amount`, which specifies the asset's amount.",
+          "type": "object",
+          "required": [
+            "amount",
+            "info"
+          ],
+          "properties": {
+            "amount": {
+              "description": "Specifies the asset's amount",
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Uint128"
+                }
+              ]
+            },
+            "info": {
+              "description": "Specifies the asset's type (CW20 or native)",
+              "allOf": [
+                {
+                  "$ref": "#/definitions/AssetInfoBase_for_Addr"
+                }
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        "AssetInfoBase_for_Addr": {
+          "description": "Represents the type of an fungible asset.\n\nEach **asset info** instance can be one of three variants:\n\n- Native SDK coins. To create an **asset info** instance of this type, provide the denomination. - CW20 tokens. To create an **asset info** instance of this type, provide the contract address.",
+          "oneOf": [
+            {
+              "type": "object",
+              "required": [
+                "native"
+              ],
+              "properties": {
+                "native": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": [
+                "cw20"
+              ],
+              "properties": {
+                "cw20": {
+                  "$ref": "#/definitions/Addr"
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "AssetListBase_for_Addr": {
+          "description": "Represents a list of fungible tokens, each with a known amount",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AssetBase_for_Addr"
+          }
+        },
+        "Expiration": {
+          "description": "Expiration represents a point in time when some event happens. It can compare with a BlockInfo and will return is_expired() == true once the condition is hit (and for every block in the future)",
+          "oneOf": [
+            {
+              "description": "AtHeight will expire when `env.block.height` >= height",
+              "type": "object",
+              "required": [
+                "at_height"
+              ],
+              "properties": {
+                "at_height": {
+                  "type": "integer",
+                  "format": "uint64",
+                  "minimum": 0.0
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "description": "AtTime will expire when `env.block.time` >= time",
+              "type": "object",
+              "required": [
+                "at_time"
+              ],
+              "properties": {
+                "at_time": {
+                  "$ref": "#/definitions/Timestamp"
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "description": "Never will never expire. Used to express the empty variant",
+              "type": "object",
+              "required": [
+                "never"
+              ],
+              "properties": {
+                "never": {
+                  "type": "object",
+                  "additionalProperties": false
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "OrderStatus": {
+          "description": "Order      ///",
+          "type": "string",
+          "enum": [
+            "creating",
+            "pending",
+            "accepted",
+            "rejected",
+            "fulfilled",
+            "disputed"
+          ]
+        },
+        "Timestamp": {
+          "description": "A point in time in nanosecond precision.\n\nThis type can represent times from 1970-01-01T00:00:00Z to 2554-07-21T23:34:33Z.\n\n## Examples\n\n``` # use cosmwasm_std::Timestamp; let ts = Timestamp::from_nanos(1_000_000_202); assert_eq!(ts.nanos(), 1_000_000_202); assert_eq!(ts.seconds(), 1); assert_eq!(ts.subsec_nanos(), 202);\n\nlet ts = ts.plus_seconds(2); assert_eq!(ts.nanos(), 3_000_000_202); assert_eq!(ts.seconds(), 3); assert_eq!(ts.subsec_nanos(), 202); ```",
+          "allOf": [
+            {
+              "$ref": "#/definitions/Uint64"
+            }
+          ]
+        },
+        "Uint128": {
+          "description": "A thin wrapper around u128 that is using strings for JSON encoding/decoding, such that the full u128 range can be used for clients that convert JSON numbers to floats, like JavaScript and jq.\n\n# Examples\n\nUse `from` to create instances of this and `u128` to get the value out:\n\n``` # use cosmwasm_std::Uint128; let a = Uint128::from(123u128); assert_eq!(a.u128(), 123);\n\nlet b = Uint128::from(42u64); assert_eq!(b.u128(), 42);\n\nlet c = Uint128::from(70u32); assert_eq!(c.u128(), 70); ```",
+          "type": "string"
+        },
+        "Uint64": {
+          "description": "A thin wrapper around u64 that is using strings for JSON encoding/decoding, such that the full u64 range can be used for clients that convert JSON numbers to floats, like JavaScript and jq.\n\n# Examples\n\nUse `from` to create instances of this and `u64` to get the value out:\n\n``` # use cosmwasm_std::Uint64; let a = Uint64::from(42u64); assert_eq!(a.u64(), 42);\n\nlet b = Uint64::from(70u32); assert_eq!(b.u64(), 70); ```",
+          "type": "string"
+        }
+      }
+    },
+    "orders_for_seller": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Tuple_of_Array_of_Order_and_Nullable_uint64",
+      "type": "array",
+      "items": [
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Order"
+          }
+        },
+        {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint64",
+          "minimum": 0.0
+        }
+      ],
+      "maxItems": 2,
+      "minItems": 2,
+      "definitions": {
+        "Addr": {
+          "description": "A human readable address.\n\nIn Cosmos, this is typically bech32 encoded. But for multi-chain smart contracts no assumptions should be made other than being UTF-8 encoded and of reasonable length.\n\nThis type represents a validated address. It can be created in the following ways 1. Use `Addr::unchecked(input)` 2. Use `let checked: Addr = deps.api.addr_validate(input)?` 3. Use `let checked: Addr = deps.api.addr_humanize(canonical_addr)?` 4. Deserialize from JSON. This must only be done from JSON that was validated before such as a contract's state. `Addr` must not be used in messages sent by the user because this would result in unvalidated instances.\n\nThis type is immutable. If you really need to mutate it (Really? Are you sure?), create a mutable copy using `let mut mutable = Addr::to_string()` and operate on that `String` instance.",
+          "type": "string"
+        },
+        "AssetBase_for_Addr": {
+          "description": "Represents a fungible asset with a known amount\n\nEach asset instance contains two values: `info`, which specifies the asset's type (CW20 or native), and its `amount`, which specifies the asset's amount.",
+          "type": "object",
+          "required": [
+            "amount",
+            "info"
+          ],
+          "properties": {
+            "amount": {
+              "description": "Specifies the asset's amount",
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Uint128"
+                }
+              ]
+            },
+            "info": {
+              "description": "Specifies the asset's type (CW20 or native)",
+              "allOf": [
+                {
+                  "$ref": "#/definitions/AssetInfoBase_for_Addr"
+                }
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        "AssetInfoBase_for_Addr": {
+          "description": "Represents the type of an fungible asset.\n\nEach **asset info** instance can be one of three variants:\n\n- Native SDK coins. To create an **asset info** instance of this type, provide the denomination. - CW20 tokens. To create an **asset info** instance of this type, provide the contract address.",
+          "oneOf": [
+            {
+              "type": "object",
+              "required": [
+                "native"
+              ],
+              "properties": {
+                "native": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": [
+                "cw20"
+              ],
+              "properties": {
+                "cw20": {
+                  "$ref": "#/definitions/Addr"
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "AssetListBase_for_Addr": {
+          "description": "Represents a list of fungible tokens, each with a known amount",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AssetBase_for_Addr"
+          }
+        },
+        "Expiration": {
+          "description": "Expiration represents a point in time when some event happens. It can compare with a BlockInfo and will return is_expired() == true once the condition is hit (and for every block in the future)",
+          "oneOf": [
+            {
+              "description": "AtHeight will expire when `env.block.height` >= height",
+              "type": "object",
+              "required": [
+                "at_height"
+              ],
+              "properties": {
+                "at_height": {
+                  "type": "integer",
+                  "format": "uint64",
+                  "minimum": 0.0
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "description": "AtTime will expire when `env.block.time` >= time",
+              "type": "object",
+              "required": [
+                "at_time"
+              ],
+              "properties": {
+                "at_time": {
+                  "$ref": "#/definitions/Timestamp"
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "description": "Never will never expire. Used to express the empty variant",
+              "type": "object",
+              "required": [
+                "never"
+              ],
+              "properties": {
+                "never": {
+                  "type": "object",
+                  "additionalProperties": false
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "Order": {
+          "type": "object",
+          "required": [
+            "buyer",
+            "buyer_risk_share",
+            "cart",
+            "expected_delivery",
+            "id",
+            "products",
+            "seller",
+            "status"
+          ],
+          "properties": {
+            "buyer": {
+              "$ref": "#/definitions/Addr"
+            },
+            "buyer_risk_share": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "integer",
+                  "format": "uint64",
+                  "minimum": 0.0
+                },
+                {
+                  "type": "integer",
+                  "format": "uint64",
+                  "minimum": 0.0
+                }
+              ],
+              "maxItems": 2,
+              "minItems": 2
+            },
+            "cart": {
+              "$ref": "#/definitions/AssetListBase_for_Addr"
+            },
+            "expected_delivery": {
+              "$ref": "#/definitions/Expiration"
+            },
+            "id": {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0.0
+            },
+            "products": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "uint64",
+                "minimum": 0.0
+              }
+            },
+            "seller": {
+              "$ref": "#/definitions/Addr"
+            },
+            "status": {
+              "$ref": "#/definitions/OrderStatus"
+            }
+          },
+          "additionalProperties": false
+        },
+        "OrderStatus": {
+          "description": "Order      ///",
+          "type": "string",
+          "enum": [
+            "creating",
+            "pending",
+            "accepted",
+            "rejected",
+            "fulfilled",
+            "disputed"
+          ]
+        },
+        "Timestamp": {
+          "description": "A point in time in nanosecond precision.\n\nThis type can represent times from 1970-01-01T00:00:00Z to 2554-07-21T23:34:33Z.\n\n## Examples\n\n``` # use cosmwasm_std::Timestamp; let ts = Timestamp::from_nanos(1_000_000_202); assert_eq!(ts.nanos(), 1_000_000_202); assert_eq!(ts.seconds(), 1); assert_eq!(ts.subsec_nanos(), 202);\n\nlet ts = ts.plus_seconds(2); assert_eq!(ts.nanos(), 3_000_000_202); assert_eq!(ts.seconds(), 3); assert_eq!(ts.subsec_nanos(), 202); ```",
+          "allOf": [
+            {
+              "$ref": "#/definitions/Uint64"
+            }
+          ]
+        },
+        "Uint128": {
+          "description": "A thin wrapper around u128 that is using strings for JSON encoding/decoding, such that the full u128 range can be used for clients that convert JSON numbers to floats, like JavaScript and jq.\n\n# Examples\n\nUse `from` to create instances of this and `u128` to get the value out:\n\n``` # use cosmwasm_std::Uint128; let a = Uint128::from(123u128); assert_eq!(a.u128(), 123);\n\nlet b = Uint128::from(42u64); assert_eq!(b.u128(), 42);\n\nlet c = Uint128::from(70u32); assert_eq!(c.u128(), 70); ```",
+          "type": "string"
+        },
+        "Uint64": {
+          "description": "A thin wrapper around u64 that is using strings for JSON encoding/decoding, such that the full u64 range can be used for clients that convert JSON numbers to floats, like JavaScript and jq.\n\n# Examples\n\nUse `from` to create instances of this and `u64` to get the value out:\n\n``` # use cosmwasm_std::Uint64; let a = Uint64::from(42u64); assert_eq!(a.u64(), 42);\n\nlet b = Uint64::from(70u32); assert_eq!(b.u64(), 70); ```",
+          "type": "string"
+        }
+      }
+    },
+    "orders_from_buyer": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Tuple_of_Array_of_Order_and_Nullable_uint64",
+      "type": "array",
+      "items": [
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Order"
+          }
+        },
+        {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint64",
+          "minimum": 0.0
+        }
+      ],
+      "maxItems": 2,
+      "minItems": 2,
+      "definitions": {
+        "Addr": {
+          "description": "A human readable address.\n\nIn Cosmos, this is typically bech32 encoded. But for multi-chain smart contracts no assumptions should be made other than being UTF-8 encoded and of reasonable length.\n\nThis type represents a validated address. It can be created in the following ways 1. Use `Addr::unchecked(input)` 2. Use `let checked: Addr = deps.api.addr_validate(input)?` 3. Use `let checked: Addr = deps.api.addr_humanize(canonical_addr)?` 4. Deserialize from JSON. This must only be done from JSON that was validated before such as a contract's state. `Addr` must not be used in messages sent by the user because this would result in unvalidated instances.\n\nThis type is immutable. If you really need to mutate it (Really? Are you sure?), create a mutable copy using `let mut mutable = Addr::to_string()` and operate on that `String` instance.",
+          "type": "string"
+        },
+        "AssetBase_for_Addr": {
+          "description": "Represents a fungible asset with a known amount\n\nEach asset instance contains two values: `info`, which specifies the asset's type (CW20 or native), and its `amount`, which specifies the asset's amount.",
+          "type": "object",
+          "required": [
+            "amount",
+            "info"
+          ],
+          "properties": {
+            "amount": {
+              "description": "Specifies the asset's amount",
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Uint128"
+                }
+              ]
+            },
+            "info": {
+              "description": "Specifies the asset's type (CW20 or native)",
+              "allOf": [
+                {
+                  "$ref": "#/definitions/AssetInfoBase_for_Addr"
+                }
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        "AssetInfoBase_for_Addr": {
+          "description": "Represents the type of an fungible asset.\n\nEach **asset info** instance can be one of three variants:\n\n- Native SDK coins. To create an **asset info** instance of this type, provide the denomination. - CW20 tokens. To create an **asset info** instance of this type, provide the contract address.",
+          "oneOf": [
+            {
+              "type": "object",
+              "required": [
+                "native"
+              ],
+              "properties": {
+                "native": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": [
+                "cw20"
+              ],
+              "properties": {
+                "cw20": {
+                  "$ref": "#/definitions/Addr"
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "AssetListBase_for_Addr": {
+          "description": "Represents a list of fungible tokens, each with a known amount",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AssetBase_for_Addr"
+          }
+        },
+        "Expiration": {
+          "description": "Expiration represents a point in time when some event happens. It can compare with a BlockInfo and will return is_expired() == true once the condition is hit (and for every block in the future)",
+          "oneOf": [
+            {
+              "description": "AtHeight will expire when `env.block.height` >= height",
+              "type": "object",
+              "required": [
+                "at_height"
+              ],
+              "properties": {
+                "at_height": {
+                  "type": "integer",
+                  "format": "uint64",
+                  "minimum": 0.0
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "description": "AtTime will expire when `env.block.time` >= time",
+              "type": "object",
+              "required": [
+                "at_time"
+              ],
+              "properties": {
+                "at_time": {
+                  "$ref": "#/definitions/Timestamp"
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "description": "Never will never expire. Used to express the empty variant",
+              "type": "object",
+              "required": [
+                "never"
+              ],
+              "properties": {
+                "never": {
+                  "type": "object",
+                  "additionalProperties": false
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "Order": {
+          "type": "object",
+          "required": [
+            "buyer",
+            "buyer_risk_share",
+            "cart",
+            "expected_delivery",
+            "id",
+            "products",
+            "seller",
+            "status"
+          ],
+          "properties": {
+            "buyer": {
+              "$ref": "#/definitions/Addr"
+            },
+            "buyer_risk_share": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "integer",
+                  "format": "uint64",
+                  "minimum": 0.0
+                },
+                {
+                  "type": "integer",
+                  "format": "uint64",
+                  "minimum": 0.0
+                }
+              ],
+              "maxItems": 2,
+              "minItems": 2
+            },
+            "cart": {
+              "$ref": "#/definitions/AssetListBase_for_Addr"
+            },
+            "expected_delivery": {
+              "$ref": "#/definitions/Expiration"
+            },
+            "id": {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0.0
+            },
+            "products": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "uint64",
+                "minimum": 0.0
+              }
+            },
+            "seller": {
+              "$ref": "#/definitions/Addr"
+            },
+            "status": {
+              "$ref": "#/definitions/OrderStatus"
+            }
+          },
+          "additionalProperties": false
+        },
+        "OrderStatus": {
+          "description": "Order      ///",
+          "type": "string",
+          "enum": [
+            "creating",
+            "pending",
+            "accepted",
+            "rejected",
+            "fulfilled",
+            "disputed"
+          ]
+        },
+        "Timestamp": {
+          "description": "A point in time in nanosecond precision.\n\nThis type can represent times from 1970-01-01T00:00:00Z to 2554-07-21T23:34:33Z.\n\n## Examples\n\n``` # use cosmwasm_std::Timestamp; let ts = Timestamp::from_nanos(1_000_000_202); assert_eq!(ts.nanos(), 1_000_000_202); assert_eq!(ts.seconds(), 1); assert_eq!(ts.subsec_nanos(), 202);\n\nlet ts = ts.plus_seconds(2); assert_eq!(ts.nanos(), 3_000_000_202); assert_eq!(ts.seconds(), 3); assert_eq!(ts.subsec_nanos(), 202); ```",
+          "allOf": [
+            {
+              "$ref": "#/definitions/Uint64"
+            }
+          ]
+        },
+        "Uint128": {
+          "description": "A thin wrapper around u128 that is using strings for JSON encoding/decoding, such that the full u128 range can be used for clients that convert JSON numbers to floats, like JavaScript and jq.\n\n# Examples\n\nUse `from` to create instances of this and `u128` to get the value out:\n\n``` # use cosmwasm_std::Uint128; let a = Uint128::from(123u128); assert_eq!(a.u128(), 123);\n\nlet b = Uint128::from(42u64); assert_eq!(b.u128(), 42);\n\nlet c = Uint128::from(70u32); assert_eq!(c.u128(), 70); ```",
+          "type": "string"
+        },
+        "Uint64": {
+          "description": "A thin wrapper around u64 that is using strings for JSON encoding/decoding, such that the full u64 range can be used for clients that convert JSON numbers to floats, like JavaScript and jq.\n\n# Examples\n\nUse `from` to create instances of this and `u64` to get the value out:\n\n``` # use cosmwasm_std::Uint64; let a = Uint64::from(42u64); assert_eq!(a.u64(), 42);\n\nlet b = Uint64::from(70u32); assert_eq!(b.u64(), 70); ```",
+          "type": "string"
+        }
+      }
+    },
+    "params": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ContractParams",
+      "description": "ContractParams  ///",
+      "type": "object",
+      "required": [
+        "admin",
+        "fee",
+        "fee_distribution",
+        "investment_distribution",
+        "max_contract_risk_share",
+        "publication_fee",
+        "publication_fee_distribution",
+        "reward_rate",
+        "unbounding_duration",
+        "weighted_accepted_assets"
+      ],
+      "properties": {
+        "admin": {
+          "$ref": "#/definitions/Addr"
+        },
+        "fee": {
+          "type": "array",
+          "items": [
+            {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0.0
+            },
+            {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0.0
+            }
+          ],
+          "maxItems": 2,
+          "minItems": 2
+        },
+        "fee_distribution": {
+          "$ref": "#/definitions/Distribution"
+        },
+        "investment_distribution": {
+          "$ref": "#/definitions/Distribution"
+        },
+        "max_contract_risk_share": {
+          "type": "array",
+          "items": [
+            {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0.0
+            },
+            {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0.0
+            }
+          ],
+          "maxItems": 2,
+          "minItems": 2
+        },
+        "publication_fee": {
+          "$ref": "#/definitions/AssetListBase_for_Addr"
+        },
+        "publication_fee_distribution": {
+          "$ref": "#/definitions/Distribution"
+        },
+        "reward_rate": {
+          "$ref": "#/definitions/Duration"
+        },
+        "unbounding_duration": {
+          "$ref": "#/definitions/Duration"
+        },
+        "weighted_accepted_assets": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": [
+              {
+                "$ref": "#/definitions/AssetInfoBase_for_Addr"
+              },
+              {
+                "type": "integer",
+                "format": "uint64",
+                "minimum": 0.0
+              }
+            ],
+            "maxItems": 2,
+            "minItems": 2
+          }
+        }
+      },
+      "additionalProperties": false,
+      "definitions": {
+        "Addr": {
+          "description": "A human readable address.\n\nIn Cosmos, this is typically bech32 encoded. But for multi-chain smart contracts no assumptions should be made other than being UTF-8 encoded and of reasonable length.\n\nThis type represents a validated address. It can be created in the following ways 1. Use `Addr::unchecked(input)` 2. Use `let checked: Addr = deps.api.addr_validate(input)?` 3. Use `let checked: Addr = deps.api.addr_humanize(canonical_addr)?` 4. Deserialize from JSON. This must only be done from JSON that was validated before such as a contract's state. `Addr` must not be used in messages sent by the user because this would result in unvalidated instances.\n\nThis type is immutable. If you really need to mutate it (Really? Are you sure?), create a mutable copy using `let mut mutable = Addr::to_string()` and operate on that `String` instance.",
+          "type": "string"
+        },
+        "AssetBase_for_Addr": {
+          "description": "Represents a fungible asset with a known amount\n\nEach asset instance contains two values: `info`, which specifies the asset's type (CW20 or native), and its `amount`, which specifies the asset's amount.",
+          "type": "object",
+          "required": [
+            "amount",
+            "info"
+          ],
+          "properties": {
+            "amount": {
+              "description": "Specifies the asset's amount",
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Uint128"
+                }
+              ]
+            },
+            "info": {
+              "description": "Specifies the asset's type (CW20 or native)",
+              "allOf": [
+                {
+                  "$ref": "#/definitions/AssetInfoBase_for_Addr"
+                }
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        "AssetInfoBase_for_Addr": {
+          "description": "Represents the type of an fungible asset.\n\nEach **asset info** instance can be one of three variants:\n\n- Native SDK coins. To create an **asset info** instance of this type, provide the denomination. - CW20 tokens. To create an **asset info** instance of this type, provide the contract address.",
+          "oneOf": [
+            {
+              "type": "object",
+              "required": [
+                "native"
+              ],
+              "properties": {
+                "native": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": [
+                "cw20"
+              ],
+              "properties": {
+                "cw20": {
+                  "$ref": "#/definitions/Addr"
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "AssetListBase_for_Addr": {
+          "description": "Represents a list of fungible tokens, each with a known amount",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AssetBase_for_Addr"
+          }
+        },
+        "Distribution": {
+          "description": "Distribution   ///",
+          "type": "object",
+          "required": [
+            "to_claim_reserve",
+            "to_dev",
+            "to_investors"
+          ],
+          "properties": {
+            "to_claim_reserve": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "integer",
+                  "format": "uint64",
+                  "minimum": 0.0
+                },
+                {
+                  "type": "integer",
+                  "format": "uint64",
+                  "minimum": 0.0
+                }
+              ],
+              "maxItems": 2,
+              "minItems": 2
+            },
+            "to_dev": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "integer",
+                  "format": "uint64",
+                  "minimum": 0.0
+                },
+                {
+                  "type": "integer",
+                  "format": "uint64",
+                  "minimum": 0.0
+                }
+              ],
+              "maxItems": 2,
+              "minItems": 2
+            },
+            "to_investors": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "integer",
+                  "format": "uint64",
+                  "minimum": 0.0
+                },
+                {
+                  "type": "integer",
+                  "format": "uint64",
+                  "minimum": 0.0
+                }
+              ],
+              "maxItems": 2,
+              "minItems": 2
+            }
+          },
+          "additionalProperties": false
+        },
+        "Duration": {
+          "description": "Duration is a delta of time. You can add it to a BlockInfo or Expiration to move that further in the future. Note that an height-based Duration and a time-based Expiration cannot be combined",
+          "oneOf": [
+            {
+              "type": "object",
+              "required": [
+                "height"
+              ],
+              "properties": {
+                "height": {
+                  "type": "integer",
+                  "format": "uint64",
+                  "minimum": 0.0
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "description": "Time in seconds",
+              "type": "object",
+              "required": [
+                "time"
+              ],
+              "properties": {
+                "time": {
+                  "type": "integer",
+                  "format": "uint64",
+                  "minimum": 0.0
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "Uint128": {
+          "description": "A thin wrapper around u128 that is using strings for JSON encoding/decoding, such that the full u128 range can be used for clients that convert JSON numbers to floats, like JavaScript and jq.\n\n# Examples\n\nUse `from` to create instances of this and `u128` to get the value out:\n\n``` # use cosmwasm_std::Uint128; let a = Uint128::from(123u128); assert_eq!(a.u128(), 123);\n\nlet b = Uint128::from(42u64); assert_eq!(b.u128(), 42);\n\nlet c = Uint128::from(70u32); assert_eq!(c.u128(), 70); ```",
+          "type": "string"
+        }
+      }
+    },
+    "product_all": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Tuple_of_Array_of_Product_and_Nullable_uint64",
+      "type": "array",
+      "items": [
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Product"
+          }
+        },
+        {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint64",
+          "minimum": 0.0
+        }
+      ],
+      "maxItems": 2,
+      "minItems": 2,
+      "definitions": {
+        "Addr": {
+          "description": "A human readable address.\n\nIn Cosmos, this is typically bech32 encoded. But for multi-chain smart contracts no assumptions should be made other than being UTF-8 encoded and of reasonable length.\n\nThis type represents a validated address. It can be created in the following ways 1. Use `Addr::unchecked(input)` 2. Use `let checked: Addr = deps.api.addr_validate(input)?` 3. Use `let checked: Addr = deps.api.addr_humanize(canonical_addr)?` 4. Deserialize from JSON. This must only be done from JSON that was validated before such as a contract's state. `Addr` must not be used in messages sent by the user because this would result in unvalidated instances.\n\nThis type is immutable. If you really need to mutate it (Really? Are you sure?), create a mutable copy using `let mut mutable = Addr::to_string()` and operate on that `String` instance.",
+          "type": "string"
+        },
+        "AssetBase_for_Addr": {
+          "description": "Represents a fungible asset with a known amount\n\nEach asset instance contains two values: `info`, which specifies the asset's type (CW20 or native), and its `amount`, which specifies the asset's amount.",
+          "type": "object",
+          "required": [
+            "amount",
+            "info"
+          ],
+          "properties": {
+            "amount": {
+              "description": "Specifies the asset's amount",
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Uint128"
+                }
+              ]
+            },
+            "info": {
+              "description": "Specifies the asset's type (CW20 or native)",
+              "allOf": [
+                {
+                  "$ref": "#/definitions/AssetInfoBase_for_Addr"
+                }
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        "AssetInfoBase_for_Addr": {
+          "description": "Represents the type of an fungible asset.\n\nEach **asset info** instance can be one of three variants:\n\n- Native SDK coins. To create an **asset info** instance of this type, provide the denomination. - CW20 tokens. To create an **asset info** instance of this type, provide the contract address.",
+          "oneOf": [
+            {
+              "type": "object",
+              "required": [
+                "native"
+              ],
+              "properties": {
+                "native": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": [
+                "cw20"
+              ],
+              "properties": {
+                "cw20": {
+                  "$ref": "#/definitions/Addr"
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "AssetListBase_for_Addr": {
+          "description": "Represents a list of fungible tokens, each with a known amount",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AssetBase_for_Addr"
+          }
+        },
+        "Duration": {
+          "description": "Duration is a delta of time. You can add it to a BlockInfo or Expiration to move that further in the future. Note that an height-based Duration and a time-based Expiration cannot be combined",
+          "oneOf": [
+            {
+              "type": "object",
+              "required": [
+                "height"
+              ],
+              "properties": {
+                "height": {
+                  "type": "integer",
+                  "format": "uint64",
+                  "minimum": 0.0
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "description": "Time in seconds",
+              "type": "object",
+              "required": [
+                "time"
+              ],
+              "properties": {
+                "time": {
+                  "type": "integer",
+                  "format": "uint64",
+                  "minimum": 0.0
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "Product": {
+          "description": "Product     ///",
+          "type": "object",
+          "required": [
+            "delivery_time",
+            "id",
+            "is_listed",
+            "meta",
+            "price",
+            "rating",
+            "seller"
+          ],
+          "properties": {
+            "delivery_time": {
+              "$ref": "#/definitions/Duration"
+            },
+            "id": {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0.0
+            },
+            "is_listed": {
+              "type": "boolean"
+            },
+            "meta": {
+              "type": "string"
+            },
+            "price": {
+              "$ref": "#/definitions/AssetListBase_for_Addr"
+            },
+            "rating": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "integer",
+                  "format": "uint64",
+                  "minimum": 0.0
+                },
+                {
+                  "type": "integer",
+                  "format": "uint64",
+                  "minimum": 0.0
+                }
+              ],
+              "maxItems": 2,
+              "minItems": 2
+            },
+            "seller": {
+              "$ref": "#/definitions/Addr"
+            }
+          },
+          "additionalProperties": false
+        },
+        "Uint128": {
+          "description": "A thin wrapper around u128 that is using strings for JSON encoding/decoding, such that the full u128 range can be used for clients that convert JSON numbers to floats, like JavaScript and jq.\n\n# Examples\n\nUse `from` to create instances of this and `u128` to get the value out:\n\n``` # use cosmwasm_std::Uint128; let a = Uint128::from(123u128); assert_eq!(a.u128(), 123);\n\nlet b = Uint128::from(42u64); assert_eq!(b.u128(), 42);\n\nlet c = Uint128::from(70u32); assert_eq!(c.u128(), 70); ```",
+          "type": "string"
+        }
+      }
+    },
+    "product_by_id": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Product",
+      "description": "Product     ///",
+      "type": "object",
+      "required": [
+        "delivery_time",
+        "id",
+        "is_listed",
+        "meta",
+        "price",
+        "rating",
+        "seller"
+      ],
+      "properties": {
+        "delivery_time": {
+          "$ref": "#/definitions/Duration"
+        },
+        "id": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0.0
+        },
+        "is_listed": {
+          "type": "boolean"
+        },
+        "meta": {
+          "type": "string"
+        },
+        "price": {
+          "$ref": "#/definitions/AssetListBase_for_Addr"
+        },
+        "rating": {
+          "type": "array",
+          "items": [
+            {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0.0
+            },
+            {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0.0
+            }
+          ],
+          "maxItems": 2,
+          "minItems": 2
+        },
+        "seller": {
+          "$ref": "#/definitions/Addr"
+        }
+      },
+      "additionalProperties": false,
+      "definitions": {
+        "Addr": {
+          "description": "A human readable address.\n\nIn Cosmos, this is typically bech32 encoded. But for multi-chain smart contracts no assumptions should be made other than being UTF-8 encoded and of reasonable length.\n\nThis type represents a validated address. It can be created in the following ways 1. Use `Addr::unchecked(input)` 2. Use `let checked: Addr = deps.api.addr_validate(input)?` 3. Use `let checked: Addr = deps.api.addr_humanize(canonical_addr)?` 4. Deserialize from JSON. This must only be done from JSON that was validated before such as a contract's state. `Addr` must not be used in messages sent by the user because this would result in unvalidated instances.\n\nThis type is immutable. If you really need to mutate it (Really? Are you sure?), create a mutable copy using `let mut mutable = Addr::to_string()` and operate on that `String` instance.",
+          "type": "string"
+        },
+        "AssetBase_for_Addr": {
+          "description": "Represents a fungible asset with a known amount\n\nEach asset instance contains two values: `info`, which specifies the asset's type (CW20 or native), and its `amount`, which specifies the asset's amount.",
+          "type": "object",
+          "required": [
+            "amount",
+            "info"
+          ],
+          "properties": {
+            "amount": {
+              "description": "Specifies the asset's amount",
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Uint128"
+                }
+              ]
+            },
+            "info": {
+              "description": "Specifies the asset's type (CW20 or native)",
+              "allOf": [
+                {
+                  "$ref": "#/definitions/AssetInfoBase_for_Addr"
+                }
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        "AssetInfoBase_for_Addr": {
+          "description": "Represents the type of an fungible asset.\n\nEach **asset info** instance can be one of three variants:\n\n- Native SDK coins. To create an **asset info** instance of this type, provide the denomination. - CW20 tokens. To create an **asset info** instance of this type, provide the contract address.",
+          "oneOf": [
+            {
+              "type": "object",
+              "required": [
+                "native"
+              ],
+              "properties": {
+                "native": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": [
+                "cw20"
+              ],
+              "properties": {
+                "cw20": {
+                  "$ref": "#/definitions/Addr"
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "AssetListBase_for_Addr": {
+          "description": "Represents a list of fungible tokens, each with a known amount",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AssetBase_for_Addr"
+          }
+        },
+        "Duration": {
+          "description": "Duration is a delta of time. You can add it to a BlockInfo or Expiration to move that further in the future. Note that an height-based Duration and a time-based Expiration cannot be combined",
+          "oneOf": [
+            {
+              "type": "object",
+              "required": [
+                "height"
+              ],
+              "properties": {
+                "height": {
+                  "type": "integer",
+                  "format": "uint64",
+                  "minimum": 0.0
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "description": "Time in seconds",
+              "type": "object",
+              "required": [
+                "time"
+              ],
+              "properties": {
+                "time": {
+                  "type": "integer",
+                  "format": "uint64",
+                  "minimum": 0.0
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "Uint128": {
+          "description": "A thin wrapper around u128 that is using strings for JSON encoding/decoding, such that the full u128 range can be used for clients that convert JSON numbers to floats, like JavaScript and jq.\n\n# Examples\n\nUse `from` to create instances of this and `u128` to get the value out:\n\n``` # use cosmwasm_std::Uint128; let a = Uint128::from(123u128); assert_eq!(a.u128(), 123);\n\nlet b = Uint128::from(42u64); assert_eq!(b.u128(), 42);\n\nlet c = Uint128::from(70u32); assert_eq!(c.u128(), 70); ```",
+          "type": "string"
+        }
+      }
+    },
+    "products_of_seller": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Tuple_of_Array_of_Product_and_Nullable_uint64",
+      "type": "array",
+      "items": [
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Product"
+          }
+        },
+        {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint64",
+          "minimum": 0.0
+        }
+      ],
+      "maxItems": 2,
+      "minItems": 2,
+      "definitions": {
+        "Addr": {
+          "description": "A human readable address.\n\nIn Cosmos, this is typically bech32 encoded. But for multi-chain smart contracts no assumptions should be made other than being UTF-8 encoded and of reasonable length.\n\nThis type represents a validated address. It can be created in the following ways 1. Use `Addr::unchecked(input)` 2. Use `let checked: Addr = deps.api.addr_validate(input)?` 3. Use `let checked: Addr = deps.api.addr_humanize(canonical_addr)?` 4. Deserialize from JSON. This must only be done from JSON that was validated before such as a contract's state. `Addr` must not be used in messages sent by the user because this would result in unvalidated instances.\n\nThis type is immutable. If you really need to mutate it (Really? Are you sure?), create a mutable copy using `let mut mutable = Addr::to_string()` and operate on that `String` instance.",
+          "type": "string"
+        },
+        "AssetBase_for_Addr": {
+          "description": "Represents a fungible asset with a known amount\n\nEach asset instance contains two values: `info`, which specifies the asset's type (CW20 or native), and its `amount`, which specifies the asset's amount.",
+          "type": "object",
+          "required": [
+            "amount",
+            "info"
+          ],
+          "properties": {
+            "amount": {
+              "description": "Specifies the asset's amount",
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Uint128"
+                }
+              ]
+            },
+            "info": {
+              "description": "Specifies the asset's type (CW20 or native)",
+              "allOf": [
+                {
+                  "$ref": "#/definitions/AssetInfoBase_for_Addr"
+                }
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        "AssetInfoBase_for_Addr": {
+          "description": "Represents the type of an fungible asset.\n\nEach **asset info** instance can be one of three variants:\n\n- Native SDK coins. To create an **asset info** instance of this type, provide the denomination. - CW20 tokens. To create an **asset info** instance of this type, provide the contract address.",
+          "oneOf": [
+            {
+              "type": "object",
+              "required": [
+                "native"
+              ],
+              "properties": {
+                "native": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": [
+                "cw20"
+              ],
+              "properties": {
+                "cw20": {
+                  "$ref": "#/definitions/Addr"
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "AssetListBase_for_Addr": {
+          "description": "Represents a list of fungible tokens, each with a known amount",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AssetBase_for_Addr"
+          }
+        },
+        "Duration": {
+          "description": "Duration is a delta of time. You can add it to a BlockInfo or Expiration to move that further in the future. Note that an height-based Duration and a time-based Expiration cannot be combined",
+          "oneOf": [
+            {
+              "type": "object",
+              "required": [
+                "height"
+              ],
+              "properties": {
+                "height": {
+                  "type": "integer",
+                  "format": "uint64",
+                  "minimum": 0.0
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "description": "Time in seconds",
+              "type": "object",
+              "required": [
+                "time"
+              ],
+              "properties": {
+                "time": {
+                  "type": "integer",
+                  "format": "uint64",
+                  "minimum": 0.0
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "Product": {
+          "description": "Product     ///",
+          "type": "object",
+          "required": [
+            "delivery_time",
+            "id",
+            "is_listed",
+            "meta",
+            "price",
+            "rating",
+            "seller"
+          ],
+          "properties": {
+            "delivery_time": {
+              "$ref": "#/definitions/Duration"
+            },
+            "id": {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0.0
+            },
+            "is_listed": {
+              "type": "boolean"
+            },
+            "meta": {
+              "type": "string"
+            },
+            "price": {
+              "$ref": "#/definitions/AssetListBase_for_Addr"
+            },
+            "rating": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "integer",
+                  "format": "uint64",
+                  "minimum": 0.0
+                },
+                {
+                  "type": "integer",
+                  "format": "uint64",
+                  "minimum": 0.0
+                }
+              ],
+              "maxItems": 2,
+              "minItems": 2
+            },
+            "seller": {
+              "$ref": "#/definitions/Addr"
+            }
+          },
+          "additionalProperties": false
+        },
+        "Uint128": {
+          "description": "A thin wrapper around u128 that is using strings for JSON encoding/decoding, such that the full u128 range can be used for clients that convert JSON numbers to floats, like JavaScript and jq.\n\n# Examples\n\nUse `from` to create instances of this and `u128` to get the value out:\n\n``` # use cosmwasm_std::Uint128; let a = Uint128::from(123u128); assert_eq!(a.u128(), 123);\n\nlet b = Uint128::from(42u64); assert_eq!(b.u128(), 42);\n\nlet c = Uint128::from(70u32); assert_eq!(c.u128(), 70); ```",
+          "type": "string"
+        }
+      }
+    },
+    "reviews_from_reviewer": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Tuple_of_Array_of_Review_and_Nullable_uint64",
+      "type": "array",
+      "items": [
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Review"
+          }
+        },
+        {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint64",
+          "minimum": 0.0
+        }
+      ],
+      "maxItems": 2,
+      "minItems": 2,
+      "definitions": {
+        "Addr": {
+          "description": "A human readable address.\n\nIn Cosmos, this is typically bech32 encoded. But for multi-chain smart contracts no assumptions should be made other than being UTF-8 encoded and of reasonable length.\n\nThis type represents a validated address. It can be created in the following ways 1. Use `Addr::unchecked(input)` 2. Use `let checked: Addr = deps.api.addr_validate(input)?` 3. Use `let checked: Addr = deps.api.addr_humanize(canonical_addr)?` 4. Deserialize from JSON. This must only be done from JSON that was validated before such as a contract's state. `Addr` must not be used in messages sent by the user because this would result in unvalidated instances.\n\nThis type is immutable. If you really need to mutate it (Really? Are you sure?), create a mutable copy using `let mut mutable = Addr::to_string()` and operate on that `String` instance.",
+          "type": "string"
+        },
+        "Review": {
+          "type": "object",
+          "required": [
+            "from",
+            "id",
+            "message",
+            "of",
+            "rating"
+          ],
+          "properties": {
+            "from": {
+              "$ref": "#/definitions/Addr"
+            },
+            "id": {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0.0
+            },
+            "message": {
+              "type": "string"
+            },
+            "of": {
+              "$ref": "#/definitions/ReviewOf"
+            },
+            "rating": {
+              "type": "integer",
+              "format": "uint8",
+              "minimum": 0.0
+            }
+          },
+          "additionalProperties": false
+        },
+        "ReviewOf": {
+          "description": "Review      ///",
+          "oneOf": [
+            {
+              "type": "object",
+              "required": [
+                "user"
+              ],
+              "properties": {
+                "user": {
+                  "$ref": "#/definitions/Addr"
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": [
+                "product"
+              ],
+              "properties": {
+                "product": {
+                  "type": "integer",
+                  "format": "uint64",
+                  "minimum": 0.0
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        }
+      }
+    },
+    "reviews_of_product": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Tuple_of_Array_of_Review_and_Nullable_uint64",
+      "type": "array",
+      "items": [
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Review"
+          }
+        },
+        {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint64",
+          "minimum": 0.0
+        }
+      ],
+      "maxItems": 2,
+      "minItems": 2,
+      "definitions": {
+        "Addr": {
+          "description": "A human readable address.\n\nIn Cosmos, this is typically bech32 encoded. But for multi-chain smart contracts no assumptions should be made other than being UTF-8 encoded and of reasonable length.\n\nThis type represents a validated address. It can be created in the following ways 1. Use `Addr::unchecked(input)` 2. Use `let checked: Addr = deps.api.addr_validate(input)?` 3. Use `let checked: Addr = deps.api.addr_humanize(canonical_addr)?` 4. Deserialize from JSON. This must only be done from JSON that was validated before such as a contract's state. `Addr` must not be used in messages sent by the user because this would result in unvalidated instances.\n\nThis type is immutable. If you really need to mutate it (Really? Are you sure?), create a mutable copy using `let mut mutable = Addr::to_string()` and operate on that `String` instance.",
+          "type": "string"
+        },
+        "Review": {
+          "type": "object",
+          "required": [
+            "from",
+            "id",
+            "message",
+            "of",
+            "rating"
+          ],
+          "properties": {
+            "from": {
+              "$ref": "#/definitions/Addr"
+            },
+            "id": {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0.0
+            },
+            "message": {
+              "type": "string"
+            },
+            "of": {
+              "$ref": "#/definitions/ReviewOf"
+            },
+            "rating": {
+              "type": "integer",
+              "format": "uint8",
+              "minimum": 0.0
+            }
+          },
+          "additionalProperties": false
+        },
+        "ReviewOf": {
+          "description": "Review      ///",
+          "oneOf": [
+            {
+              "type": "object",
+              "required": [
+                "user"
+              ],
+              "properties": {
+                "user": {
+                  "$ref": "#/definitions/Addr"
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": [
+                "product"
+              ],
+              "properties": {
+                "product": {
+                  "type": "integer",
+                  "format": "uint64",
+                  "minimum": 0.0
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        }
+      }
+    },
+    "reviews_of_reviewed": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Tuple_of_Array_of_Review_and_Nullable_uint64",
+      "type": "array",
+      "items": [
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Review"
+          }
+        },
+        {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint64",
+          "minimum": 0.0
+        }
+      ],
+      "maxItems": 2,
+      "minItems": 2,
+      "definitions": {
+        "Addr": {
+          "description": "A human readable address.\n\nIn Cosmos, this is typically bech32 encoded. But for multi-chain smart contracts no assumptions should be made other than being UTF-8 encoded and of reasonable length.\n\nThis type represents a validated address. It can be created in the following ways 1. Use `Addr::unchecked(input)` 2. Use `let checked: Addr = deps.api.addr_validate(input)?` 3. Use `let checked: Addr = deps.api.addr_humanize(canonical_addr)?` 4. Deserialize from JSON. This must only be done from JSON that was validated before such as a contract's state. `Addr` must not be used in messages sent by the user because this would result in unvalidated instances.\n\nThis type is immutable. If you really need to mutate it (Really? Are you sure?), create a mutable copy using `let mut mutable = Addr::to_string()` and operate on that `String` instance.",
+          "type": "string"
+        },
+        "Review": {
+          "type": "object",
+          "required": [
+            "from",
+            "id",
+            "message",
+            "of",
+            "rating"
+          ],
+          "properties": {
+            "from": {
+              "$ref": "#/definitions/Addr"
+            },
+            "id": {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0.0
+            },
+            "message": {
+              "type": "string"
+            },
+            "of": {
+              "$ref": "#/definitions/ReviewOf"
+            },
+            "rating": {
+              "type": "integer",
+              "format": "uint8",
+              "minimum": 0.0
+            }
+          },
+          "additionalProperties": false
+        },
+        "ReviewOf": {
+          "description": "Review      ///",
+          "oneOf": [
+            {
+              "type": "object",
+              "required": [
+                "user"
+              ],
+              "properties": {
+                "user": {
+                  "$ref": "#/definitions/Addr"
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": [
+                "product"
+              ],
+              "properties": {
+                "product": {
+                  "type": "integer",
+                  "format": "uint64",
+                  "minimum": 0.0
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        }
+      }
+    },
+    "total_power_at_height": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "TotalPowerAtHeightResponse",
+      "type": "object",
+      "required": [
+        "height",
+        "power"
+      ],
+      "properties": {
+        "height": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0.0
+        },
+        "power": {
+          "$ref": "#/definitions/Uint128"
+        }
+      },
+      "additionalProperties": false,
+      "definitions": {
+        "Uint128": {
+          "description": "A thin wrapper around u128 that is using strings for JSON encoding/decoding, such that the full u128 range can be used for clients that convert JSON numbers to floats, like JavaScript and jq.\n\n# Examples\n\nUse `from` to create instances of this and `u128` to get the value out:\n\n``` # use cosmwasm_std::Uint128; let a = Uint128::from(123u128); assert_eq!(a.u128(), 123);\n\nlet b = Uint128::from(42u64); assert_eq!(b.u128(), 42);\n\nlet c = Uint128::from(70u32); assert_eq!(c.u128(), 70); ```",
+          "type": "string"
+        }
+      }
+    },
+    "user_stats": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "description": "User       ///",
+      "type": "object",
+      "required": [
+        "addr",
+        "generated_fees",
+        "invested",
+        "nb_disputed_orders",
+        "nb_fulfilled_orders",
+        "nb_orders",
+        "nb_rejected_orders",
+        "rating",
+        "unbonding"
+      ],
+      "properties": {
+        "addr": {
+          "$ref": "#/definitions/Addr"
+        },
+        "generated_fees": {
+          "$ref": "#/definitions/AssetListBase_for_Addr"
+        },
+        "invested": {
+          "$ref": "#/definitions/AssetListBase_for_Addr"
+        },
+        "nb_disputed_orders": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0.0
+        },
+        "nb_fulfilled_orders": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0.0
+        },
+        "nb_orders": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0.0
+        },
+        "nb_rejected_orders": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0.0
+        },
+        "rating": {
+          "type": "array",
+          "items": [
+            {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0.0
+            },
+            {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0.0
+            }
+          ],
+          "maxItems": 2,
+          "minItems": 2
+        },
+        "unbonding": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": [
+              {
+                "$ref": "#/definitions/AssetBase_for_Addr"
+              },
+              {
+                "$ref": "#/definitions/Expiration"
+              }
+            ],
+            "maxItems": 2,
+            "minItems": 2
+          }
+        }
+      },
+      "additionalProperties": false,
+      "definitions": {
+        "Addr": {
+          "description": "A human readable address.\n\nIn Cosmos, this is typically bech32 encoded. But for multi-chain smart contracts no assumptions should be made other than being UTF-8 encoded and of reasonable length.\n\nThis type represents a validated address. It can be created in the following ways 1. Use `Addr::unchecked(input)` 2. Use `let checked: Addr = deps.api.addr_validate(input)?` 3. Use `let checked: Addr = deps.api.addr_humanize(canonical_addr)?` 4. Deserialize from JSON. This must only be done from JSON that was validated before such as a contract's state. `Addr` must not be used in messages sent by the user because this would result in unvalidated instances.\n\nThis type is immutable. If you really need to mutate it (Really? Are you sure?), create a mutable copy using `let mut mutable = Addr::to_string()` and operate on that `String` instance.",
+          "type": "string"
+        },
+        "AssetBase_for_Addr": {
+          "description": "Represents a fungible asset with a known amount\n\nEach asset instance contains two values: `info`, which specifies the asset's type (CW20 or native), and its `amount`, which specifies the asset's amount.",
+          "type": "object",
+          "required": [
+            "amount",
+            "info"
+          ],
+          "properties": {
+            "amount": {
+              "description": "Specifies the asset's amount",
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Uint128"
+                }
+              ]
+            },
+            "info": {
+              "description": "Specifies the asset's type (CW20 or native)",
+              "allOf": [
+                {
+                  "$ref": "#/definitions/AssetInfoBase_for_Addr"
+                }
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        "AssetInfoBase_for_Addr": {
+          "description": "Represents the type of an fungible asset.\n\nEach **asset info** instance can be one of three variants:\n\n- Native SDK coins. To create an **asset info** instance of this type, provide the denomination. - CW20 tokens. To create an **asset info** instance of this type, provide the contract address.",
+          "oneOf": [
+            {
+              "type": "object",
+              "required": [
+                "native"
+              ],
+              "properties": {
+                "native": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": [
+                "cw20"
+              ],
+              "properties": {
+                "cw20": {
+                  "$ref": "#/definitions/Addr"
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "AssetListBase_for_Addr": {
+          "description": "Represents a list of fungible tokens, each with a known amount",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AssetBase_for_Addr"
+          }
+        },
+        "Expiration": {
+          "description": "Expiration represents a point in time when some event happens. It can compare with a BlockInfo and will return is_expired() == true once the condition is hit (and for every block in the future)",
+          "oneOf": [
+            {
+              "description": "AtHeight will expire when `env.block.height` >= height",
+              "type": "object",
+              "required": [
+                "at_height"
+              ],
+              "properties": {
+                "at_height": {
+                  "type": "integer",
+                  "format": "uint64",
+                  "minimum": 0.0
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "description": "AtTime will expire when `env.block.time` >= time",
+              "type": "object",
+              "required": [
+                "at_time"
+              ],
+              "properties": {
+                "at_time": {
+                  "$ref": "#/definitions/Timestamp"
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "description": "Never will never expire. Used to express the empty variant",
+              "type": "object",
+              "required": [
+                "never"
+              ],
+              "properties": {
+                "never": {
+                  "type": "object",
+                  "additionalProperties": false
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "Timestamp": {
+          "description": "A point in time in nanosecond precision.\n\nThis type can represent times from 1970-01-01T00:00:00Z to 2554-07-21T23:34:33Z.\n\n## Examples\n\n``` # use cosmwasm_std::Timestamp; let ts = Timestamp::from_nanos(1_000_000_202); assert_eq!(ts.nanos(), 1_000_000_202); assert_eq!(ts.seconds(), 1); assert_eq!(ts.subsec_nanos(), 202);\n\nlet ts = ts.plus_seconds(2); assert_eq!(ts.nanos(), 3_000_000_202); assert_eq!(ts.seconds(), 3); assert_eq!(ts.subsec_nanos(), 202); ```",
+          "allOf": [
+            {
+              "$ref": "#/definitions/Uint64"
+            }
+          ]
+        },
+        "Uint128": {
+          "description": "A thin wrapper around u128 that is using strings for JSON encoding/decoding, such that the full u128 range can be used for clients that convert JSON numbers to floats, like JavaScript and jq.\n\n# Examples\n\nUse `from` to create instances of this and `u128` to get the value out:\n\n``` # use cosmwasm_std::Uint128; let a = Uint128::from(123u128); assert_eq!(a.u128(), 123);\n\nlet b = Uint128::from(42u64); assert_eq!(b.u128(), 42);\n\nlet c = Uint128::from(70u32); assert_eq!(c.u128(), 70); ```",
+          "type": "string"
+        },
+        "Uint64": {
+          "description": "A thin wrapper around u64 that is using strings for JSON encoding/decoding, such that the full u64 range can be used for clients that convert JSON numbers to floats, like JavaScript and jq.\n\n# Examples\n\nUse `from` to create instances of this and `u64` to get the value out:\n\n``` # use cosmwasm_std::Uint64; let a = Uint64::from(42u64); assert_eq!(a.u64(), 42);\n\nlet b = Uint64::from(70u32); assert_eq!(b.u64(), 70); ```",
+          "type": "string"
+        }
+      }
+    },
+    "voting_power_at_height": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "VotingPowerAtHeightResponse",
+      "type": "object",
+      "required": [
+        "height",
+        "power"
+      ],
+      "properties": {
+        "height": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0.0
+        },
+        "power": {
+          "$ref": "#/definitions/Uint128"
+        }
+      },
+      "additionalProperties": false,
+      "definitions": {
+        "Uint128": {
+          "description": "A thin wrapper around u128 that is using strings for JSON encoding/decoding, such that the full u128 range can be used for clients that convert JSON numbers to floats, like JavaScript and jq.\n\n# Examples\n\nUse `from` to create instances of this and `u128` to get the value out:\n\n``` # use cosmwasm_std::Uint128; let a = Uint128::from(123u128); assert_eq!(a.u128(), 123);\n\nlet b = Uint128::from(42u64); assert_eq!(b.u128(), 42);\n\nlet c = Uint128::from(70u32); assert_eq!(c.u128(), 70); ```",
+          "type": "string"
+        }
+      }
+    }
+  }
+}

@@ -3,8 +3,14 @@ name = "store"
 version = "0.1.0"
 edition = "2021"
 
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[features]
+library = []
+
 [dependencies]
-cargo-tarpaulin = "0.31.0"
 cosmwasm-schema = "2.1.0"
 cosmwasm-std = "1.5.0"
 cw-asset = "3.1.1"
@@ -20,3 +26,5 @@ thiserror = "1.0.63"
 [dev-dependencies]
 cw-multi-test = "1.2.0"
 cw20-base = { version = "1.1.2", features = ["library"] }
+cargo-tarpaulin = "0.31.0"
+
