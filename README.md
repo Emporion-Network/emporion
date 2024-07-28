@@ -10,15 +10,15 @@
 
 - [ ] Contract
     - [x] add withraw dev to address
-    - [ ] add expiration to orders
+    - [x] add expiration to orders
 - [x] integration tests
     - [x] product creation tests
     - [x] user tests
-    - [ ] order tests
-    - [ ] bank tests
-    - [ ] params tests
-    - [ ] review tests
-    - [ ] distribution tests
+    - [x] order tests
+    - [x] bank tests
+    - [x] params tests
+    - [x] review tests
+    - [x] distribution tests
 - [ ] Front
     - [ ] Finish home page
     - [ ] Finish store v1
