@@ -1,0 +1,6 @@
+[workspace]
+
+members = [
+    "store-contract"
+]
+resolver = "2"
