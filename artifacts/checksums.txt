@@ -1,1 +1,2 @@
 ad93c0c556d7e66e2274370bfc0c30acd83e914b8867d93709eeb416c2f6b0d9  emporion_core.wasm
+fa45ea36781e7f3dcbbf8ae708c4c7b20eae5514e50327a8270931a86ab93bb0  emporion_voting_module.wasm

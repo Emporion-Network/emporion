@@ -1,4 +1,6 @@
 import { $ } from "bun";
+import { downloadGitFolder } from "./utils";
+
 
 let release = 'v2.4.2';
 let releases: {
@@ -10,6 +12,7 @@ assets = assets.filter(e => e.name.endsWith('.wasm'))
 
 await Promise.all(assets.map(async ({ browser_download_url, name }) => {
     let resp = await (await fetch(browser_download_url)).arrayBuffer();
-    Bun.write(`DA0/${name}`, resp);
+    Bun.write(`DAO/${name}`, resp);
 }))
-console.log(assets);
+
+await downloadGitFolder('https://github.com/DA0-DA0/dao-dao-ui/tree/development/packages/types/contracts', 'DAO/types')

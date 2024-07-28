@@ -800,6 +800,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "emporion-voting-module"
+version = "0.1.0"
+dependencies = [
+ "cargo-tarpaulin",
+ "cosmwasm-schema 2.1.0",
+ "cosmwasm-std",
+ "cw-multi-test",
+ "cw-storage-plus",
+ "cw2",
+ "cw20-base",
+ "schemars",
+ "serde",
+ "thiserror",
+]
+
+[[package]]
 name = "encoding_rs"
 version = "0.8.34"
 source = "registry+https://github.com/rust-lang/crates.io-index"

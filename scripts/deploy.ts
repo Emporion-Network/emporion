@@ -1,9 +1,10 @@
 import "bun";
 import { SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
-import { StargateClient, GasPrice } from "@cosmjs/stargate";
+import { GasPrice } from "@cosmjs/stargate";
 import { EmporionClient } from "../client-ts/Emporion.client"
 import { InstantiateMsg } from "../client-ts/Emporion.types";
-import { appendFile } from "node:fs/promises";
+import { InstantiateMsg as InstantiateMsgEmporionVoting } from "../client-ts/EmporionVoting.types";
+
 import * as DAOCore from '../DAO/types/DaoDaoCore';
 import * as DAOProposalSingle from '../DAO/types/DaoProposalSingle.v2';
 import * as DAOPreProposeSingle from '../DAO/types/DaoPreProposeSingle';
@@ -33,17 +34,19 @@ let signer = await SigningCosmWasmClient.connectWithSigner(ENDPOINT, adminClient
 
 const deploy = async () => {
     const DAY = 24 * 60 * 60;
-    let emporion_store_wasm = new Uint8Array(await Bun.file('artifacts/emporion_core.wasm').arrayBuffer());
+    let emporion_core_wasm = new Uint8Array(await Bun.file('artifacts/emporion_core.wasm').arrayBuffer());
+    let emporion_voting_module_wasm = new Uint8Array(await Bun.file('artifacts/emporion_voting_module.wasm').arrayBuffer());
     let dao_core_wasm = new Uint8Array(await Bun.file('DAO/dao_dao_core.wasm').arrayBuffer());
     let dao_proposal_single_wasm = new Uint8Array(await Bun.file('DAO/dao_proposal_single.wasm').arrayBuffer());
     let dao_pre_propose_single_wasm = new Uint8Array(await Bun.file('DAO/dao_pre_propose_single.wasm').arrayBuffer());
 
-    let { codeId: STORE_CODE_ID } = await signer.upload(adminAddress, emporion_store_wasm, "auto");
+    let { codeId: VOTING_CODE_ID } = await signer.upload(adminAddress, emporion_voting_module_wasm, "auto");
+    let { codeId: CORE_CODE_ID } = await signer.upload(adminAddress, emporion_core_wasm, "auto");
     let { codeId: DAO_CODE_ID } = await signer.upload(adminAddress, dao_core_wasm, "auto");
     let { codeId: PRE_PROPOSE_SINGLE_CODE_ID } = await signer.upload(adminAddress, dao_pre_propose_single_wasm, "auto");
     let { codeId: PROPOSE_SINGLE_CODE_ID } = await signer.upload(adminAddress, dao_proposal_single_wasm, "auto");
 
-    let instantiate_store: InstantiateMsg = {
+    let instantiate_core: InstantiateMsg = {
         admin: adminAddress,
         dev:adminAddress,
         fee_ratio: [1, 100],
@@ -76,6 +79,7 @@ const deploy = async () => {
             [{ native: "uibcatom" }, 1],
         ],
     };
+
 
     let instantiate_pre_propose_single: DAOPreProposeSingle.InstantiateMsg = {
         extension: {},
@@ -135,15 +139,24 @@ const deploy = async () => {
 
     }
 
+    
+
+    let result = await signer.instantiate(adminAddress, CORE_CODE_ID, instantiate_core, "Emporion Core", "auto")
+    let STORE_ADDRESS = result.contractAddress;
+
+    let instantiate_voting: InstantiateMsgEmporionVoting  = {
+        core_address:STORE_ADDRESS,
+    }
+
     let instantiate_dao: DAOCore.InstantiateMsg = {
         automatically_add_cw20s: false,
         automatically_add_cw721s: false,
         name: "Emporion DAO",
         description: "The Emporion network DAO",
         voting_module_instantiate_info: {
-            code_id: STORE_CODE_ID,
-            msg: encodeMessage(instantiate_store),
-            label: "Emporion store",
+            code_id: VOTING_CODE_ID,
+            msg: encodeMessage(instantiate_voting),
+            label: "Emporion Voting",
             funds: [],
         },
         proposal_modules_instantiate_info: [
@@ -156,10 +169,7 @@ const deploy = async () => {
         ]
     }
 
-    let result = await signer.instantiate(adminAddress, DAO_CODE_ID, instantiate_dao, "Emporion DAO Core", "auto")
-
-    let attributes = result.events.map(e => e.attributes).flat();
-    let STORE_ADDRESS = attributes.find(a => a.key === "voting_module")!.value;
+    result = await signer.instantiate(adminAddress, DAO_CODE_ID, instantiate_dao, "Emporion DAO Core", "auto")
     let DAO_ADDRESS = result.contractAddress;
 
     let env = loadEnvFile(await Bun.file(`.env.${Bun.env.NODE_ENV}`).text());
@@ -181,11 +191,6 @@ const deploy = async () => {
 const testDeployement = async ({ DAO_ADDRESS, STORE_ADDRESS }: { DAO_ADDRESS: string, STORE_ADDRESS: string }) => {
     let params = await new EmporionClient(signer, adminAddress, STORE_ADDRESS).params();
     assert(params.admin === DAO_ADDRESS, "DAO should be the admin");
-    await signer.queryContractSmart(DAO_ADDRESS, {
-        voting_power_at_height: {
-            address: adminAddress
-        }
-    });
     console.log('✅ Deployement is ready!')
 }
 

@@ -1,6 +1,7 @@
 [workspace]
 
 members = [
-    "contracts/emporion-core"
+    "contracts/emporion-core",
+    "contracts/emporion-voting-module"
 ]
 resolver = "2"
