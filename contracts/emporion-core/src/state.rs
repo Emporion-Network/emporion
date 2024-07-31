@@ -918,6 +918,10 @@ impl Product {
         if let Duration::Height(_) = msg.delivery_time {
             return Err(ContractError::InvalidDuration {});
         }
+        if price.is_empty() {
+            return Err(ContractError::InvalidPrice {});
+        }
+        
         if !prms.publication_fee.is_empty() {
             let mut bnk = Bank::load(deps.as_ref())?;
             sent_publication_fee
@@ -942,6 +946,8 @@ impl Product {
             bnk.to_investors.add_many(&to_investors)?;
             bnk.save(deps)?;
         }
+        
+       
         let prd = Product {
             id: get_index(deps)?,
             meta: msg.meta,

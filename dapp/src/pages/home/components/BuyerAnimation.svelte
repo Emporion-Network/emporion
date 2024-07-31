@@ -1,12 +1,12 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import Atom from "../../assets/Atom.svelte";
-    import Osmo from "../../assets/Osmo.svelte";
-    import Axelar from "../../assets/Axelar.svelte";
-    import Dydx from "../../assets/Dydx.svelte";
-    import Neutron from "../../assets/Neutron.svelte";
-    import Nolus from "../../assets/Nolus.svelte";
-    import AnimatableNumber from "../../lib/AnimatableNumber.svelte";
+    import Atom from "../../../assets/Atom.svelte";
+    import Osmo from "../../../assets/Osmo.svelte";
+    import Axelar from "../../../assets/Axelar.svelte";
+    import Dydx from "../../../assets/Dydx.svelte";
+    import Neutron from "../../../assets/Neutron.svelte";
+    import Nolus from "../../../assets/Nolus.svelte";
+    import AnimatableNumber from "../../../lib/AnimatableNumber.svelte";
     import {
         aminateProp,
         fadeIn,
@@ -16,11 +16,11 @@
         scrollTo,
         together,
         wait,
-    } from "../../lib/utils";
+    } from "../../../lib/utils";
     import BuyerAnimationCell from "./BuyerAnimationCell.svelte";
-    import AnimatableTitle from "../../lib/AnimatableTitle.svelte";
-    import { fancyBorder } from "../../lib/directives";
-    import Vault from "../../assets/Vault.svelte";
+    import AnimatableTitle from "../../../lib/AnimatableTitle.svelte";
+    import { fancyBorder } from "../../../lib/directives";
+    import Vault from "../../../assets/Vault.svelte";
 
     let grid: HTMLElement;
     let picker: HTMLElement;

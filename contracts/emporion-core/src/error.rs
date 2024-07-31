@@ -54,4 +54,7 @@ pub enum ContractError {
 
     #[error("Invalid duration")]
     InvalidDuration {},
+
+    #[error("Invalid price")]
+    InvalidPrice{},
 }

@@ -28,7 +28,7 @@ let adminClient = await Secp256k1HdWallet.fromMnemonic(MNEMONIC_1, {
 let adminAddress = (await adminClient.getAccounts())[0].address;
 
 let signer = await SigningCosmWasmClient.connectWithSigner(ENDPOINT, adminClient, {
-    gasPrice: GasPrice.fromString("10000untrn"),
+    gasPrice: GasPrice.fromString("25untrn"),
 });
 
 
@@ -182,6 +182,11 @@ const deploy = async () => {
     });
 
     await Bun.write(`.env.${Bun.env.NODE_ENV}`, envToString(env))
+    /// update front env
+    env = loadEnvFile(await Bun.file(`dapp/.env.${Bun.env.NODE_ENV}`).text());
+    env['VITE_STORE_ADDRESS'] = STORE_ADDRESS;
+    await Bun.write(`dapp/.env.${Bun.env.NODE_ENV}`, envToString(env))
+
     return {
         STORE_ADDRESS,
         DAO_ADDRESS,

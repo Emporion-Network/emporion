@@ -8,7 +8,7 @@
     import Osmo from "../../assets/Osmo.svelte";
     import Dydx from "../../assets/Dydx.svelte";
     import Neutron from "../../assets/Neutron.svelte";
-    import BuyerAnimation from "./BuyerAnimation.svelte";
+    import BuyerAnimation from "./components/BuyerAnimation.svelte";
     let lines: HTMLElement;
 
     let animate = () => {
