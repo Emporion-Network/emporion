@@ -49,9 +49,9 @@ a{
     isolation: isolate;
 }
 
-*:focus-visible{
-    outline: 1px solid var(--gray-12);
-    outline-offset: 5px;
+*:focus-visible, .input:focus-within{
+    outline: 3px solid var(--gray-12);
+    outline-offset: 2px;
 }
 
 
@@ -60,40 +60,42 @@ a{
 }
 
 .button-1 {
-    background-color: var(--gray-12);
-    color: var(--gray-9);
+    background-color: var(--indigo-9);
+    height: 3rem;
+    color: var(--white-a12);
     cursor: pointer;
     border: 1px solid transparent;
     padding: 0 1em;
     border-radius: 5px;
-    font-weight: 600;
+    font-weight: 900;
     &:disabled{
         background-color: var(--gray-7);
         color: var(--gray-8);
         cursor: default;
         &:hover{
             color: var(--gray-8);
+            background-color: var(--gray-7);
         }
     }
     &:hover{
-        color: var(--gray-1);
+        background-color: var(--indigo-10);
     }
 }
 
 .button-1-2 {
-    background-color: var(--gray-3);
+    background-color: var(--gray-2);
     color: var(--gray-11);
     border: 1px solid transparent;
     padding: 0 1em;
     border-radius: 5px;
     cursor: pointer;
     &:hover{
-        background-color: var(--gray-4);
+        background-color: var(--gray-3);
         color: var(--gray-12);
     }
     &:disabled{
         background-color: var(--gray-7);
-        color: var(--gray-8);
+        color: var(--gray-10);
         cursor: default;
     }
 }
@@ -101,12 +103,13 @@ a{
 .button-2 {
     background-color: transparent;
     color: var(--gray-12);
-    border: 1px solid var(--gray-12);
+    border: 1px solid var(--gray-7);
     cursor: pointer;
     border-radius: 5px;
     padding: 0 1em;
     &:hover{
         background-color: var(--gray-a2);
+        border: 1px solid var(--gray-8);
     }
 }
 
@@ -130,5 +133,40 @@ a{
     padding: 0 1em;
     &:hover{
         background-color: var(--gray-2);
+    }
+}
+
+.button-ghost{
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--gray-12);
+    border-radius: 3px;
+    aspect-ratio: 1;
+    height: 2rem;
+    &:hover{
+        background-color: var(--gray-3);
+    }
+}
+
+.button-link{
+    background-color: transparent;
+    border: none;
+    color: var(--indigo-11);
+    width: max-content;
+    cursor: pointer;
+    &:hover{
+        text-decoration: underline;
+    }
+}
+
+.button-link-2{
+    background-color: transparent;
+    border: none;
+    color: var(--gray-10);
+    width: max-content;
+    cursor: pointer;
+    &:hover{
+        text-decoration: underline;
     }
 }

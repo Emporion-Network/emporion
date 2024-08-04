@@ -12,8 +12,8 @@
     export let coinDenom: string;
     export let direction: "deposit" | "withdraw";
     let prevVisible = isVisible;
-    let status:''|'error' = '';
-    let errorLabel = ''
+    let status: "" | "error" = "";
+    let errorLabel = "";
 
     $: nativeCoin = $prices[nativeCoinDenom];
     $: coin = $prices[coinDenom];
@@ -33,16 +33,23 @@
             notification({
                 type: "success",
                 text: `Transaction successful`,
-                url: direction === 'deposit' ? 
-                coin.blockExplorerUrl.replace('TX_HASH', tx?.transactionHash||'') 
-                : nativeCoin.blockExplorerUrl.replace('TX_HASH',tx?.transactionHash||''),
-                urlLabel:tx?.transactionHash,
+                url:
+                    direction === "deposit"
+                        ? coin.blockExplorerUrl.replace(
+                              "TX_HASH",
+                              tx?.transactionHash || "",
+                          )
+                        : nativeCoin.blockExplorerUrl.replace(
+                              "TX_HASH",
+                              tx?.transactionHash || "",
+                          ),
+                urlLabel: tx?.transactionHash,
             });
         } catch (e: unknown) {
             let err = e as Error;
             if (isVisible) {
                 errorLabel = err.message;
-                status = 'error';
+                status = "error";
             } else {
                 notification({
                     type: "error",
@@ -72,8 +79,6 @@
     }
 </script>
 
-
-
 {#if isVisible}
     <!-- svelte-ignore a11y-click-events-have-key-events -->
     <!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -89,9 +94,9 @@
                             name={nativeCoin.chainName}
                             label={`From ${nativeCoin.chainName}`}
                         />
-                        <button class="button-1-2">
+                        <div class="dir">
                             <i class="ri-arrow-right-line"></i>
-                        </button>
+                        </div>
                         <InputAddress
                             address={toPrefix(
                                 account.address,
@@ -111,9 +116,9 @@
                             name={coin.chainName}
                             label={`From ${coin.chainName}`}
                         />
-                        <button class="button-1-2">
+                        <div class="dir">
                             <i class="ri-arrow-right-line"></i>
-                        </button>
+                        </div>
                         <InputAddress
                             address={account.address}
                             icon={nativeCoin.icon}
@@ -136,10 +141,10 @@
                 bind:value={transferAmount}
             ></AmountInput>
             <div class="info {status}">
-                {#if status === ''}
+                {#if status === ""}
                     <i class="ri-time-line"></i>
                     <p>Estimated time: <span>20 seconds</span></p>
-                    {:else}
+                {:else}
                     <i class="ri-error-warning-line"></i>
                     <p>{errorLabel}</p>
                 {/if}
@@ -203,9 +208,9 @@
             color: var(--gray-9);
             padding: 0.5rem;
             gap: 0.5rem;
-            &.error{
+            &.error {
                 color: var(--red-11);
-                i{
+                i {
                     color: var(--red-11);
                 }
             }
@@ -247,7 +252,7 @@
                 height: 100%;
                 .wpr {
                     flex-direction: column;
-                    .button-1-2 {
+                    .dir {
                         width: 50px;
                         align-self: center;
                         transform: rotate(90deg);
@@ -265,8 +270,16 @@
                 display: flex;
                 gap: 1rem;
                 width: 100%;
-                .button-1-2 {
+                .dir {
                     aspect-ratio: 1;
+                    background-color: var(--gray-2);
+                    color: var(--gray-11);
+                    border: 1px solid transparent;
+                    padding: 0 1em;
+                    border-radius: 5px;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
                 }
             }
 

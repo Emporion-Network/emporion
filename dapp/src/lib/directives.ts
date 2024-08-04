@@ -40,7 +40,6 @@ export function fancyBorder(node: HTMLElement) {
 /** @type {import('svelte/action').Action}  */
 export function clickOutside(node: HTMLElement, callback: () => void = () => { }) {
     node.setAttribute('tabindex', '-1');
-    node.focus()
     const evt = () => {
         setTimeout(() => {
             if (document.activeElement !== node && !node.contains(document.activeElement)) {
@@ -48,12 +47,19 @@ export function clickOutside(node: HTMLElement, callback: () => void = () => { }
             }
         }, 10)
     }
+    const closeOnEsc = (e:KeyboardEvent)=>{
+        if(['Esc', 'Escape'].includes(e.key)){
+            callback()
+        }
+    }
     document.addEventListener('focusout', evt)
+    document.addEventListener('keydown', closeOnEsc)
 
     return {
         destroy() {
             // the node has been removed from the DOM
             document.removeEventListener('focusout', evt);
+            document.removeEventListener('keydown', closeOnEsc)
         }
     };
 

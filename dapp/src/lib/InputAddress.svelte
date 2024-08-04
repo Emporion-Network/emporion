@@ -11,7 +11,7 @@
         <img src="{icon}" alt="{name}">
         <div>
             <span>{address.slice(0, -5)}</span>
-            <span></span>{address.slice(-5)}
+            <span>{address.slice(-5)}</span>
         </div>
     </div>    
 </div>

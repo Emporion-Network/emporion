@@ -4,15 +4,16 @@ import { Decimal } from "@cosmjs/math";
 import { rotateObj, toPrefix } from "../lib/utils";
 import { user } from "./user";
 import { notification } from "../lib/Notifications.svelte";
+import { CosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 
 const {
     VITE_NATIVE_COIN: NATIVE_COIN,
 } = import.meta.env;
 
 
-// const { COIN_DATA } = await import(`../COIN_DATA.${import.meta.env.MODE}.ts`) as { COIN_DATA: CoinMap };
+const { COIN_DATA } = await import(`../COIN_DATA.${import.meta.env.MODE}.ts`) as { COIN_DATA: CoinMap };
 //@ts-ignore
-const { COIN_DATA } = await import("../COIN_DATA.production.ts") as { COIN_DATA: CoinMap };
+// const { COIN_DATA } = await import("../COIN_DATA.production.ts") as { COIN_DATA: CoinMap };
 
 export type CoinData = {
     icon: string,
@@ -33,6 +34,8 @@ export type CoinData = {
     withdrawChanel: string,
     depositChanel: string,
     gasPrice: string,
+    blockExplorerUrl: string,
+    isCw20: boolean,
 }
 
 export type CoinMap = Record<string, CoinData>;
@@ -40,16 +43,17 @@ export type CoinMap = Record<string, CoinData>;
 const prices = writable<CoinMap>(COIN_DATA);
 let timeout: ReturnType<typeof setTimeout>;
 
-export const addIbcTx = (denom:string, tx:{ sequence: number, direction: 'withdraw' | 'deposit' })=>{
+export const addIbcTx = (denom: string, tx: { sequence: number, direction: 'withdraw' | 'deposit' }) => {
     COIN_DATA[denom].ibcTxs.push(tx)
 }
 
 
-export const clean = ()=>{
+export const clean = () => {
     clearTimeout(timeout);
 }
 
 export const watchPrices = async () => {
+
     await Promise.all(Object.keys(COIN_DATA).map(async (k) => {
         let client = await StargateClient.connect(COIN_DATA[k].rpc);
         //@ts-ignore
@@ -66,23 +70,9 @@ export const watchPrices = async () => {
     let ids = Object.values(COIN_DATA).map(e => e.coinGeckoId).join(',');
 
     let userAddress = '';
-    let prevTime = Date.now();
-    user.subscribe(async (newU) => {
-        if (!newU) {
-            userAddress = '';
-            return;
-        };
-        const address = (await newU.offlineSigner.getAccounts())[0].address;
-        userAddress = address;
 
-        if (timeout) {
-            clearTimeout(timeout)
-        }
-        updatePrices();
-    })
 
     const updatePrices = async () => {
-        prevTime = Date.now()
         try {
             const resp = await (await fetch(`/price/api/v3/simple/price?ids=${ids}&vs_currencies=usd&precision=3&include_24hr_change=true`)).json();
             const REF = rotateObj(COIN_DATA, 'coinGeckoId');
@@ -97,21 +87,21 @@ export const watchPrices = async () => {
         }
 
         try {
-            if (userAddress === '') return;
+            if (userAddress === '') throw Error('Skip');
             const depositing = Object.values(COIN_DATA)
-            .map(c => c.ibcTxs.filter(e => e.direction === 'deposit').map(e => ({ sequence: e.sequence, coin: c }))).flat();
+                .map(c => c.ibcTxs.filter(e => e.direction === 'deposit').map(e => ({ sequence: e.sequence, coin: c }))).flat();
             await Promise.all(Object.values(COIN_DATA).map(async c => {
                 let offchainAddress = toPrefix(userAddress, c.addressPrefix);
                 if (c.coinDenom === NATIVE_COIN) {
-                    let onChainBalance =await COIN_DATA[NATIVE_COIN].queryClient.getBalance(userAddress, c.onChainDenom);
+                    let onChainBalance = await COIN_DATA[NATIVE_COIN].queryClient.getBalance(userAddress, c.onChainDenom);
                     c.onChainAmount = Decimal.fromAtomics(onChainBalance.amount, c.coinDecimals);
                     c.nativeAmount = Decimal.fromAtomics(onChainBalance.amount, c.coinDecimals);
                     depositing.forEach(async e => {
                         let r = await c.queryClient.ibc.channel.packetReceipt('transfer', e.coin.withdrawChanel, e.sequence);
                         if (r.received) {
                             notification({
-                                type:"success",
-                                text:`Your ${e.coin.coinDenom} are available`,
+                                type: "success",
+                                text: `Your ${e.coin.coinDenom} are available`,
                             })
                             e.coin.ibcTxs = e.coin.ibcTxs.filter(t => t.sequence != e.sequence);
                         }
@@ -126,8 +116,8 @@ export const watchPrices = async () => {
                         if (r.received) {
                             console.log('withrew!')
                             notification({
-                                type:"success",
-                                text:`Your ${c.coinDenom} have been withdrawn successfully`,
+                                type: "success",
+                                text: `Your ${c.coinDenom} have been withdrawn successfully`,
                             })
                             c.ibcTxs = c.ibcTxs.filter(tp => tp.sequence != t.sequence);
                         }
@@ -138,10 +128,25 @@ export const watchPrices = async () => {
         } catch {
         }
 
-        prices.update(()=>({...COIN_DATA}));
+        prices.update(() => ({ ...COIN_DATA }));
 
         timeout = setTimeout(updatePrices, 10000);
     }
+
+    user.subscribe(async (newU) => {
+        if (!newU) {
+            userAddress = '';
+            return;
+        };
+        const address = newU.address;
+        if (address === userAddress) return;
+        userAddress = address;
+
+        if (timeout) {
+            clearTimeout(timeout)
+        }
+        updatePrices();
+    })
 
 };
 

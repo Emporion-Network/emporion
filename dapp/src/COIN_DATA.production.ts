@@ -13,6 +13,7 @@ export const COIN_DATA = {
         depositChanel:"",
         gasPrice:"50unrtn",
         blockExplorerUrl:"https://www.mintscan.io/neutron/tx/TX_HASH",
+        isCw20:false,
     },
     "ATOM":{
         icon:"https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/cosmoshub/chain.png",
@@ -28,6 +29,7 @@ export const COIN_DATA = {
         depositChanel:"channel-569",
         gasPrice:"50uatom",
         blockExplorerUrl:"https://www.mintscan.io/cosmos/tx/TX_HASH",
+        isCw20:false,
     },
     "DYDX":{
         icon:"https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/dydx-mainnet/adydx.png",
@@ -43,6 +45,7 @@ export const COIN_DATA = {
         depositChanel:"channel-11",
         gasPrice:"50adydx",
         blockExplorerUrl:"https://www.mintscan.io/dydx/tx/TX_HASH",
+        isCw20:false,
     },
     "NLS":{
         icon:"https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/pirin/nolus.png",
@@ -58,6 +61,7 @@ export const COIN_DATA = {
         depositChanel:"channel-3839",
         gasPrice:"50unls",
         blockExplorerUrl:"https://nolus.explorers.guru/transaction/TX_HASH",
+        isCw20:false,
     },
     "AXL":{
         icon:"https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/axelar-dojo/chain.png",
@@ -73,6 +77,7 @@ export const COIN_DATA = {
         depositChanel:"channel-78",
         gasPrice:"50uaxl",
         blockExplorerUrl:"https://www.mintscan.io/axelar/tx/TX_HASH",
+        isCw20:false,
 
     },
     "OSMO":{
@@ -89,6 +94,7 @@ export const COIN_DATA = {
         depositChanel:"channel-874",
         gasPrice:"50uosmo",
         blockExplorerUrl:"https://www.mintscan.io/osmosis/tx/TX_HASH",
+        isCw20:false,
     },
     "TIA":{
         icon:"https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/celestia/chain.png",
@@ -104,6 +110,7 @@ export const COIN_DATA = {
         depositChanel:"channel-8",
         gasPrice:"50utia",
         blockExplorerUrl:"https://www.mintscan.io/celestia/tx/TX_HASH",
+        isCw20:false,
     },
     "USDC":{
         icon:"https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:1/erc20/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.png",
@@ -119,6 +126,7 @@ export const COIN_DATA = {
         depositChanel:"channel-18",
         gasPrice:"50uusdc",
         blockExplorerUrl:"https://www.mintscan.io/noble/tx/TX_HASH",
+        isCw20:false,
     },
     "axlWETH":{
         icon:"https://raw.githubusercontent.com/cosmos/chain-registry/master/axelar/images/weth.png",
@@ -134,5 +142,6 @@ export const COIN_DATA = {
         depositChanel:"channel-78",
         gasPrice:"50uaxl",
         blockExplorerUrl:"https://www.mintscan.io/axelar/tx/TX_HASH",
+        isCw20:false,
     },
 }

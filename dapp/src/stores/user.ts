@@ -3,9 +3,12 @@ import type { Window as KeplrWindow, Keplr } from "@keplr-wallet/types";
 import { CosmWasmClient, SigningCosmWasmClient, } from "@cosmjs/cosmwasm-stargate";
 import { StargateClient } from "@cosmjs/stargate";
 import { GasPrice } from "@cosmjs/stargate";
-
+const {
+    VITE_NATIVE_COIN: NATIVE_COIN,
+} = import.meta.env;
 
 import { EmporionClient } from "../../../client-ts/Emporion.client"
+import { getNames } from "../lib/utils";
 
 declare global {
     // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -18,14 +21,17 @@ const user = writable<{
     offlineSigner: OfflineSigner,
     emporionClient: EmporionClient,
     cosmWasmClient: CosmWasmClient,
+    selectedCoin: string,
+    address: string,
+    names: string[]
 } | null>(null);
 
 const autoLogIn = {
-    set(v:boolean){
+    set(v: boolean) {
         localStorage.setItem("auto-login", `${v}`);
     },
-    get(){
-        return JSON.parse(localStorage.getItem("auto-login")||"false");
+    get() {
+        return JSON.parse(localStorage.getItem("auto-login") || "false");
     }
 };
 
@@ -44,14 +50,18 @@ const setUser = async () => {
         await window.keplr.enable(chainId);
         const offlineSigner = window.keplr.getOfflineSigner(chainId);
         const cosmWasmClient = await SigningCosmWasmClient.connectWithSigner(ENDPOINT_RPC, offlineSigner, {
-            gasPrice: GasPrice.fromString("25untrn"),
+            gasPrice: GasPrice.fromString("0.02untrn"),
         });
         const address = (await offlineSigner.getAccounts())[0].address;
         const emporionClient = new EmporionClient(cosmWasmClient, address, STORE_ADDRESS);
+        
         user.set({
             offlineSigner,
             emporionClient,
             cosmWasmClient,
+            selectedCoin: NATIVE_COIN,
+            address,
+            names:await getNames(address),
         })
         autoLogIn.set(true);
     } catch (e) {

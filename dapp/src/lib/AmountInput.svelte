@@ -7,9 +7,11 @@
     export let coinDenom: string;
     export let useNativeAmount: boolean;
     export let value = Decimal.zero(0);
+    export let checkAmout = true;
+    $:value = value ?? Decimal.zero(0);
     $:coin = $prices[coinDenom];
     $:available = useNativeAmount ? coin.nativeAmount : coin.onChainAmount;
-    let amount = "";
+    let amount = value.toString();
     let tgt:HTMLInputElement;
 
     const onInput = (e: Parameters<FormEventHandler<HTMLInputElement>>[0]) => {
@@ -53,15 +55,17 @@
 </script>
 
 <div class="wrpr">
+    {#if checkAmout}
     <div class="label">
         <span>{label}</span>
         <button class="button-3" on:click={set(1, 1)}>Available {available.toString()}</button>
     </div>
-    <div class="input-amount" tabindex="0" role="textbox">
+    {/if}
+    <div class="input" tabindex="0" role="textbox">
         <div class="img">
             <img src={coin.icon} alt={coin.chainName} />
         </div>
-        <input type="text" on:input={onInput} bind:this={tgt} />
+        <input type="text" on:input={onInput} bind:this={tgt} value="{value.toString()}" />
         <div class="info">
             <span class="denom">{coin.coinDenom}</span>
             {#if getApprox(amount, coin) > 0}
@@ -70,11 +74,13 @@
             {/if}
         </div>
     </div>
+    {#if checkAmout}
     <div class="btns">
         <button class="button-1-2" on:click={set(1, 1)}>MAX</button>
         <button class="button-1-2" on:click={set(1, 2)}>1/2</button>
         <button class="button-1-2" on:click={set(1, 3)}>1/3</button>
     </div>
+    {/if}
 </div>
 
 <style lang="scss">
@@ -96,12 +102,12 @@
                 font-size: 1.2rem;
             }
         }
-        .input-amount {
+        .input {
             display: flex;
             padding: 0.5rem;
             padding-right: 1rem;
             border: 1px solid var(--gray-6);
-            background-color: transparent;
+            background-color: var(--gray-2);
             border-radius: 5px;
             justify-content: flex-start;
             align-items: center;
@@ -136,6 +142,9 @@
             }
             &:hover {
                 border: 1px solid var(--gray-7);
+                .img{
+                    border-right: 1px solid var(--gray-6);
+                }
             }
             img {
                 width: 40px;

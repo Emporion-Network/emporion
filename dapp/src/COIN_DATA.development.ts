@@ -9,6 +9,7 @@ export const COIN_DATA = {
         addressPrefix:"neutron",
         chainName:"Neutron",
         rpc:"http://localhost:5173/rpc",
+        isCw20:false,
     },
     "ATOM":{
         icon:"https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/cosmoshub/chain.png",
@@ -19,7 +20,8 @@ export const COIN_DATA = {
         coinDecimals: 6,
         addressPrefix:"cosmos",
         chainName:"Cosmos Hub",
-        rpc:"https://cosmos-rpc.publicnode.com:443"
+        rpc:"https://cosmos-rpc.publicnode.com:443",
+        isCw20:false,
     },
     "DYDX":{
         icon:"https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/dydx-mainnet/adydx.png",
@@ -30,7 +32,8 @@ export const COIN_DATA = {
         coinDecimals: 18,
         addressPrefix:"dydx",
         chainName:"dYdX",
-        rpc:"https://dydx-rpc.publicnode.com:443"
+        rpc:"https://dydx-rpc.publicnode.com:443",
+        isCw20:false,
     },
     "NLS":{
         icon:"https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/pirin/nolus.png",
@@ -41,7 +44,8 @@ export const COIN_DATA = {
         coinDecimals: 6,
         addressPrefix:"nolus",
         chainName:"Nolus",
-        rpc:"https://nolus-rpc.publicnode.com"
+        rpc:"https://nolus-rpc.publicnode.com",
+        isCw20:false,
     },
     "AXL":{
         icon:"https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/axelar-dojo/chain.png",
@@ -53,6 +57,7 @@ export const COIN_DATA = {
         addressPrefix:"axelar",
         chainName:"Axelar",
         rpc:"https://tm.axelar.lava.build",
+        isCw20:false,
     },
     "OSMO":{
         icon:"https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/osmosis/chain.png",
@@ -65,6 +70,7 @@ export const COIN_DATA = {
         chainName:"Osmosis",
         rpc:"https://osmosis-rpc.publicnode.com:443",
         gasPrice:"50uosmo",
+        isCw20:false,
     },
     "TIA":{
         icon:"https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/celestia/chain.png",
@@ -75,7 +81,9 @@ export const COIN_DATA = {
         coinDecimals: 6,
         addressPrefix:"celestia",
         chainName:"Celestia",
-        rpc:"https://celestia-rpc.publicnode.com:443"
+        rpc:"https://celestia-rpc.publicnode.com:443",
+        isCw20:false,
+
     },
     "USDC":{
         icon:"https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:1/erc20/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.png",
@@ -86,7 +94,9 @@ export const COIN_DATA = {
         coinDecimals: 6,
         addressPrefix:"noble",
         chainName:"Noble",
-        rpc:"https://rpc.noble.strange.love:443"
+        rpc:"https://rpc.noble.strange.love:443",
+        isCw20:false,
+
     },
     "axlWETH":{
         icon:"https://raw.githubusercontent.com/cosmos/chain-registry/master/axelar/images/weth.png",
@@ -97,6 +107,8 @@ export const COIN_DATA = {
         coinDecimals: 18,
         addressPrefix:"axelar",
         chainName:"Axelar",
-        rpc:"https://tm.axelar.lava.build"
+        rpc:"https://tm.axelar.lava.build",
+        isCw20:false,
+
     },
 }
