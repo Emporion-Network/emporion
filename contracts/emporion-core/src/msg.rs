@@ -131,6 +131,7 @@ pub struct CreateProductExecuteMessage {
     pub meta: String,
     pub is_listed: bool,
     pub delivery_time:Duration,
+    pub meta_hash:String,
 }
 
 #[cw_serde]

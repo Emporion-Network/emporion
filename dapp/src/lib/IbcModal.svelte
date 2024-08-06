@@ -181,7 +181,7 @@
         width: 100vw;
         height: 100vh;
         z-index: 90;
-        backdrop-filter: blur(3px);
+        backdrop-filter: blur(10px);
         display: flex;
         justify-content: center;
         align-items: center;

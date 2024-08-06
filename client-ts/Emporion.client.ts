@@ -357,11 +357,13 @@ export interface EmporionInterface extends EmporionReadOnlyInterface {
     deliveryTime,
     isListed,
     meta,
+    metaHash,
     price
   }: {
     deliveryTime: Duration;
     isListed: boolean;
     meta: string;
+    metaHash: string;
     price: AssetListBaseForString;
   }, fee?: number | StdFee | "auto", memo?: string, _funds?: Coin[]) => Promise<ExecuteResult>;
   listProduct: ({
@@ -615,11 +617,13 @@ export class EmporionClient extends EmporionQueryClient implements EmporionInter
     deliveryTime,
     isListed,
     meta,
+    metaHash,
     price
   }: {
     deliveryTime: Duration;
     isListed: boolean;
     meta: string;
+    metaHash: string;
     price: AssetListBaseForString;
   }, fee: number | StdFee | "auto" = "auto", memo?: string, _funds?: Coin[]): Promise<ExecuteResult> => {
     return await this.client.execute(this.sender, this.contractAddress, {
@@ -627,6 +631,7 @@ export class EmporionClient extends EmporionQueryClient implements EmporionInter
         delivery_time: deliveryTime,
         is_listed: isListed,
         meta,
+        meta_hash: metaHash,
         price
       }
     }, fee, memo, _funds);

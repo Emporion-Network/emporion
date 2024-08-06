@@ -14,6 +14,7 @@
         border-radius: 3px;
         padding: 0.5rem;
         min-height: 3rem;
+        font-weight: bold;
         &:hover{
             border-color: var(--gray-7);
         }

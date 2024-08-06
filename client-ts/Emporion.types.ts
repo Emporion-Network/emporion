@@ -129,6 +129,7 @@ export interface CreateProductExecuteMessage {
   delivery_time: Duration;
   is_listed: boolean;
   meta: string;
+  meta_hash: string;
   price: AssetListBaseForString;
 }
 export interface Cw20ReceiveMsg {
@@ -263,6 +264,7 @@ export interface Product {
   id: number;
   is_listed: boolean;
   meta: string;
+  meta_hash: string;
   price: AssetListBaseForAddr;
   rating: [number, number];
   seller: Addr;

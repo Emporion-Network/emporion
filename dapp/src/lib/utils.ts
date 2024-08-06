@@ -1,12 +1,20 @@
-import { toBase64, fromBase64, toBech32, fromBech32 } from "@cosmjs/encoding"
+import { toBech32, fromBech32 } from "@cosmjs/encoding"
 import { addIbcTx, type CoinData } from "../stores/coins";
 import { SigningStargateClient } from "@cosmjs/stargate";
-import { MsgTransfer, MsgTransferResponse } from "cosmjs-types/ibc/applications/transfer/v1/tx"
-import { Decimal, Uint32 } from "@cosmjs/math";
+import { MsgTransfer } from "cosmjs-types/ibc/applications/transfer/v1/tx"
+import { Decimal } from "@cosmjs/math";
 import { GasPrice } from "@cosmjs/stargate";
-import { CosmWasmClient } from "@cosmjs/cosmwasm-stargate";
+import { CosmWasmClient, type ExecuteResult } from "@cosmjs/cosmwasm-stargate";
+import { notification } from "./Notifications.svelte";
+import type { ProductMetaData } from "../../../shared-types";
+import stringify from 'json-stable-stringify';
+import { sha256 } from '@cosmjs/crypto';
+import type { EmporionClient } from "../../../client-ts/Emporion.client";
 
 
+const {
+    VITE_ENDPOINT_BACK_END_API: ENDPOINT_BACK_END_API,
+} = import.meta.env;
 
 export const caplz = (str: string) => {
     return `${str[0].toUpperCase()}${str.slice(1)}`;
@@ -185,7 +193,6 @@ export const ibcTransfer = (direction: "deposit" | "withdraw") => async (nativeC
     let sequence = Number(msg.value)
     addIbcTx(coin.coinDenom, { sequence, direction });
 
-    console.log(coin);
     return tx
 }
 
@@ -197,29 +204,34 @@ export const multiply_ratio = (a: Decimal, [b, c]: [number, number]) => {
 }
 
 
-export const uploadImage = (multiple: boolean = false): Promise<{
-    url: string;
-}[]> => {
+export const hash = (str:string)=>{
+    const buf = new TextEncoder().encode(str);
+    const h = sha256(buf)
+    const hex = Array.from(h).map((b) => b.toString(16).padStart(2, "0")).join("");
+    return hex.toLocaleLowerCase();
+}
+
+
+export const getMetaHash = (meta:ProductMetaData)=>{
+    const p:Partial<ProductMetaData> = structuredClone(meta);
+    delete p.id;
+    const h = stringify(p)
+    console.log(h)
+    return hash(h)
+}
+
+export const uploadImage = (token: string): Promise<string | undefined> => {
     return new Promise(resolve => {
         let ipt = document.createElement('input');
         ipt.type = "file"
         ipt.accept = "image/*"
-        ipt.multiple = multiple;
-        ipt.onchange = (e) => {
-            if (ipt.files) {
-                let files = Promise.all(Array.from(ipt.files).map(e => {
-                    return new Promise<{url:string}>(resolve => {
-                        const reader = new FileReader();
-                        reader.onloadend = ()=>{
-                            resolve({url: reader.result as string})
-                        }
-                        reader.readAsDataURL(e)
-                    })
-                }));
-                files.then(e => resolve(e))
-            } else {
-                resolve([])
+        ipt.multiple = false;
+        ipt.onchange = () => {
+            const f = ipt.files?.[0];
+            if (f === undefined) {
+                return resolve(undefined)
             }
+            resolve(uploadFile(f, token))
         }
         ipt.click()
     })
@@ -229,7 +241,7 @@ export const uploadImage = (multiple: boolean = false): Promise<{
 
 export const id = () => {
     const dateString = Date.now().toString(36);
-    const randomness = Math.random().toString(36).substr(2);
+    const randomness = Math.random().toString(36).substring(2);
     return dateString + randomness;
 };
 
@@ -240,9 +252,7 @@ export const getNames = async (address: string) => {
         contract: "stars1fx74nkqkw2748av8j7ew7r3xt9cgjqduwn8m0ur5lhe49uhlsasszc5fhr",
         prefix: 'stars'
     }].map(async ({ rpc, contract, prefix }) => {
-        console.log(address);
         const client = await CosmWasmClient.connect(rpc);
-
         try {
             let res = await client.queryContractSmart(contract, {
                 name: { address: toPrefix(address, prefix) },
@@ -254,7 +264,7 @@ export const getNames = async (address: string) => {
     })).then(e => e.filter(a => a !== ""));
 }
 
-export const intersect = <T>(a:T[], b:T[])=>{
+export const intersect = <T>(a: T[], b: T[]) => {
     return a.filter(e => b.indexOf(e) !== -1)
 }
 
@@ -289,29 +299,148 @@ export class Map2<K1, K2, T> {
 }
 
 
-export const eq = <T,K>(a:T,b:K)=>{
-    if(typeof a !== typeof b) return false;
-    if(Array.isArray(a) && Array.isArray(b)){
-        if(a.length !== b.length) return false;
+export class LMap<K, V> {
+    private map = new Map<string, V>();
+    set(k: K, v: V) {
+        this.map.set(JSON.stringify(k), v);
+    }
+    get(k: K) {
+        return this.map.get(JSON.stringify(k))
+    }
+
+    keys() {
+        return Array.from(this.map.keys()).map(k => JSON.parse(k) as K)
+    }
+    has(k: K) {
+        return this.map.has(JSON.stringify(k))
+    }
+
+    values() {
+        return this.map.values()
+    }
+
+    forEach(fn: (v: V, k: K) => void) {
+        this.map.forEach((v, k) => {
+            fn(v, JSON.parse(k))
+        })
+    };
+
+    entries() {
+        return Array.from(this.map.entries()).map(([k, v]) => {
+            return [JSON.parse(k), v]
+        }).values()
+    }
+}
+
+export const eq = <T, K>(a: T, b: K) => {
+    if (typeof a !== typeof b) return false;
+    if (Array.isArray(a) && Array.isArray(b)) {
+        if (a.length !== b.length) return false;
         for (let i = 0; i < a.length; i++) {
-            if(!eq(a[i], b[i])){
+            if (!eq(a[i], b[i])) {
                 return false;
             }
         }
         return true;
     }
-    if(typeof a === 'object' && typeof b === 'object' && a !== null && b!== null && Object.prototype.toString.call(a) === Object.prototype.toString.call(b) 
-        && Object.prototype.toString.call(a) === '[object Object]'){
+    if (typeof a === 'object' && typeof b === 'object' && a !== null && b !== null && Object.prototype.toString.call(a) === Object.prototype.toString.call(b)
+        && Object.prototype.toString.call(a) === '[object Object]') {
         let ks = Object.keys(a);
-        if(ks.length !== Object.keys(b).length){
-            for(const key of ks){
-                if(!('key' in b)) return false;
+        if (ks.length !== Object.keys(b).length) {
+            for (const key of ks) {
+                if (!('key' in b)) return false;
                 //@ts-ignore
-                if(!eq(a[key], b[key])) return false;
+                if (!eq(a[key], b[key])) return false;
             }
             return true;
         }
     }
     //@ts-ignore
     return a === b
+}
+
+export const signMessage = async (nonce: string) => {
+    if (!window.keplr) return;
+    const key = await window.keplr.getKey('cosmoshub-4')
+    const signature = await window.keplr.signArbitrary('cosmoshub-4', key.bech32Address, nonce);
+    return signature;
+}
+
+export const testAuth = async (token: string) => {
+    console.log((await fetch(`${ENDPOINT_BACK_END_API}/auth/test`, {
+        method: "GET",
+        headers: {
+            'Authorization': `bearer ${token}`,
+        }
+    })).json())
+}
+
+export const uploadFile = async (f: File, token: string) => {
+    try {
+        const data = new FormData()
+        data.append('file', f);
+        const resp = await fetch(`${ENDPOINT_BACK_END_API}/auth/upload-image`, {
+            method: "POST",
+            headers: {
+                'Authorization': `bearer ${token}`,
+            },
+            body: data,
+        });
+        const res: { url: string } = await resp.json()
+        return `${ENDPOINT_BACK_END_API}/image/${res.url}`
+    } catch (e: any) {
+        notification({
+            type: "error",
+            text: e.message || "An Error occured"
+        })
+    }
+}
+
+export const getImages = async (user: string) => {
+    try{
+        const resp = await fetch(`${ENDPOINT_BACK_END_API}/images/${user}`);
+        const {images}:{images:string[]} = await resp.json()
+        return images.map(e => `${ENDPOINT_BACK_END_API}/image/${e}`);
+    } catch (e: any) {
+        notification({
+            type: "error",
+            text: e.message || "An Error occured"
+        })
+    }
+    return []
+}
+
+
+export const getProductsMeta = async (address: string, collection:string) => {
+    try{
+        const resp = await fetch(`${ENDPOINT_BACK_END_API}/collection/${address}/${collection}`);
+        const productsMeta:ProductMetaData[] = await resp.json();
+        if(`error` in productsMeta){
+            return [];
+        }
+        return productsMeta;
+    } catch (e: any) {
+        notification({
+            type: "error",
+            text: e.message || "An Error occured"
+        })
+    }
+    return []
+}
+
+
+export const extractAttr = (attr:string, resp:ExecuteResult)=>{
+    const attrs = resp.events.filter(e => e.type == 'wasm').map(e => e.attributes).flat()
+    return attrs.find(a => a.key === attr)?.value
+}
+
+export const uploadMeta = async (meta:ProductMetaData, token:string)=>{
+    const resp = await fetch(`${ENDPOINT_BACK_END_API}/auth/create-product`, {
+        method: "POST",
+        headers: {
+            'Authorization': `bearer ${token}`,
+        },
+        body: JSON.stringify(meta),
+    });
+    console.log(resp)
 }

@@ -1,32 +1,52 @@
 <script lang="ts">
     import { Decimal } from "@cosmjs/math";
-    import Wallet from "../../lib/Wallet.svelte";
-    import { user } from "../../stores/user";
+    import { jwt, user } from "../../stores/user";
     import ImageUploader from "./components/ImageUploader.svelte";
     import Description from "./components/Description.svelte";
     import Categories from "./components/Categories.svelte";
     import PricePicker from "./components/PriceMaker.svelte";
-    import type { Attribute } from "./components/Attributes.svelte";
-    import Attriutes from "./components/Attributes.svelte";
+    import Attriutes from "./components/AttributesMaker.svelte";
     import ProductShow from "./ProductShow.svelte";
     import type { AssetInfoBaseForAddr } from "../../../../client-ts/Emporion.types";
+    import Tooltip from "../../lib/Tooltip.svelte";
+    import Search from "../../lib/Search.svelte";
+    import type { ProductMetaData } from "../../../../shared-types";
+    import { extractAttr, getMetaHash, uploadMeta } from "../../lib/utils";
+    import DeliveryTime from "./components/DeliveryTime.svelte";
+    const {
+    VITE_ENDPOINT_BACK_END_API: ENDPOINT_BACK_END_API,
+} = import.meta.env;
 
     let name: string;
     let description: string;
-    let imgs: {
-        file: File;
-        url: string;
-    }[];
+    let img: string|undefined;
     let categories: string[];
-    let attributes: Attribute[] = [];
-    let price: Record<string, {amount:Decimal, info:AssetInfoBaseForAddr}> = {};
+    let attributes: ProductMetaData['attributes'] = [];
+    let price: Record<string, { amount: Decimal; info: AssetInfoBaseForAddr }> ={};
+    let collectionId:string = "";
+    let deliveryTime:number;
     let preview = false;
     const create = async () => {
+        const meta:ProductMetaData = {
+            id:"",
+            name,
+            description,
+            image:img||"",
+            collection_id:collectionId,
+            categories:categories,
+            attributes:attributes.map(a => {
+                //@ts-ignore
+                delete a.key
+                return a;
+            }),
+        }
+        const hash = getMetaHash(meta)
+        console.log(hash);
         let r = await $user?.emporionClient.createProduct({
             deliveryTime: {
-                time: 123456,
+                time: deliveryTime,
             },
-            meta: "",
+            meta: `${ENDPOINT_BACK_END_API}/hash/${hash}`,
             price: [
                 {
                     amount: "10000",
@@ -36,28 +56,39 @@
                 },
             ],
             isListed: true,
-            metaHash: "",
+            metaHash: hash,
         });
+        if(r == undefined) return;
+        let id = extractAttr('product_id', r);
+        if(!id) return;
+        meta.id = id;
+        console.log(id);
+        const res = await uploadMeta(meta, jwt.get()||"");
 
-        console.log(r);
+
     };
 </script>
 
 <div class="action-menu">
-    <button class="preview button-1-2" on:click={()=>preview = !preview}>
-        {#if preview}
-        <i class="ri-eye-off-fill"></i>
-        {:else}
-        <i class="ri-eye-fill"></i>
-        {/if}
-    </button>
+    <Tooltip text="Preview your product">
+        <button
+            class="preview button-1-2"
+            on:click={() => (preview = !preview)}
+        >
+            {#if preview}
+                <i class="ri-eye-off-fill"></i>
+            {:else}
+                <i class="ri-eye-fill"></i>
+            {/if}
+        </button>
+    </Tooltip>
     <button class="preview button-1-2">
         <i class="ri-more-line"></i>
     </button>
 </div>
 {#if !preview}
     <div class="page">
-        <ImageUploader bind:imgs></ImageUploader>
+        <ImageUploader bind:img></ImageUploader>
         <div class="creation-form">
             <Description rows={2} placeholder="Product name" bind:value={name}
             ></Description>
@@ -66,6 +97,8 @@
                 placeholder="Prodcut description"
                 bind:value={description}
             ></Description>
+            <Search suggestions={['some attr', 'some other', 'iPhones']}  bind:value={collectionId} placeholder="Collection name"></Search>
+            <DeliveryTime bind:value={deliveryTime}></DeliveryTime>
             <Categories bind:selected={categories}></Categories>
             <PricePicker bind:price></PricePicker>
             <Attriutes bind:attributes></Attriutes>
@@ -75,30 +108,30 @@
         </div>
     </div>
 {:else}
-        <ProductShow
-            meta={{
-                id:"",
-                name,
-                description,
-                collection_id: "",
-                image: imgs[0]?.url || "",
-                categories,
-                attributes,
-            }}
-            product={{
-                meta: "",
-                id: -1,
-                delivery_time: { time: 400 },
-                is_listed: true,
-                price: Object.values(price).map((e) => ({
-                    amount: e.amount.atomics,
-                    info: e.info,
-                })),
-                rating: [4, 500],
-                seller: $user?.address || "",
-                meta_hash: "",
-            }}
-        ></ProductShow>
+    <ProductShow
+        meta={{
+            id: "-1",
+            name,
+            description,
+            collection_id: collectionId || "some collection",
+            image: img || "",
+            categories,
+            attributes,
+        }}
+        product={{
+            meta: "",
+            id: -1,
+            delivery_time: { time: 400 },
+            is_listed: true,
+            price: Object.values(price).map((e) => ({
+                amount: e.amount.atomics,
+                info: e.info,
+            })),
+            rating: [4, 500],
+            seller: $user?.address || "",
+            meta_hash: "",
+        }}
+    ></ProductShow>
 {/if}
 
 <style lang="scss">

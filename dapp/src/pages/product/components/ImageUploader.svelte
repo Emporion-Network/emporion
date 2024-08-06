@@ -1,69 +1,107 @@
 <script lang="ts">
-    import { uploadImage } from "../../../lib/utils";
-    export let imgs: {
-        url: string;
-    }[] = [];
-    export let multiple = false;
+    import { getImages, uploadFile, uploadImage } from "../../../lib/utils";
+    import { jwt, user } from "../../../stores/user";
+
+    export let img:string|undefined;
     let dragover = false;
+    let state: "gallery" | "show" | "upload" = img ? "show" : "gallery";
     const handleKeydown = async (e: KeyboardEvent) => {
         if (["Enter", " "].includes(e.key)) {
-            imgs = await uploadImage(multiple);
-            console.log(imgs);
+            img = await uploadImage(jwt.get() || "");
         }
     };
 
     const handleClick = async () => {
-        imgs = await uploadImage(multiple);
+        img = await uploadImage(jwt.get() || "");
+        state = "show";
     };
 
     const handleDrop = async (e: DragEvent) => {
         e.preventDefault();
         dragover = false;
-        imgs = await Promise.all(
-            Array.from(e.dataTransfer?.files || [])
-                .filter((e) => e.type.startsWith("image"))
-                .map((e) => {
-                    return new Promise<{ url: string }>((resolve) => {
-                        const reader = new FileReader();
-                        reader.onloadend = () => {
-                            console.log(reader.result)
-                            resolve({ url: reader.result as string });
-                        };
-                        reader.readAsDataURL(e);
-                    });
-                }),
-        );
-        if (!multiple) {
-            imgs = imgs.slice(0, 1);
-        }
+        if (!e.dataTransfer?.files) return;
+        const f = Array.from(e.dataTransfer?.files || []).filter((e) =>
+            e.type.startsWith("image"),
+        )[0];
+        img = await uploadFile(f, jwt.get() || "");
+        state = "show";
     };
-    const setDragOver = (v:boolean)=>()=>{
+    const setDragOver = (v: boolean) => () => {
         dragover = v;
-    }
+    };
+    const select = (url: string) => () => {
+        img = url;
+        state = "show";
+    };
 </script>
 
-<div
-    class="image-upload"
-    on:drop={handleDrop}
-    on:dragover|preventDefault={setDragOver(true)}
-    on:dragleave={setDragOver(false)}
-    on:dragend={setDragOver(false)}
-    on:click={handleClick}
-    on:keydown={handleKeydown}
-    class:dragover
-    role="button"
-    tabindex="0"
->
-    {#if imgs.length > 0}
-        <img src={imgs[0].url} alt="" />
-    {:else}
+{#if state == "gallery" && $user?.address}
+    <div class="gallery">
+        {#await getImages($user?.address) then images}
+            <button on:click={() => (state = "upload")}>
+                <i class="ri-image-add-line"></i>
+            </button>
+            {#each [...images] as src}
+                <button class:selected={img == src} on:click={select(src)}><img {src} alt="" /></button>
+            {/each}
+        {/await}
+    </div>
+{/if}
+{#if state == "upload"}
+    <div
+        class="image-upload"
+        on:drop={handleDrop}
+        on:dragover|preventDefault={setDragOver(true)}
+        on:dragleave={setDragOver(false)}
+        on:dragend={setDragOver(false)}
+        on:click={handleClick}
+        on:keydown={handleKeydown}
+        class:dragover
+        role="button"
+        tabindex="0"
+    >
         <i class="ri-image-add-line"></i>
-        <p>Click to upload or drag an image</p>
-    {/if}
-</div>
+        <p>Click or drag an image to upload</p>
+        <button class="button-link" on:click={()=>state = "gallery"}>Gallery</button>
+    </div>
+{/if}
+{#if state == "show" && img}
+    <div class="image-upload"  role="button" tabindex="0" on:click={()=>state = "gallery"} on:keydown={(e)=> ["Enter", " "].includes(e.key) ? state = "gallery" : ""}>
+        <img src={img} alt="" />
+    </div>
+{/if}
 
 <style lang="scss">
     @use "../../../media.scss";
+    .gallery {
+        flex: 2;
+        aspect-ratio: 1;
+        background-color: var(--gray-2);
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+        grid-auto-flow: row;
+        align-content: start;
+        overflow-y: auto;
+        grid-gap: 5px;
+        padding: 1rem;
+        button {
+            aspect-ratio: 1;
+            background-color: transparent;
+            border: 2px solid var(--gray-6);
+            border-radius: 3px;
+            overflow: hidden;
+            cursor: pointer;
+            color: var(--gray-12);
+            &.selected {
+                border: 2px solid var(--indigo-10);
+            }
+            img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+        }
+    }
     .image-upload {
         flex: 2;
         aspect-ratio: 1;
@@ -79,7 +117,8 @@
         overflow: hidden;
         position: sticky;
         top: 3rem;
-        &.dragover{
+        padding: 1rem;
+        &.dragover {
             outline: 3px solid var(--indigo-10);
             outline-offset: 3px;
         }
@@ -95,6 +134,7 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+            position: absolute;
         }
     }
 </style>

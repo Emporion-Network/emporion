@@ -4,10 +4,8 @@
         Product,
     } from "../../../../client-ts/Emporion.types";
     import type { ProductMetaData } from "../../../../shared-types";
-    import { getNames, rotateObj } from "../../lib/utils";
+    import { getNames, getProductsMeta, rotateObj } from "../../lib/utils";
     import { prices } from "../../stores/coins";
-    export let meta: ProductMetaData;
-    export let product: Product;
     import markdownit from "markdown-it";
     import { Decimal } from "@cosmjs/math";
     import PricePicker from "./components/PricePicker.svelte";
@@ -15,13 +13,17 @@
     import Stars from "../../lib/Stars.svelte";
     import DisplayAttributes from "./components/DisplayAttributes.svelte";
 
+    export let meta: ProductMetaData;
+    export let product: Product;
+    let productId = "-1";
+
+
     const md = markdownit({
         linkify: false,
         html: false,
         breaks: true,
     });
 
-    let productId = "0";
 
     const getOnChainDenom = (info: AssetInfoBaseForAddr) => {
         if ("cw20" in info) {
@@ -38,7 +40,6 @@
         };
     });
     let sellerNames = getNames(product.seller);
-
 </script>
 
 <div class="page">
@@ -85,7 +86,9 @@
         <h1>{meta.name}</h1>
         <Stars rating={product.rating}></Stars>
         <PricePicker {productPrices}></PricePicker>
-        <DisplayAttributes bind:selectedProductId="{productId}"></DisplayAttributes>
+        {#await getProductsMeta(product.seller, meta.collection_id) then products}
+            <DisplayAttributes products={[...(product.id === -1 ? [meta]:[]), ...products]} bind:selectedProductId="{productId}"></DisplayAttributes>
+        {/await}
         <button on:click={()=>{productId = "0"; console.log('dede')}}>hummm</button>
         <div class="description">
             {@html md.render(meta.description)}

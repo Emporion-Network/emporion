@@ -1,7 +1,7 @@
 <script lang="ts" context="module">
     import type { ProductMetaData } from "../../../../../shared-types";
     export type Attribute = ProductMetaData["attributes"][number] & {
-        key: string;
+        key?: string;
     };
 </script>
 

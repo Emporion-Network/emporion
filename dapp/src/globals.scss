@@ -55,8 +55,9 @@ a{
 }
 
 
-.font-small{
-    font-size: 0.6rem;
+input::placeholder,
+textarea::placeholder {
+    color: var(--gray-10);
 }
 
 .button-1 {

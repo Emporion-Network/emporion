@@ -101,7 +101,7 @@
         border: 1px solid var(--gray-6);
         background-color: var(--gray-2);
         &.isOpen {
-            z-index: 4;
+            z-index:99;
         }
         &:hover {
             border-color: var(--gray-7);

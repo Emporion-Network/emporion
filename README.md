@@ -1,7 +1,6 @@
 # Momorepo containing all code related to emporion.network
 
 ## Things to consider
-
 - [ ] updating price of a product in case an order is beeing created with older price
 
 
@@ -22,6 +21,8 @@
 - [ ] Front
     - [ ] Finish home page
     - [ ] Finish store v1
-    - [ ] deploy the dao
+    - [x] deploy the dao
+    - [ ] add metadata server
+    - [ ] 
 - [ ] Write deployement scripts
 - [ ] Write docs

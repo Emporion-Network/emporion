@@ -57,4 +57,8 @@ pub enum ContractError {
 
     #[error("Invalid price")]
     InvalidPrice{},
+
+    #[error("Invalid meta hash")]
+    InvalidMetaHash{},
+
 }

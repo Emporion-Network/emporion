@@ -809,6 +809,7 @@
           "delivery_time",
           "is_listed",
           "meta",
+          "meta_hash",
           "price"
         ],
         "properties": {
@@ -819,6 +820,9 @@
             "type": "boolean"
           },
           "meta": {
+            "type": "string"
+          },
+          "meta_hash": {
             "type": "string"
           },
           "price": {
@@ -2672,6 +2676,7 @@
             "id",
             "is_listed",
             "meta",
+            "meta_hash",
             "price",
             "rating",
             "seller"
@@ -2689,6 +2694,9 @@
               "type": "boolean"
             },
             "meta": {
+              "type": "string"
+            },
+            "meta_hash": {
               "type": "string"
             },
             "price": {
@@ -2733,6 +2741,7 @@
         "id",
         "is_listed",
         "meta",
+        "meta_hash",
         "price",
         "rating",
         "seller"
@@ -2750,6 +2759,9 @@
           "type": "boolean"
         },
         "meta": {
+          "type": "string"
+        },
+        "meta_hash": {
           "type": "string"
         },
         "price": {
@@ -3017,6 +3029,7 @@
             "id",
             "is_listed",
             "meta",
+            "meta_hash",
             "price",
             "rating",
             "seller"
@@ -3034,6 +3047,9 @@
               "type": "boolean"
             },
             "meta": {
+              "type": "string"
+            },
+            "meta_hash": {
               "type": "string"
             },
             "price": {

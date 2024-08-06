@@ -163,6 +163,7 @@ mod tests {
                 is_listed,
                 meta,
                 delivery_time: delivery_time.unwrap_or(WEEK),
+                meta_hash:"fa6f3766f8d2c11cdbb065700392f3d432923caccda6a33561490aeefd9aefeb".to_string()
             }),
             &publication_fee.unwrap_or(vec![]),
         )?;
@@ -190,6 +191,7 @@ mod tests {
             is_listed: is_active,
             meta,
             delivery_time: WEEK,
+            meta_hash:"a7889fd57643004efb391e675b3d67107b687acb0cb72db268414bf5516f3144".to_string()
         });
         let resp = app.execute_contract(
             seller.clone(),

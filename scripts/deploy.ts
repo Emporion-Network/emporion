@@ -1,4 +1,4 @@
-import "bun";
+import {$} from "bun";
 import { SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 import { GasPrice } from "@cosmjs/stargate";
 import { EmporionClient } from "../client-ts/Emporion.client"
@@ -187,6 +187,12 @@ const deploy = async () => {
     env['VITE_STORE_ADDRESS'] = STORE_ADDRESS;
     await Bun.write(`dapp/.env.${Bun.env.NODE_ENV}`, envToString(env))
 
+    /// update back env 
+    env = loadEnvFile(await Bun.file(`backend/.env.${Bun.env.NODE_ENV}`).text());
+    env['STORE_ADDRESS'] = STORE_ADDRESS;
+    env['DAO_ADDRESS'] = DAO_ADDRESS;
+    await Bun.write(`backend/.env.${Bun.env.NODE_ENV}`, envToString(env))
+
     return {
         STORE_ADDRESS,
         DAO_ADDRESS,
@@ -199,6 +205,8 @@ const testDeployement = async ({ DAO_ADDRESS, STORE_ADDRESS }: { DAO_ADDRESS: st
     console.log('✅ Deployement is ready!')
 }
 
+
+await $`bun scripts/build.ts`;
 
 await testDeployement(await deploy())
 

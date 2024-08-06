@@ -29,9 +29,9 @@
             transition: all 100ms ease-in-out;
         }
         &.on{
-            background-color: var(--gray-a8);
+            background-color: var(--indigo-a3);
             &::after{
-                background-color: var(--gray-12);
+                background-color: var(--indigo-10);
                 left: 50%;
             }
         }

@@ -158,6 +158,7 @@ pub struct Product {
     pub meta: String,
     pub is_listed: bool,
     pub delivery_time: Duration,
+    pub meta_hash:String,
 }
 
 ///////////////////////
@@ -947,6 +948,9 @@ impl Product {
             bnk.save(deps)?;
         }
         
+        if msg.meta_hash.len() != 64 || msg.meta_hash.chars().any(|c| !c.is_ascii_hexdigit()){
+            return Err(ContractError::InvalidMetaHash {  });
+        }
        
         let prd = Product {
             id: get_index(deps)?,
@@ -956,6 +960,7 @@ impl Product {
             is_listed: msg.is_listed,
             rating: (0, 0),
             delivery_time: msg.delivery_time,
+            meta_hash:msg.meta_hash,
         };
         prd.save(deps)?;
         User::load_or_new(deps, prd.seller.clone())?;
