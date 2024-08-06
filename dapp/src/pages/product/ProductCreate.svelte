@@ -1,3 +1,13 @@
+<script lang="ts" context="module">
+    let myCollections:string[] = []
+    user.subscribe(async (u)=>{
+        if(u?.address){
+            myCollections = await getSellerCollections(u.address || "")
+        }
+    })
+</script>
+
+
 <script lang="ts">
     import { Decimal } from "@cosmjs/math";
     import { jwt, user } from "../../stores/user";
@@ -11,36 +21,42 @@
     import Tooltip from "../../lib/Tooltip.svelte";
     import Search from "../../lib/Search.svelte";
     import type { ProductMetaData } from "../../../../shared-types";
-    import { extractAttr, getMetaHash, uploadMeta } from "../../lib/utils";
+    import {
+        extractAttr,
+        getMetaHash,
+        getProductsMeta,
+        getSellerCollections,
+        uploadMeta,
+    } from "../../lib/utils";
     import DeliveryTime from "./components/DeliveryTime.svelte";
-    const {
-    VITE_ENDPOINT_BACK_END_API: ENDPOINT_BACK_END_API,
-} = import.meta.env;
+    const { VITE_ENDPOINT_BACK_END_API: ENDPOINT_BACK_END_API } = import.meta
+        .env;
 
     let name: string;
     let description: string;
-    let img: string|undefined;
+    let img: string | undefined;
     let categories: string[];
-    let attributes: ProductMetaData['attributes'] = [];
-    let price: Record<string, { amount: Decimal; info: AssetInfoBaseForAddr }> ={};
-    let collectionId:string = "";
-    let deliveryTime:number;
+    let attributes: ProductMetaData["attributes"] = [];
+    let price: Record<string, { amount: Decimal; info: AssetInfoBaseForAddr }> =
+        {};
+    let collectionId: string = "";
+    let deliveryTime: number;
     let preview = false;
     const create = async () => {
-        const meta:ProductMetaData = {
-            id:"",
+        const meta: ProductMetaData = {
+            id: "",
             name,
             description,
-            image:img||"",
-            collection_id:collectionId,
-            categories:categories,
-            attributes:attributes.map(a => {
+            image: img || "",
+            collection_id: collectionId,
+            categories: categories,
+            attributes: attributes.map((a) => {
                 //@ts-ignore
-                delete a.key
+                delete a.key;
                 return a;
             }),
-        }
-        const hash = getMetaHash(meta)
+        };
+        const hash = getMetaHash(meta);
         console.log(hash);
         let r = await $user?.emporionClient.createProduct({
             deliveryTime: {
@@ -58,15 +74,42 @@
             isListed: true,
             metaHash: hash,
         });
-        if(r == undefined) return;
-        let id = extractAttr('product_id', r);
-        if(!id) return;
+        if (r == undefined) return;
+        let id = extractAttr("product_id", r);
+        if (!id) return;
         meta.id = id;
         console.log(id);
-        const res = await uploadMeta(meta, jwt.get()||"");
-
-
+        const res = await uploadMeta(meta, jwt.get() || "");
     };
+
+    $: canCreate = 
+    !!img && 
+    img.length > 0 && 
+    collectionId.length > 0 &&
+    name.length > 0 &&
+    description.length > 0 &&
+    categories.length > 0 &&
+    Object.keys(price).length > 0;
+
+    $:console.log(canCreate)
+
+    let isFromExistingCollection = false;
+
+    $:collectionId, (()=>{
+        isFromExistingCollection = myCollections.includes(collectionId)
+        if(isFromExistingCollection){
+            presetParams(collectionId)
+        }
+    })()
+   
+
+    const presetParams = async (collection:string)=>{
+        const metas = await getProductsMeta($user?.address||"", collection)
+        if(metas.length === 0) return;
+        attributes = metas[0].attributes;
+        categories = metas[0].categories;
+    }
+
 </script>
 
 <div class="action-menu">
@@ -97,12 +140,23 @@
                 placeholder="Prodcut description"
                 bind:value={description}
             ></Description>
-            <Search suggestions={['some attr', 'some other', 'iPhones']}  bind:value={collectionId} placeholder="Collection name"></Search>
+            {#if $user?.address}
+                {#await getSellerCollections($user?.address || "") then suggestions}
+                    <Search
+                        suggestions={suggestions || []}
+                        bind:value={collectionId}
+                        placeholder="Collection name"
+                    ></Search>
+                {/await}
+            {/if}
             <DeliveryTime bind:value={deliveryTime}></DeliveryTime>
-            <Categories bind:selected={categories}></Categories>
+            <Categories disabled={isFromExistingCollection} bind:selected={categories}></Categories>
             <PricePicker bind:price></PricePicker>
-            <Attriutes bind:attributes></Attriutes>
-            <button class="button-1 create" on:click={create}
+            <Attriutes bind:disableNames={isFromExistingCollection} bind:attributes></Attriutes>
+            <button 
+            disabled={!canCreate}
+            class="button-1 create" 
+            on:click={create}
                 >Create Product</button
             >
         </div>
@@ -151,7 +205,7 @@
             }
         }
 
-        @include media.for-size(phone) {
+        @include media.for-size(tablet-lg) {
             flex-direction: column;
             gap: 1rem;
             .creation-form {

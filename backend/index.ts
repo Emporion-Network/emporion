@@ -24,7 +24,8 @@ const client = new EmporionQueryClient(queryClient, Bun.env.STORE_ADDRESS || "")
 const PRODUCTS = new FileStorage<ProductMetaData>('PRODUCTS', true);
 const COLLECTION_TO_PRODUCTS = new FileStorage<string[]>('COLLECTION_TO_PRODUCTS', true);
 const FILES = new FileStorage<File>('Files', true, true);
-const HASH_TO_PRODUCT_ID =  new FileStorage<Record<string, string>>("HASH_TO_PRODUCT_ID");
+const HASH_TO_PRODUCT_ID =  new FileStorage<Record<string, string>>("HASH_TO_PRODUCT_ID", true);
+const SELLER_COLLECTIONS = new FileStorage<string[]>('SELLER_COLLECTIONS', true);
 
 
 
@@ -94,7 +95,6 @@ const nonceToAddr = new Map<string, [address: string, timeout: number]>()
 app.post('/auth/create-product', async (c) => {
     const body = await c.req.json();
     let { address }: { address: string } = c.get('jwtPayload')
-    console.log(body);
     let productMeta: ProductMetaData = ProductMetaSchema.parse(body);
     let tohash: Partial<ProductMetaData> = structuredClone(productMeta);
     delete tohash.id;
@@ -114,6 +114,12 @@ app.post('/auth/create-product', async (c) => {
         record[pHash]=productMeta.id;
         return record;
     }), errors.UNKNOWN_ERROR)
+    assert(await SELLER_COLLECTIONS.update(address, (v=[])=>{
+        if(!v.includes(productMeta.collection_id)){
+            v.push(productMeta.collection_id)
+        }
+        return v;
+    }),errors.UNKNOWN_ERROR)
     return c.json({})
 })
 
@@ -190,6 +196,13 @@ app.get('/collection/:address/:collection', async (c) => {
     assert(productIds !== undefined, "collection not found", 404);
     const products = await PRODUCTS.getList(productIds)
     return c.json(products)
+})
+
+app.get('/collections/:address', async(c)=>{
+    const {address} = c.req.param();
+    validateAddress(address)
+    const collections = await SELLER_COLLECTIONS.get(address)
+    return c.json(collections)
 })
 
 app.get("/auth/test", async (c) => {

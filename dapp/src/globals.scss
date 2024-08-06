@@ -49,7 +49,7 @@ a{
     isolation: isolate;
 }
 
-*:focus-visible, .input:focus-within{
+*:focus-visible, .input:focus-within:not(.input.disabled){
     outline: 3px solid var(--gray-12);
     outline-offset: 2px;
 }
@@ -69,16 +69,7 @@ textarea::placeholder {
     padding: 0 1em;
     border-radius: 5px;
     font-weight: 900;
-    &:disabled{
-        background-color: var(--gray-7);
-        color: var(--gray-8);
-        cursor: default;
-        &:hover{
-            color: var(--gray-8);
-            background-color: var(--gray-7);
-        }
-    }
-    &:hover{
+    &:hover:not(&:disabled){
         background-color: var(--indigo-10);
     }
 }
@@ -90,14 +81,9 @@ textarea::placeholder {
     padding: 0 1em;
     border-radius: 5px;
     cursor: pointer;
-    &:hover{
+    &:hover:not(&:disabled){
         background-color: var(--gray-3);
         color: var(--gray-12);
-    }
-    &:disabled{
-        background-color: var(--gray-7);
-        color: var(--gray-10);
-        cursor: default;
     }
 }
 
@@ -108,7 +94,7 @@ textarea::placeholder {
     cursor: pointer;
     border-radius: 5px;
     padding: 0 1em;
-    &:hover{
+    &:hover:not(&:disabled){
         background-color: var(--gray-a2);
         border: 1px solid var(--gray-8);
     }
@@ -121,7 +107,7 @@ textarea::placeholder {
     border: none;
     cursor: pointer;
     padding: 0 1em;
-    &:hover{
+    &:hover:not(&:disabled){
         text-decoration: underline;
     }
 }
@@ -132,7 +118,7 @@ textarea::placeholder {
     border: none;
     cursor: pointer;
     padding: 0 1em;
-    &:hover{
+    &:hover:not(&:disabled){
         background-color: var(--gray-2);
     }
 }
@@ -145,7 +131,7 @@ textarea::placeholder {
     border-radius: 3px;
     aspect-ratio: 1;
     height: 2rem;
-    &:hover{
+    &:hover:not(&:disabled){
         background-color: var(--gray-3);
     }
 }
@@ -156,7 +142,7 @@ textarea::placeholder {
     color: var(--indigo-11);
     width: max-content;
     cursor: pointer;
-    &:hover{
+    &:hover:not(&:disabled){
         text-decoration: underline;
     }
 }
@@ -167,7 +153,21 @@ textarea::placeholder {
     color: var(--gray-10);
     width: max-content;
     cursor: pointer;
-    &:hover{
+    &:hover:not(&:disabled){
         text-decoration: underline;
+    }
+}
+
+.button-1,
+.button-1-2,
+.button-2,
+.button-3,
+.button-3-2,
+.button-ghost,
+.button-link,
+.button-link-2{
+    &:disabled{
+        opacity: 0.3;
+        cursor: default;
     }
 }

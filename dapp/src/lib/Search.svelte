@@ -5,6 +5,7 @@
     export let suggestions:string[] = [];
     export let placeholder:string="";
     export let icon:string|undefined = undefined;
+    export let onSelect = (v:string)=>{};
     let isOpen = false;
     const handleClose = ()=>{
         isOpen = false;
@@ -12,6 +13,7 @@
     const setValue = (newv:string)=>()=>{
         value = newv;
         isOpen = false;
+        onSelect(value);
     }
     const matches = (str1:string, str2:string)=>{
         return str1.toLowerCase().includes(str2.toLowerCase())

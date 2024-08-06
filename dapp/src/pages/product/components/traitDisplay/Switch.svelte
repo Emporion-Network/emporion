@@ -16,15 +16,19 @@
     const select = (select:string[])=>()=>{
         selected = select;
     }
+    $:disabled = Array.from(values.entries()).length !== 2;
+
 
 </script>
 
 <div class="wrpr">
+    {#if !disabled}
     {#each values.entries() as [label, {ids}]}
         {#if ids.includes(productId)}
-            <button class="toggle" class:on={label} on:click={select(values.get(!label)?.ids||[])}></button>
+            <button class="toggle"  class:on={label} on:click={select(values.get(!label)?.ids||[])}></button>
         {/if}
     {/each}
+    {/if}
     <h4>{label}</h4>
 </div>
 
@@ -44,6 +48,9 @@
         border-radius: 2rem;
         position: relative;
         cursor: pointer;
+        &:disabled{
+            opacity: 0.3;
+        }
         &::after{
             content: "";
             width: calc(1.6rem - 2px);

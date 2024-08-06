@@ -204,7 +204,7 @@ export const multiply_ratio = (a: Decimal, [b, c]: [number, number]) => {
 }
 
 
-export const hash = (str:string)=>{
+export const hash = (str: string) => {
     const buf = new TextEncoder().encode(str);
     const h = sha256(buf)
     const hex = Array.from(h).map((b) => b.toString(16).padStart(2, "0")).join("");
@@ -212,8 +212,8 @@ export const hash = (str:string)=>{
 }
 
 
-export const getMetaHash = (meta:ProductMetaData)=>{
-    const p:Partial<ProductMetaData> = structuredClone(meta);
+export const getMetaHash = (meta: ProductMetaData) => {
+    const p: Partial<ProductMetaData> = structuredClone(meta);
     delete p.id;
     const h = stringify(p)
     console.log(h)
@@ -397,9 +397,9 @@ export const uploadFile = async (f: File, token: string) => {
 }
 
 export const getImages = async (user: string) => {
-    try{
+    try {
         const resp = await fetch(`${ENDPOINT_BACK_END_API}/images/${user}`);
-        const {images}:{images:string[]} = await resp.json()
+        const { images }: { images: string[] } = await resp.json()
         return images.map(e => `${ENDPOINT_BACK_END_API}/image/${e}`);
     } catch (e: any) {
         notification({
@@ -411,11 +411,11 @@ export const getImages = async (user: string) => {
 }
 
 
-export const getProductsMeta = async (address: string, collection:string) => {
-    try{
+export const getProductsMeta = async (address: string, collection: string) => {
+    try {
         const resp = await fetch(`${ENDPOINT_BACK_END_API}/collection/${address}/${collection}`);
-        const productsMeta:ProductMetaData[] = await resp.json();
-        if(`error` in productsMeta){
+        const productsMeta: ProductMetaData[] = await resp.json();
+        if (`error` in productsMeta) {
             return [];
         }
         return productsMeta;
@@ -429,12 +429,30 @@ export const getProductsMeta = async (address: string, collection:string) => {
 }
 
 
-export const extractAttr = (attr:string, resp:ExecuteResult)=>{
+
+export const getSellerCollections = async (address: string,) => {
+    try {
+        const resp = await fetch(`${ENDPOINT_BACK_END_API}/collections/${address}`);
+        const collections: string[] = await resp.json();
+        if (`error` in collections) {
+            return [];
+        }
+        return collections;
+    } catch (e: any) {
+        notification({
+            type: "error",
+            text: e.message || "An Error occured"
+        })
+    }
+    return []
+}
+
+export const extractAttr = (attr: string, resp: ExecuteResult) => {
     const attrs = resp.events.filter(e => e.type == 'wasm').map(e => e.attributes).flat()
     return attrs.find(a => a.key === attr)?.value
 }
 
-export const uploadMeta = async (meta:ProductMetaData, token:string)=>{
+export const uploadMeta = async (meta: ProductMetaData, token: string) => {
     const resp = await fetch(`${ENDPOINT_BACK_END_API}/auth/create-product`, {
         method: "POST",
         headers: {
@@ -442,5 +460,16 @@ export const uploadMeta = async (meta:ProductMetaData, token:string)=>{
         },
         body: JSON.stringify(meta),
     });
-    console.log(resp)
+
+    if (resp.status == 200) {
+        notification({
+            text: "Product created successfuly",
+            type: "success"
+        })
+        return;
+    }
+    notification({
+        text: "An error occured",
+        type: "error"
+    })
 }

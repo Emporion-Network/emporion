@@ -1,5 +1,5 @@
 <script lang="ts">
-    import Input from "../Input.svelte";
+    import Input from "../../../../lib/Input.svelte";
     export let value:string;
 </script>
 

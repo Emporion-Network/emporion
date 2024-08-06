@@ -12,6 +12,8 @@
     export let options: Option[] = [];
     export let max = 5;
     export let placeholder = "";
+    export let disabled:boolean = false;
+
 
     let isOpen = false;
     let valueEl: HTMLElement;
@@ -62,12 +64,13 @@
     };
 </script>
 
-<div class="multiselect input" class:isOpen use:clickOutside={close}>
+<div class="multiselect input" class:disabled class:isOpen use:clickOutside={close}>
     <button
         class="value"
         class:placeholder={selected.length === 0}
         on:click={() => (isOpen = !isOpen)}
         bind:this={valueEl}
+        {disabled}
     >
         <div>{getSelected(selected)}</div>
         <i class="ri-arrow-{isOpen ? 'up' : 'down'}-s-line"></i>
@@ -106,6 +109,14 @@
         &:hover {
             border-color: var(--gray-7);
         }
+        &.disabled{
+            opacity: 0.3;
+            cursor: default;
+            &:hover {
+                border: 1px solid var(--gray-6);
+            }
+        }
+
         .value {
             height: 3rem;
             background-color: transparent;

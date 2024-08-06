@@ -1,6 +1,7 @@
 <script lang="ts">
-    import Input from "../Input.svelte";
+    import Input from "../../../../lib/Input.svelte";
     import { uploadImage } from "../../../../lib/utils";
+    import { jwt } from "../../../../stores/user";
     
     export let value:{
         src:string,
@@ -9,15 +10,16 @@
         src:"",
         label:""
     };
-    export let img: Awaited<ReturnType<typeof uploadImage>>[0];
+    export let img: Awaited<ReturnType<typeof uploadImage>>;
+
     const handleClick = async () => {
-        img = (await uploadImage(false))[0];
+        img = (await uploadImage(jwt.get()||""));
     };
 </script>
 
 <button class="image-select" class:withImage={!!img} on:click={handleClick}>
     {#if img}
-        <img src={img.url} alt="" />
+        <img src={img} alt="" />
     {:else}
         <i class="ri-image-add-line"></i>
     {/if}

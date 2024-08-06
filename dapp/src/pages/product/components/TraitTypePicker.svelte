@@ -38,9 +38,9 @@
         }
     ];
     export let value:Attribute['display_type']='color';
-
+    export let disabled = false;
     let selected:Attribute['display_type'][] = [value];
 
     $:value = selected[0];
 </script>
-<MultiSelect options={options} max={1} bind:selected={selected}></MultiSelect>
+<MultiSelect {disabled} options={options} max={1} bind:selected={selected}></MultiSelect>

@@ -11,7 +11,7 @@
     import Switch from "./traitInputs/Switch.svelte";
     import Color from "./traitInputs/Color.svelte";
     import { id } from "../../../lib/utils";
-    import Input from "./Input.svelte";
+    import Input from "../../../lib/Input.svelte";
     import TraitTypePicker from "./TraitTypePicker.svelte";
     import Image from "./traitInputs/Image.svelte";
     import Region from "./traitInputs/Region.svelte";
@@ -19,6 +19,7 @@
     import RadioButton from "./traitInputs/RadioButton.svelte";
 
     export let attributes: Attribute[] = [];
+    export let disableNames = false;
 
     const traitToComponent: Record<Attribute["display_type"], ComponentType> = {
         color: Color,
@@ -76,7 +77,7 @@
     </div>
     <div class="attributes" slot="content">
         {#if attributes.length}
-            {#each attributes as attribute (attribute.key)}
+            {#each attributes as attribute,i (attribute.key||i)}
                 <div class="wrpr">
                     <svelte:component
                         this={traitToComponent[attribute.display_type]}
@@ -85,10 +86,12 @@
                     <Input
                         bind:value={attribute.trait_type}
                         placeholder="Attribute name"
+                        disabled={disableNames}
                     />
                     <button
                         class="button-2 del{''}"
                         on:click={removeAttribute(attribute)}
+                        disabled={disableNames}
                     >
                         <i class="ri-delete-bin-7-line"></i>
                         <i class="ri-close-line"></i>
@@ -99,10 +102,10 @@
             <p>No attributes</p>
         {/if}
         <div class="wrpr">
-            <TraitTypePicker bind:value={traitToAdd}></TraitTypePicker>
-            <button class="button-2 create" on:click={addAttribute}
-                >{traitToLabel[traitToAdd]}</button
-            >
+            <TraitTypePicker bind:value={traitToAdd} disabled={disableNames}></TraitTypePicker>
+            <button class="button-2 create" disabled={disableNames} on:click={addAttribute}>
+                {traitToLabel[traitToAdd]}
+            </button>
         </div>
     </div>
 </Foldable>
@@ -147,7 +150,7 @@
             i:nth-of-type(2) {
                 display: none;
             }
-            &:hover {
+            &:hover:not(&:disabled) {
                 color: var(--red-11);
                 border-color: var(--red-11);
             }

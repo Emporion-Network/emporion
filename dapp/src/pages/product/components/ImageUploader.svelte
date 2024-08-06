@@ -4,7 +4,7 @@
 
     export let img:string|undefined;
     let dragover = false;
-    let state: "gallery" | "show" | "upload" = img ? "show" : "gallery";
+    let state: "gallery" | "show" | "upload" = img ? "show" : "upload";
     const handleKeydown = async (e: KeyboardEvent) => {
         if (["Enter", " "].includes(e.key)) {
             img = await uploadImage(jwt.get() || "");
@@ -62,7 +62,11 @@
     >
         <i class="ri-image-add-line"></i>
         <p>Click or drag an image to upload</p>
-        <button class="button-link" on:click={()=>state = "gallery"}>Gallery</button>
+        <p>Or</p>
+        <p>
+            Sellect from
+            <button class="button-link" on:click={()=>state = "gallery"}>Gallery</button>
+        </p>
     </div>
 {/if}
 {#if state == "show" && img}
@@ -122,11 +126,7 @@
             outline: 3px solid var(--indigo-10);
             outline-offset: 3px;
         }
-        @include media.for-size(phone) {
-            position: relative;
-            width: 100%;
-            top: 0;
-        }
+       
         i {
             font-size: 2rem;
         }
@@ -135,6 +135,13 @@
             height: 100%;
             object-fit: cover;
             position: absolute;
+        }
+    }
+    .gallery,.image-upload{
+        @include media.for-size(tablet-lg) {
+            position: relative;
+            width: 100%;
+            top: 0;
         }
     }
 </style>
