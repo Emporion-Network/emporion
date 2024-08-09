@@ -16,7 +16,7 @@
     import Categories from "./components/Categories.svelte";
     import PricePicker from "./components/PriceMaker.svelte";
     import Attriutes from "./components/AttributesMaker.svelte";
-    import ProductShow from "./ProductShow.svelte";
+    import ProductShow from "./components/ProductShow.svelte";
     import type { AssetInfoBaseForAddr } from "../../../../client-ts/Emporion.types";
     import Tooltip from "../../lib/Tooltip.svelte";
     import Search from "../../lib/Search.svelte";
@@ -26,9 +26,11 @@
         getMetaHash,
         getProductsMeta,
         getSellerCollections,
+        id,
         uploadMeta,
     } from "../../lib/utils";
     import DeliveryTime from "./components/DeliveryTime.svelte";
+    import Menu from "../../lib/Menu.svelte";
     const { VITE_ENDPOINT_BACK_END_API: ENDPOINT_BACK_END_API } = import.meta
         .env;
 
@@ -37,8 +39,7 @@
     let img: string | undefined;
     let categories: string[];
     let attributes: ProductMetaData["attributes"] = [];
-    let price: Record<string, { amount: Decimal; info: AssetInfoBaseForAddr }> =
-        {};
+    let price: Record<string, { amount: Decimal; info: AssetInfoBaseForAddr }> = {};
     let collectionId: string = "";
     let deliveryTime: number;
     let preview = false;
@@ -63,14 +64,10 @@
                 time: deliveryTime,
             },
             meta: `${ENDPOINT_BACK_END_API}/hash/${hash}`,
-            price: [
-                {
-                    amount: "10000",
-                    info: {
-                        native: "untrn",
-                    },
-                },
-            ],
+            price: Object.values(price).map((e) => ({
+                amount: e.amount.atomics,
+                info: e.info,
+            })),
             isListed: true,
             metaHash: hash,
         });
@@ -106,12 +103,13 @@
     const presetParams = async (collection:string)=>{
         const metas = await getProductsMeta($user?.address||"", collection)
         if(metas.length === 0) return;
-        attributes = metas[0].attributes;
+        attributes = metas[0].attributes.map((a)=> ({...a, key:id()}));
         categories = metas[0].categories;
     }
 
 </script>
 
+<Menu></Menu>
 <div class="action-menu">
     <Tooltip text="Preview your product">
         <button
@@ -175,7 +173,7 @@
         product={{
             meta: "",
             id: -1,
-            delivery_time: { time: 400 },
+            delivery_time: { time: deliveryTime },
             is_listed: true,
             price: Object.values(price).map((e) => ({
                 amount: e.amount.atomics,

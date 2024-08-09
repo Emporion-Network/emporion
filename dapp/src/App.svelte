@@ -3,32 +3,24 @@
     import ProductCreate from "./pages/product/ProductCreate.svelte";
     import { watchPrices, clean } from "./stores/coins";
     import Notifications from "./lib/Notifications.svelte";
-    import Wallet from "./lib/Wallet.svelte";
-    import Logo from "./lib/Logo.svelte";
+    import Route from "./lib/Route.svelte";
+    import Home from "./pages/home/Home.svelte";
+    import ProductShow from "./pages/product/ProductShow.svelte";
+
     watchPrices()
     onMount(()=>{
         return clean
     })
+
 </script>
 
-<div class="menu">
-    <div class="left">
-        <Logo></Logo>
-    </div>
-    <Wallet></Wallet>
-</div>
-<ProductCreate></ProductCreate>
+<Route match="/">
+ <Home></Home>
+</Route>
+<Route match="/create">
+    <ProductCreate></ProductCreate>
+</Route>
+<Route match="/product">
+    <ProductShow></ProductShow>
+</Route>
 <Notifications></Notifications>
-
-<style lang="scss">
-     .menu {
-        display: flex;
-        justify-content: flex-end;
-        width: 100%;
-        padding: 2rem 5%;
-        align-items: center;
-        .left{
-            margin-right: auto;
-        }
-    }
-</style>

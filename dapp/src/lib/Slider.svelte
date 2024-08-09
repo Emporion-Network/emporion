@@ -3,10 +3,15 @@
     export let max: number = 10;
     export let step: number = 1;
     export let value: number = min;
+    export let active = false
 </script>
 
-<div class="slider" style="--p:{(value - min) / (max - min)}">
-    <input type="range" {min} {max} {step} bind:value />
+<div class="slider" class:active style="--p:{(value - min) / (max - min)}">
+    <input type="range" {min} {max} {step} 
+    bind:value 
+    on:mousedown={()=>active = true} 
+    on:mouseup={()=>active=false} 
+    on:mouseleave={()=>active = false} />
     <button class="handle"></button>
 </div>
 
@@ -17,6 +22,9 @@
         background-color: var(--gray-3);
         border-radius: 10px;
         border: 1px solid var(--gray-6);
+        &.active{
+            cursor: grabbing;
+        }
 
         &::before{
             content: "";
@@ -54,7 +62,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            cursor: pointer;
+            cursor: inherit;
         }
     }
 </style>

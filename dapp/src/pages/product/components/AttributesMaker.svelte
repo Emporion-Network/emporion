@@ -10,13 +10,15 @@
     import Foldable from "../../../lib/Foldable.svelte";
     import Switch from "./traitInputs/Switch.svelte";
     import Color from "./traitInputs/Color.svelte";
-    import { id } from "../../../lib/utils";
+    import { id, swap } from "../../../lib/utils";
     import Input from "../../../lib/Input.svelte";
     import TraitTypePicker from "./TraitTypePicker.svelte";
     import Image from "./traitInputs/Image.svelte";
     import Region from "./traitInputs/Region.svelte";
     import RadioImage from "./traitInputs/RadioImage.svelte";
     import RadioButton from "./traitInputs/RadioButton.svelte";
+    import Drag from "../../../lib/Drag.svelte";
+    import Draggable from "../../../lib/Draggable.svelte";
 
     export let attributes: Attribute[] = [];
     export let disableNames = false;
@@ -41,10 +43,10 @@
         attributes = attributes;
     };
 
-    function removeAttribute(a: Attribute){
+    function removeAttribute(a: Attribute) {
         return (ev: MouseEvent) => {
             let btn = ev.currentTarget as HTMLElement;
-            if (!btn.classList.contains('clicked')) {
+            if (!btn.classList.contains("clicked")) {
                 btn.classList.add("clicked");
                 setTimeout(() => {
                     btn?.classList.remove("clicked");
@@ -53,7 +55,7 @@
             }
             attributes = attributes.filter((e) => e != a);
         };
-    };
+    }
     let traitToAdd: Attribute["display_type"];
 
     const traitToLabel: Record<Attribute["display_type"], string> = {
@@ -65,6 +67,11 @@
         region: "Add a region",
         select: "Add a Select",
     };
+
+    const swapAttributes = (a:number, b:number)=>{
+        swap(attributes, a, b)
+        attributes = attributes;
+    }
 </script>
 
 <Foldable>
@@ -77,17 +84,22 @@
     </div>
     <div class="attributes" slot="content">
         {#if attributes.length}
-            {#each attributes as attribute,i (attribute.key||i)}
-                <div class="wrpr">
-                    <svelte:component
-                        this={traitToComponent[attribute.display_type]}
-                        bind:value={attribute.value}
-                    ></svelte:component>
+            <Drag let:swap onSwap={swapAttributes}>
+            {#each attributes as attribute, i (attribute.key || i)}
+                <Draggable {swap} let:dragger let:moving>
+                <div class="wrpr" class:moving>
+                    <button use:dragger class="dragger">
+                        <i class="ri-draggable" />
+                      </button>
                     <Input
                         bind:value={attribute.trait_type}
                         placeholder="Attribute name"
                         disabled={disableNames}
                     />
+                    <svelte:component
+                        this={traitToComponent[attribute.display_type]}
+                        bind:value={attribute.value}
+                    ></svelte:component>
                     <button
                         class="button-2 del{''}"
                         on:click={removeAttribute(attribute)}
@@ -97,13 +109,20 @@
                         <i class="ri-close-line"></i>
                     </button>
                 </div>
+                </Draggable>
             {/each}
+            </Drag>
         {:else}
             <p>No attributes</p>
         {/if}
         <div class="wrpr">
-            <TraitTypePicker bind:value={traitToAdd} disabled={disableNames}></TraitTypePicker>
-            <button class="button-2 create" disabled={disableNames} on:click={addAttribute}>
+            <TraitTypePicker bind:value={traitToAdd} disabled={disableNames}
+            ></TraitTypePicker>
+            <button
+                class="button-2 create"
+                disabled={disableNames}
+                on:click={addAttribute}
+            >
                 {traitToLabel[traitToAdd]}
             </button>
         </div>
@@ -160,6 +179,13 @@
         display: flex;
         gap: 1rem;
         align-items: center;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+        .dragger{
+            background-color: transparent;
+            color: var(--gray-11);
+            border: none;
+        }
         .create {
             height: 3rem;
         }

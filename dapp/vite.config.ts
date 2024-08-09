@@ -16,11 +16,6 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
-      '/price': {
-        target:"https://api.coingecko.com/",
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/price/, ''),
-      }
     }
   }
 })

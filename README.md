@@ -20,9 +20,20 @@
     - [x] distribution tests
 - [ ] Front
     - [ ] Finish home page
-    - [ ] Finish store v1
     - [x] deploy the dao
-    - [ ] add metadata server
-    - [ ] 
+    - [x] add metadata server
+    - [x] proxy the prices
+    - [x] add navigation
+    - [ ] add image and location attributes
+    - [ ] update color to have a label
+    - [ ] add tooltips all over
+    - [ ] add products page
+    - [ ] add investment page
+    - [ ] add stats page
+    - [ ] add orders page
+    - [ ] add home page
+    - [x] add search
+    - [ ] scroll on the animation
+    - [ ] add cart
 - [ ] Write deployement scripts
 - [ ] Write docs

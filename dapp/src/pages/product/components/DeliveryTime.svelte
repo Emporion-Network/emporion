@@ -19,17 +19,26 @@
 
 <div class="wpr">
     <Slider min={DAY} max={60*DAY} step={DAY} bind:value={value}></Slider>
-    <span>{toStr(value)}</span>
+    <span style="--p:{value/(60*DAY)}">{toStr(value)}</span>
 </div>
 
 <style lang="scss">
     .wpr{
         display: flex;
         flex-direction: column;
-        gap:0.5rem;
+        position: relative;
+        margin-top: 2rem;
         span{
             align-self: flex-end;
             color: var(--gray-12);
+            background-color: var(--gray-3);
+            padding: 0 1rem;
+            position: absolute;
+            pointer-events: none;
+            top:-110%;
+            left: calc(var(--p)  * 100%);
+            transform: translate(-50%, -100%);
+            min-width: max-content;
         }
     }
 </style>

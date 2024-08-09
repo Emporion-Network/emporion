@@ -8,10 +8,12 @@ import {
 } from "@aws-sdk/client-s3";
 import { ResponseMetadata } from "@aws-sdk/types";
 import { join, relative } from "path";
+import * as lancedb from "@lancedb/lancedb";
+import * as arrow from "apache-arrow";
 
 const client = new S3Client({
     endpoint: Bun.env.BUKET_ENDPOINT,
-    region:  Bun.env.BUKET_REGION,
+    region: Bun.env.BUKET_REGION,
     credentials: {
         secretAccessKey: Bun.env.STORAGE_SECRET || 'error',
         accessKeyId: Bun.env.STORAGE_KEY || 'error',
@@ -24,13 +26,13 @@ const client = new S3Client({
 export class FileStorage<T> {
     private base: string
     private buket: string
-    private ACL:"public-read"|"private"
-    private isBinary:boolean;
+    private ACL: "public-read" | "private"
+    private isBinary: boolean;
     static MAX_ELS_PER_PAGE = 10;
     constructor(base: string,
-        isPublic=false,
+        isPublic = false,
         binary = false,
-        buket: string = Bun.env.STORAGE_BUKET||"") {
+        buket: string = Bun.env.STORAGE_BUKET || "") {
         this.ACL = isPublic ? "public-read" : "private"
         this.buket = buket;
         this.base = base;
@@ -49,7 +51,7 @@ export class FileStorage<T> {
             });
             const stream = await client.send(cmd);
             this.isSuccess(stream.$metadata);
-            if(this.isBinary){
+            if (this.isBinary) {
                 return await stream.Body?.transformToByteArray() as T;
             }
             return JSON.parse(await stream.Body?.transformToString('utf8') || "undefined");
@@ -66,105 +68,130 @@ export class FileStorage<T> {
                 // @ts-ignore
                 Body: f,
                 Key: join(this.base, id),
-                ContentType: f instanceof File ? f.type  :  "application/json"
+                ContentType: f instanceof File ? f.type : "application/json"
             });
             const stream = await client.send(cmd);
             this.isSuccess(stream.$metadata);
             return true;
 
-        } catch (e){
+        } catch (e) {
             return false
         }
 
     }
 
-    async update(id:string, fn:(v:undefined|T)=>T|Promise<T>){
+    async update(id: string, fn: (v: undefined | T) => T | Promise<T>) {
         let v = await this.get(id);
         let newV = await fn(v);
         return await this.set(id, newV);
     }
 
-    async paginated(startFromKey?:string):Promise<T[]>{
-       let cmd = new ListObjectsCommand({
+    async paginated(startFromKey?: string): Promise<T[]> {
+        let cmd = new ListObjectsCommand({
             Bucket: this.buket,
-            Prefix:this.base,
-            Marker:startFromKey ? join(this.base, startFromKey):undefined,
-            MaxKeys:2,
+            Prefix: this.base,
+            Marker: startFromKey ? join(this.base, startFromKey) : undefined,
+            MaxKeys: 2,
         });
         const stream = await client.send(cmd);
         return (await Promise.all(stream.Contents?.map((e) => {
-            if(!e.Key) return;
+            if (!e.Key) return;
             return this.get(relative(this.base, e.Key));
-        })||[])).filter(e => e !== undefined);
+        }) || [])).filter(e => e !== undefined);
     }
 
-    async keys(){
+    async keys() {
         let cmd = new ListObjectsCommand({
             Bucket: this.buket,
-            Prefix:this.base,
+            Prefix: this.base,
         });
         const stream = await client.send(cmd);
         return stream.Contents?.map((e) => {
-            return relative(this.base, e.Key||"")
-        }).filter(e => e !== undefined)||[];
+            return relative(this.base, e.Key || "")
+        }).filter(e => e !== undefined) || [];
     }
 
-    async delete(id:string){
+    async delete(id: string) {
         try {
-          const cmd = new DeleteObjectCommand({
-            Bucket:this.buket,
-            Key:join(this.base, id),
-          })
-          const r = await client.send(cmd);
-          this.isSuccess(r.$metadata);
-          return true;
-        } catch(e){
-          return false;
+            const cmd = new DeleteObjectCommand({
+                Bucket: this.buket,
+                Key: join(this.base, id),
+            })
+            const r = await client.send(cmd);
+            this.isSuccess(r.$metadata);
+            return true;
+        } catch (e) {
+            return false;
         }
     }
 
-    async has(id:string){
+    async has(id: string) {
         try {
             let cmd = new ListObjectsCommand({
                 Bucket: this.buket,
-                Prefix:join(this.base, id),
-                MaxKeys:1,
+                Prefix: join(this.base, id),
+                MaxKeys: 1,
             });
             const stream = await client.send(cmd);
             return stream.Contents?.length === 1
-        } catch{
+        } catch {
             return false;
         }
-       
+
     }
 
 
-    async getList(ids:string[]):Promise<T[]>{
+    async getList(ids: string[]): Promise<T[]> {
         const res = await Promise.all(ids.map(id => this.get(id)))
         return res.filter(e => e !== undefined)
     }
 
-    prefix(key:string){
+    prefix(key: string) {
         return new FileStorage<T>(join(this.base, key), this.ACL == 'public-read', this.isBinary, this.buket)
     }
 
-    async clear(){
+    async clear() {
         try {
             const cmd = new DeleteObjectsCommand({
-              Bucket:this.buket,
-              Delete:{
-                Objects:(await this.keys()).map(e => ({Key:e}))
-              }
+                Bucket: this.buket,
+                Delete: {
+                    Objects: (await this.keys()).map(e => ({ Key: e }))
+                }
             })
             await client.send(cmd);
             return true;
-          } catch(e){
+        } catch (e) {
             return false;
-          }
+        }
     }
 }
 
 
 
+const EmbedingsDb = await lancedb.connect(
+    {
+        uri: `s3://${Bun.env.STORAGE_BUKET}/embedings`,
+        storageOptions: {
+            aws_endpoint: Bun.env.BUKET_ENDPOINT,
+            aws_access_key_id: Bun.env.STORAGE_KEY,
+            aws_secret_access_key: Bun.env.STORAGE_SECRET,
+            aws_region: Bun.env.BUKET_REGION,
+        },
+    }
+);
+
+const schema = new arrow.Schema([
+    new arrow.Field("id", new arrow.Uint64()),
+    new arrow.Field("vector", new arrow.FixedSizeList(384, new arrow.Field('item', new arrow.Float64()))),
+]);
+
+const tbl = await EmbedingsDb.createEmptyTable('vectors', schema, {
+    existOk:true,
+})
+if(await tbl.countRows()>10000){
+    await tbl.createIndex('vector')
+}
+
+export const Embedings = tbl;
 
 

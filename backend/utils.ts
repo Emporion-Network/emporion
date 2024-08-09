@@ -4,7 +4,7 @@ import {
     serializeSignDoc,
 } from '@cosmjs/amino';
 import { StatusCode } from 'hono/utils/http-status';
-
+import { cos_sim, pipeline } from "@xenova/transformers";
 
 export const verifySignature = async (message:string, signature) => {
     const signDoc = {
@@ -74,3 +74,14 @@ export const validAddress = (address:string)=>{
         throw new ServerError("address not valid", 400)
     }
 }
+
+const extractor = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2', {model:"decoder_model_merged", dtype:"fp32"});
+export const embed = async (t:string)=>{
+    const a1 = (await extractor(t, {pooling:"mean", normalize:true})).data;
+    return a1
+  }
+
+  export const textSim = async (a1:number[], a2:number[])=>{
+    const output = cos_sim(a1, a2)
+    return output;
+  }

@@ -136,6 +136,7 @@
                 font-weight: 700;
                 height: 48px;
                 padding-left: calc(48px + 1.3rem);
+                min-width: 0;
             }
             .denom {
                 font-weight: 600;

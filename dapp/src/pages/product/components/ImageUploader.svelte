@@ -88,6 +88,8 @@
         overflow-y: auto;
         grid-gap: 5px;
         padding: 1rem;
+        position: sticky;
+        top: 3rem;
         button {
             aspect-ratio: 1;
             background-color: transparent;

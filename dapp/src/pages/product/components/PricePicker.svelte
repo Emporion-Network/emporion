@@ -13,7 +13,7 @@
 
     $: selctedPrice =
         productPrices.find((p) => p.denom == showPriceIn) || productPrices[0];
-    const options = productPrices.map((e) => ({
+    $:options = productPrices.map((e) => ({
         label: e.denom,
         value: e.denom,
     }));

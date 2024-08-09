@@ -232,8 +232,8 @@
 
     };
     onMount(async () => {
-        // await animateExplore();
-        // await animatePicker();
+        await animateExplore();
+        await animatePicker();
         await animateVault();
     });
 </script>

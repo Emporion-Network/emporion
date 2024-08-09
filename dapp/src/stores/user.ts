@@ -41,7 +41,7 @@ const autoLogIn = {
 
 const jwt = {
     set(v: string) {
-        localStorage.setItem("item", `${v}`);
+        localStorage.setItem("item", v?`${v}`:'');
     },
     get() {
         return localStorage.getItem("item") || undefined;
@@ -134,6 +134,7 @@ const setUser = async () => {
 
     } catch (e) {
         autoLogIn.set(false)
+        jwt.clear();
         console.log(e);
     }
 }

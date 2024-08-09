@@ -3,14 +3,19 @@
     "dev": "bun --watch index.ts"
   },
   "devDependencies": {
-    "@types/bun": "^1.1.6"
+    "@types/bun": "^1.1.6",
+    "@types/markdown-it": "^14.1.2"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.600.0",
     "@cosmjs/cosmwasm-stargate": "^0.32.4",
     "@cosmjs/stargate": "^0.32.4",
+    "@lancedb/lancedb": "^0.9.0",
+    "@xenova/transformers": "github:xenova/transformers.js#v3",
     "hono": "^4.5.3",
     "json-stable-stringify": "^1.1.1",
+    "markdown-it": "^14.1.0",
+    "markdown-it-plain-text": "^0.3.0",
     "zod": "^3.23.8"
   }
 }

@@ -94,7 +94,7 @@ export const COIN_DATA = {
         coinDecimals: 6,
         addressPrefix:"noble",
         chainName:"Noble",
-        rpc:"https://rpc.noble.strange.love:443",
+        rpc:"https://noble-rpc.polkachu.com/",
         isCw20:false,
 
     },

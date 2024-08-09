@@ -7,15 +7,17 @@ import { stream } from 'hono/streaming'
 import type { ProductMetaData, Attribute } from "../shared-types/index"
 import { CATEGORIES } from "../shared-types/categories"
 import { REGIONS } from "../shared-types/countries"
-
+import markdownit from 'markdown-it'
+import plaintext from 'markdown-it-plain-text'
 
 import { CosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 import { EmporionQueryClient } from "../client-ts/Emporion.client";
 import stringify from 'json-stable-stringify'
 import { randomUUID } from "crypto";
-import { assert, hash, ServerError, verifySignature, errors, getUniqueCollectionId, validAddress as validateAddress } from "./utils";
+import { assert, hash, ServerError, verifySignature, errors, getUniqueCollectionId, validAddress as validateAddress, embed, textSim } from "./utils";
 import { fromBech32 } from "@cosmjs/encoding";
-import { FileStorage } from "./fileStorage";
+import { FileStorage, Embedings } from "./fileStorage";
+
 
 const app = new Hono<{ Variables: JwtVariables }>();
 const queryClient = await CosmWasmClient.connect(Bun.env.ENDPOINT || "");
@@ -26,8 +28,6 @@ const COLLECTION_TO_PRODUCTS = new FileStorage<string[]>('COLLECTION_TO_PRODUCTS
 const FILES = new FileStorage<File>('Files', true, true);
 const HASH_TO_PRODUCT_ID =  new FileStorage<Record<string, string>>("HASH_TO_PRODUCT_ID", true);
 const SELLER_COLLECTIONS = new FileStorage<string[]>('SELLER_COLLECTIONS', true);
-
-
 
 
 app.use('*', cors({
@@ -88,8 +88,11 @@ const NonceReq = z.object({
     address: z.string(),
 });
 
+const nonceToAddr = new Map<string, [address: string, timeout: number]>();
+const md = new markdownit();
+md.use(plaintext);
 
-const nonceToAddr = new Map<string, [address: string, timeout: number]>()
+let prices = {};
 
 
 app.post('/auth/create-product', async (c) => {
@@ -120,6 +123,13 @@ app.post('/auth/create-product', async (c) => {
         }
         return v;
     }),errors.UNKNOWN_ERROR)
+    md.render(productMeta.description)
+    //@ts-ignore
+    const toEmbed = `${productMeta.name}\n${md.plainText}`
+    console.log(toEmbed);
+    await Embedings.add([{
+        id:BigInt(productMeta.id), vector:await embed(toEmbed)
+    }])
     return c.json({})
 })
 
@@ -242,6 +252,22 @@ app.get("/images/:address", async(c)=>{
     })
 })
 
+let lastFetch = Date.now();
+
+app.get("/prices", async (c)=>{
+    if(lastFetch + 1000 > Date.now()){
+        return c.json(prices);
+    }
+    const ids = c.req.query('ids');
+    const req = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&precision=3&include_24hr_change=true`);
+    if(req.status != 200){
+        return c.json(prices)
+    }
+    lastFetch = Date.now();
+    prices = await req.json()
+    return c.json(prices);
+})
+
 app.get("/image/:address/:key", async(c)=>{
     const {address, key} = c.req.param();
     validateAddress(address);
@@ -250,6 +276,21 @@ app.get("/image/:address/:key", async(c)=>{
     assert(file !== undefined, "File not found", 404);
     return stream(c, async (s)=>{
         s.write(file as unknown as Uint8Array)
+    })
+})
+
+app.get("/search", async (c)=>{
+    const search = c.req.query('q');
+    if(!search){
+        return c.json([]);
+    }
+    const vect = embed(search)
+    const results = await Embedings.search(vect).distanceType('cosine').limit(100).toArray();
+    return c.json({
+        results:results.map(e => ({
+            d:e._distance,
+            id:e.id.toString()
+        })),
     })
 })
 

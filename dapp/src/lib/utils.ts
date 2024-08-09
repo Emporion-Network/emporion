@@ -9,7 +9,6 @@ import { notification } from "./Notifications.svelte";
 import type { ProductMetaData } from "../../../shared-types";
 import stringify from 'json-stable-stringify';
 import { sha256 } from '@cosmjs/crypto';
-import type { EmporionClient } from "../../../client-ts/Emporion.client";
 
 
 const {
@@ -420,13 +419,27 @@ export const getProductsMeta = async (address: string, collection: string) => {
         }
         return productsMeta;
     } catch (e: any) {
+    }
+    return []
+}
+
+
+export const getProduct = async (id:number) => {
+    try {
+        const resp = await fetch(`${ENDPOINT_BACK_END_API}/product/${id}`);
+        const productsMeta: ProductMetaData = await resp.json();
+        if (`error` in productsMeta) {
+            return undefined;
+        }
+        return productsMeta;
+    } catch (e: any) {
         notification({
             type: "error",
             text: e.message || "An Error occured"
         })
     }
-    return []
 }
+
 
 
 
@@ -473,3 +486,8 @@ export const uploadMeta = async (meta: ProductMetaData, token: string) => {
         type: "error"
     })
 }
+
+
+export const swap = <T>(arr:T[], idxA:number, idxB:number) => {
+    [arr[idxA], arr[idxB]] = [arr[idxB], arr[idxA]];
+  };

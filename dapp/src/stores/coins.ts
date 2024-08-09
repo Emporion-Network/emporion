@@ -8,12 +8,13 @@ import { CosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 
 const {
     VITE_NATIVE_COIN: NATIVE_COIN,
+    VITE_ENDPOINT_BACK_END_API: ENDPOINT_BACK_END_API,
+
 } = import.meta.env;
 
 
+
 const { COIN_DATA } = await import(`../COIN_DATA.${import.meta.env.MODE}.ts`) as { COIN_DATA: CoinMap };
-//@ts-ignore
-// const { COIN_DATA } = await import("../COIN_DATA.production.ts") as { COIN_DATA: CoinMap };
 
 export type CoinData = {
     icon: string,
@@ -74,7 +75,7 @@ export const watchPrices = async () => {
 
     const updatePrices = async () => {
         try {
-            const resp = await (await fetch(`/price/api/v3/simple/price?ids=${ids}&vs_currencies=usd&precision=3&include_24hr_change=true`)).json();
+            const resp = await (await fetch(`${ENDPOINT_BACK_END_API}/prices?ids=${ids}`)).json();
             const REF = rotateObj(COIN_DATA, 'coinGeckoId');
             Object.keys(resp).forEach((k) => {
                 REF[k].price = Decimal.fromUserInput(resp[k].usd.toFixed(2), 2)
