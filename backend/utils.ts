@@ -75,7 +75,7 @@ export const validAddress = (address:string)=>{
     }
 }
 
-const extractor = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2', {model:"decoder_model_merged", dtype:"fp32"});
+const extractor = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
 export const embed = async (t:string)=>{
     const a1 = (await extractor(t, {pooling:"mean", normalize:true})).data;
     return a1

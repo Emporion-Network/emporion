@@ -9,14 +9,14 @@ import { CATEGORIES } from "../shared-types/categories"
 import { REGIONS } from "../shared-types/countries"
 import markdownit from 'markdown-it'
 import plaintext from 'markdown-it-plain-text'
-
+import sqlstring from 'sqlstring';
 import { CosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 import { EmporionQueryClient } from "../client-ts/Emporion.client";
 import stringify from 'json-stable-stringify'
 import { randomUUID } from "crypto";
-import { assert, hash, ServerError, verifySignature, errors, getUniqueCollectionId, validAddress as validateAddress, embed, textSim } from "./utils";
+import { assert, hash, ServerError, verifySignature, errors, getUniqueCollectionId, validAddress as validateAddress, embed } from "./utils";
 import { fromBech32 } from "@cosmjs/encoding";
-import { FileStorage, Embedings } from "./fileStorage";
+import { FileStorage, Embedings, Search } from "./fileStorage";
 
 
 const app = new Hono<{ Variables: JwtVariables }>();
@@ -103,9 +103,7 @@ app.post('/auth/create-product', async (c) => {
     delete tohash.id;
     let pHash = hash(stringify(tohash)).toLowerCase();
     const onChainProduct = await client.productById({ productId: Number(productMeta.id) });
-    console.log(stringify(tohash))
     assert(onChainProduct.seller === address, errors.UNAUTHORIZED);
-    console.log(pHash, onChainProduct.meta_hash);
     assert(onChainProduct.meta_hash.toLowerCase() === pHash.toLocaleLowerCase(), "Invalid hash")
     assert(await PRODUCTS.has(productMeta.id) === false, "Product already created")
     assert(await PRODUCTS.set(productMeta.id, productMeta), errors.UNKNOWN_ERROR)
@@ -126,7 +124,6 @@ app.post('/auth/create-product', async (c) => {
     md.render(productMeta.description)
     //@ts-ignore
     const toEmbed = `${productMeta.name}\n${md.plainText}`
-    console.log(toEmbed);
     await Embedings.add([{
         id:BigInt(productMeta.id), vector:await embed(toEmbed)
     }])
@@ -212,7 +209,7 @@ app.get('/collections/:address', async(c)=>{
     const {address} = c.req.param();
     validateAddress(address)
     const collections = await SELLER_COLLECTIONS.get(address)
-    return c.json(collections)
+    return c.json(collections||[])
 })
 
 app.get("/auth/test", async (c) => {
@@ -281,22 +278,35 @@ app.get("/image/:address/:key", async(c)=>{
 
 app.get("/search", async (c)=>{
     const search = c.req.query('q');
+    let categorie = c.req.query('categorie');
+    categorie = categorie === 'all' ? undefined : categorie;
     if(!search){
         return c.json([]);
     }
     const vect = embed(search)
-    const results = await Embedings.search(vect).distanceType('cosine').limit(100).toArray();
-    return c.json({
-        results:results.map(e => ({
-            d:e._distance,
-            id:e.id.toString()
-        })),
-    })
+    const ids:any[] = (await Embedings.search(vect)
+    .distanceType('cosine').limit(10).toArray()).filter(e => e._distance < 0.8)
+    const results =  (await PRODUCTS.getList(ids.map(e => e.id.toString())))
+    .filter(e => categorie ? e.categories.includes(categorie) : true);
+    return c.json(results)
+})
+
+app.get("/search-suggestions", async(c)=>{
+    const search = c.req.query('q');
+    if(!search){
+        return c.json([]);
+    }
+    let escaped = sqlstring.escape(`%${search.replaceAll(/[%_]/g,'')}%`)
+    const results:{text:string}[] = await Search.query()
+    .where(`lower(text) LIKE ${escaped}`)
+    .select(["text"])
+    .limit(10).toArray();
+
+    return c.json(results.map(e=>e.text))
 })
 
 
 app.onError((e, c) => {
-    console.log(e);
     if (e instanceof ServerError) {
         return c.json({
             error: e.message

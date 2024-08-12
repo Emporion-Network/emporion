@@ -31,13 +31,15 @@ let client = await new EmporionClient(signer, adminAddress, STORE_ADDRESS);
 //     denom:"untrn"
 // }])
 
-// let r = await signer.queryContractSmart(DAO_ADDRESS, {
-//     voting_power_at_height: {
-//         address: adminAddress
-//     }
-// });
-
 let r = await signer.queryContractSmart(DAO_ADDRESS, {
+    voting_power_at_height: {
+        address: adminAddress
+    }
+});
+
+console.log(r);
+
+r = await signer.queryContractSmart(DAO_ADDRESS, {
     voting_module:{}
 });
 

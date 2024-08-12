@@ -1,3 +1,4 @@
+import "bun"
 import {
     S3Client,
     ListObjectsCommand,
@@ -91,7 +92,7 @@ export class FileStorage<T> {
             Bucket: this.buket,
             Prefix: this.base,
             Marker: startFromKey ? join(this.base, startFromKey) : undefined,
-            MaxKeys: 2,
+            MaxKeys: 40,
         });
         const stream = await client.send(cmd);
         return (await Promise.all(stream.Contents?.map((e) => {
@@ -180,18 +181,23 @@ const EmbedingsDb = await lancedb.connect(
     }
 );
 
-const schema = new arrow.Schema([
+const vectorSchema = new arrow.Schema([
     new arrow.Field("id", new arrow.Uint64()),
     new arrow.Field("vector", new arrow.FixedSizeList(384, new arrow.Field('item', new arrow.Float64()))),
 ]);
 
-const tbl = await EmbedingsDb.createEmptyTable('vectors', schema, {
-    existOk:true,
+if (!(await EmbedingsDb.tableNames()).includes('search')) {
+    const { searches } = await import("./search");
+    await EmbedingsDb.createTable("search", searches.map(e => ({ text: e })), {mode:"overwrite"})
+}
+
+const tbl = await EmbedingsDb.createEmptyTable('vectors', vectorSchema, {
+    existOk: true,
 })
-if(await tbl.countRows()>10000){
+if (await tbl.countRows() > 10000) {
     await tbl.createIndex('vector')
 }
 
 export const Embedings = tbl;
 
-
+export const Search = await EmbedingsDb.openTable('search')
