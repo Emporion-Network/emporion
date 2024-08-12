@@ -6,7 +6,7 @@ import { id } from "../lib/utils";
 type CartItem = {product:Product, meta:ProductMetaData, coinDenom:string};
 
 export const cart = writable<(CartItem&{key:string})[]>(JSON.parse(localStorage.getItem('cart')||"[]"))
-export const isVisible = writable(true);
+export const isVisible = writable(false);
 
 export const addItem = (item:CartItem)=>{
     cart.update((c)=>{
