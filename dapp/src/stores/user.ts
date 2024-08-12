@@ -10,7 +10,7 @@ const {
 } = import.meta.env;
 
 import { EmporionClient } from "../../../client-ts/Emporion.client"
-import { getNames, signMessage, testAuth } from "../lib/utils";
+import { getNames, signMessage } from "../lib/utils";
 import { notification } from "../lib/Notifications.svelte";
 
 declare global {

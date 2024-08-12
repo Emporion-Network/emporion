@@ -100,6 +100,11 @@ textarea::placeholder {
     }
 }
 
+.stop-scrolling {
+    height: 100%;
+    overflow: hidden;
+  }
+
 
 .button-3 {
     background-color: transparent;
@@ -142,8 +147,18 @@ textarea::placeholder {
     color: var(--indigo-11);
     width: max-content;
     cursor: pointer;
+    position: relative;
+    padding: 0;
     &:hover:not(&:disabled){
-        text-decoration: underline;
+        &::after{
+            height: 1px;
+            width: 100%;
+            background-color: var(--indigo-11);
+            content: "";
+            top: 100%;
+            left: 0;
+            position: absolute;
+        }
     }
 }
 
@@ -153,8 +168,13 @@ textarea::placeholder {
     color: var(--gray-10);
     width: max-content;
     cursor: pointer;
+    position: relative;
     &:hover:not(&:disabled){
-        text-decoration: underline;
+        &::after{
+            height: 1px;
+            width: 100%;
+            background-color: var(--indigo-10);
+        }
     }
 }
 

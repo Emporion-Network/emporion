@@ -22,6 +22,7 @@
         background-color: var(--gray-3);
         border-radius: 10px;
         border: 1px solid var(--gray-6);
+        flex:1;
         &.active{
             cursor: grabbing;
         }

@@ -23,7 +23,5 @@ export const goTo = (url:string)=>()=>{
 }
 
 window.addEventListener("popstate", () => {
-    matched.set(false);
     reroute(location.href);
-    console.log('pop')
 });

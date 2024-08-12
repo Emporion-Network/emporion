@@ -39,14 +39,19 @@
 </Radio>
 
 <style lang="scss">
-    .color {
+    .color.button-2 {
         min-width: 3rem;
         min-height: 3rem;
         background-color: var(--color);
         border-color: var(--gray-8);
         border-radius: 3px;
-        &.selected {
+        border: 2px solid transparent;
+        &.selected, &:hover.selected {
             border: 2px solid var(--indigo-10);
+        }
+        &:hover{
+            border: 2px solid var(--gray-12);
+            background-color: var(--color);
         }
         &.disable {
             opacity: 0.1;

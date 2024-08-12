@@ -9,20 +9,22 @@
         amount: Decimal;
     }[];
 
-    let showPriceIn: string = $user?.selectedCoin || NATIVE_COIN;
+    export let addToCart = (coinDenom:string)=>{};
 
+    let showPriceIn: string = $user?.selectedCoin || NATIVE_COIN;
+    let selctedPrice =  productPrices[0];
     $: selctedPrice =
         productPrices.find((p) => p.denom == showPriceIn) || productPrices[0];
     $:options = productPrices.map((e) => ({
         label: e.denom,
         value: e.denom,
     }));
-    let value = [showPriceIn];
+    let value = [selctedPrice.denom];
     $: showPriceIn = value[0];
     user.subscribe((nu) => {
         if (!nu) return;
         showPriceIn = nu?.selectedCoin;
-        value = [showPriceIn];
+        value = [(productPrices.find((p) => p.denom == showPriceIn) || productPrices[0]).denom];
     });
 </script>
 
@@ -30,11 +32,11 @@
     <div class="small">Current price</div>
     {#if selctedPrice}
     <h2>{selctedPrice.amount.toString()}
-        {showPriceIn}
-        <span class='small'>≈ ${(selctedPrice.amount.toFloatApproximation() * $prices[showPriceIn].price.toFloatApproximation()).toFixed(2)}</span>
+        {selctedPrice.denom}
+        <span class='small'>≈ ${(selctedPrice.amount.toFloatApproximation() * $prices[selctedPrice.denom].price.toFloatApproximation()).toFixed(2)}</span>
     </h2>
     <div class="wpr">
-        <button class="button-1">Add to cart</button>
+        <button class="button-1" on:click={()=>addToCart(value[0])}>Add to cart</button>
         <MultiSelect {options} bind:selected={value} max={1}></MultiSelect>
     </div>
     {:else}

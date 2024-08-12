@@ -38,7 +38,7 @@
     .button-2{
         min-height: 3rem;
         border-radius: 5px;
-        &.selected{
+        &.selected, &:hover.selected{
             border: 2px solid var(--indigo-10);
         }
         &.disable{

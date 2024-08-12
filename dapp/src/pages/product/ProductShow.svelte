@@ -10,39 +10,45 @@
 </script>
 
 <script lang="ts">
-    import ProductShow from "./components/ProductShow.svelte";
-    import { goTo, href, historyReplace } from "../../stores/location";
+    import ProductShow from "./components/ProductPickerShow.svelte";
+    import { href, historyReplace } from "../../stores/location";
     import { EmporionQueryClient } from "../../../../client-ts/Emporion.client";
     import { CosmWasmClient } from "@cosmjs/cosmwasm-stargate";
-    import { getProduct } from "../../lib/utils";
+    import { getProduct, getProductsMeta } from "../../lib/utils";
     import Menu from "../../lib/Menu.svelte";
-    let productId = $href.searchParams.get("p")||"";
-    let productInfo = client
-        .productById({ productId: Number(productId) })
-        .then((product) => {
-            return getProduct(product.id).then((meta) => {
-                return {
-                    product,
-                    meta,
-                };
-            });
-        }).catch(e => {
-            goTo('/')()
-            return {
-                product:undefined,
-                meta:undefined
-            }
-        });
+    import SearchBar from "../../lib/SearchBar.svelte";
+    import type { Product } from "../../../../client-ts/Emporion.types";
+    import type { ProductMetaData } from "../../../../shared-types";
+    let productId:string;
+    let metas:ProductMetaData[] = [];
+    let products:Product[] = [];
+
     $:productId, (()=>{
-        const newUrl = new URL($href.href);
-        newUrl.searchParams.set('p', productId);
-        historyReplace(newUrl.href)
+        if($href.searchParams.get('p') === productId || !productId) return;
+        const u = new URL($href.href)
+        u.searchParams.set('p', productId);
+        historyReplace(u.href);
     })()
+
+    href.subscribe(async (newHref) => {
+        const newPid = newHref.searchParams.get("p");
+        if(!newPid || productId == newPid) return;
+        const mp = await getProduct(newPid) as ProductMetaData;
+        const p = await client.productById({productId:Number(newPid)})
+        const newMetas = await getProductsMeta(p.seller, mp.collection_id);
+        const newProducts = (await Promise.all(newMetas.map(({id})=>{
+            if(Number(id) === p.id) return p;
+            return client.productById({productId:Number(id)})
+        }))).filter(e => e !== undefined)
+        metas = newMetas;
+        products = newProducts;
+        productId = newPid;
+    });
 </script>
 
-<Menu></Menu>
-{#await productInfo then { product, meta }}
-    {#if meta && product}
-        <ProductShow {product} {meta} bind:productId={productId}></ProductShow>
-    {/if}
-{/await}
+<Menu>
+    <SearchBar></SearchBar>
+</Menu>
+{#if products.length}
+    <ProductShow products={products} metas={metas} bind:productId={productId}></ProductShow>
+{/if}

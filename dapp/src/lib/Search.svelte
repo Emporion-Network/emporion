@@ -1,8 +1,9 @@
 <script lang="ts">
     import { clickOutside } from "./directives";
-
+    type Suggestion = string|{label:string, value:string};
     export let value = "";
-    export let suggestions:string[] = [];
+
+    export let suggestions:Suggestion[] = [];
     export let placeholder:string="";
     export let icon:string|undefined = undefined;
     export let onSelect = (v:string)=>{};
@@ -10,27 +11,35 @@
     const handleClose = ()=>{
         isOpen = false;
     }
-    const setValue = (newv:string)=>()=>{
-        value = newv;
+    const setValue = (newv:Suggestion)=>()=>{
+        value = typeof newv === 'string' ? newv : newv.label;
         isOpen = false;
-        onSelect(value);
+        onSelect(typeof newv === 'string' ? value : newv.value);
     }
-    const matches = (str1:string, str2:string)=>{
+    const matches = (str1:Suggestion, str2:string)=>{
+        if(typeof str1 !== 'string'){
+            return true;
+        }
         return str1.toLowerCase().includes(str2.toLowerCase())
+    }
+    const handleEnter = (e:KeyboardEvent)=>{
+        if(e.key !== 'Enter') return;
+        onSelect(value)
+        isOpen = false;
     }
 </script>
 <div class="search input" class:isOpen use:clickOutside={handleClose}>
     <div class="ipt">
-        <input type="text" bind:value={value} on:focus={()=>isOpen = true} {placeholder}>
         {#if icon}
-        <i class="{icon}"></i>
+            <i class="{icon}"></i>
         {/if}
+        <input type="text" on:keydown={handleEnter} bind:value={value} on:focus={()=>isOpen = true} {placeholder}>
     </div>
     {#if suggestions.length > 0 && isOpen}
     <div class="suggestions">
         {#each suggestions as suggestion}
             {#if matches(suggestion, value)}
-                <button on:click={setValue(suggestion)}>{suggestion}</button>
+                <button on:click={setValue(suggestion)}>{typeof suggestion == 'string' ? suggestion : suggestion.label}</button>
             {/if}
         {/each}
     </div>
@@ -51,6 +60,12 @@
         .ipt{
             display: flex;
             width: 100%;
+            color:var(--gray-12);
+            align-items: center;
+            height: 100%;
+            i{
+                margin-left: 1rem;
+            }
         }
         input{
             height: 3rem;

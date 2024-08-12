@@ -16,8 +16,8 @@
     import Categories from "./components/Categories.svelte";
     import PricePicker from "./components/PriceMaker.svelte";
     import Attriutes from "./components/AttributesMaker.svelte";
-    import ProductShow from "./components/ProductShow.svelte";
-    import type { AssetInfoBaseForAddr } from "../../../../client-ts/Emporion.types";
+    import ProductShow from "./components/ProductPickerShow.svelte";
+    import type { AssetInfoBaseForAddr, Product } from "../../../../client-ts/Emporion.types";
     import Tooltip from "../../lib/Tooltip.svelte";
     import Search from "../../lib/Search.svelte";
     import type { ProductMetaData } from "../../../../shared-types";
@@ -58,7 +58,6 @@
             }),
         };
         const hash = getMetaHash(meta);
-        console.log(hash);
         let r = await $user?.emporionClient.createProduct({
             deliveryTime: {
                 time: deliveryTime,
@@ -75,8 +74,7 @@
         let id = extractAttr("product_id", r);
         if (!id) return;
         meta.id = id;
-        console.log(id);
-        const res = await uploadMeta(meta, jwt.get() || "");
+        await uploadMeta(meta, jwt.get() || "");
     };
 
     $: canCreate = 
@@ -88,23 +86,29 @@
     categories.length > 0 &&
     Object.keys(price).length > 0;
 
-    $:console.log(canCreate)
-
     let isFromExistingCollection = false;
+    let metas:ProductMetaData[] = [];
+    let products:Product[] = [];
 
     $:collectionId, (()=>{
         isFromExistingCollection = myCollections.includes(collectionId)
         if(isFromExistingCollection){
             presetParams(collectionId)
+        } else {
+            metas = [];
+            products = [];
         }
     })()
    
 
     const presetParams = async (collection:string)=>{
-        const metas = await getProductsMeta($user?.address||"", collection)
+        metas = await getProductsMeta($user?.address||"", collection)
         if(metas.length === 0) return;
         attributes = metas[0].attributes.map((a)=> ({...a, key:id()}));
         categories = metas[0].categories;
+        products = (await Promise.all(metas.map(({id})=>{
+            return $user?.emporionClient.productById({productId:Number(id)})
+        }))).filter(e => e !== undefined)
     }
 
 </script>
@@ -161,7 +165,7 @@
     </div>
 {:else}
     <ProductShow
-        meta={{
+        metas={[{
             id: "-1",
             name,
             description,
@@ -169,8 +173,8 @@
             image: img || "",
             categories,
             attributes,
-        }}
-        product={{
+        }, ...metas]}
+        products={[{
             meta: "",
             id: -1,
             delivery_time: { time: deliveryTime },
@@ -182,7 +186,8 @@
             rating: [4, 500],
             seller: $user?.address || "",
             meta_hash: "",
-        }}
+        }, ...products]}
+        productId="-1"
     ></ProductShow>
 {/if}
 

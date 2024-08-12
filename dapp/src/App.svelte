@@ -6,6 +6,9 @@
     import Route from "./lib/Route.svelte";
     import Home from "./pages/home/Home.svelte";
     import ProductShow from "./pages/product/ProductShow.svelte";
+    import ProductIndex from "./pages/product/ProductIndex.svelte";
+    import ProductSearch from "./pages/product/ProductSearch.svelte";
+    import Cart from "./lib/Cart.svelte";
 
     watchPrices()
     onMount(()=>{
@@ -18,9 +21,16 @@
  <Home></Home>
 </Route>
 <Route match="/create">
-    <ProductCreate></ProductCreate>
+    <ProductCreate/>
 </Route>
 <Route match="/product">
     <ProductShow></ProductShow>
 </Route>
-<Notifications></Notifications>
+<Route match="/products">
+    <ProductIndex/>
+</Route>
+<Route match="/search">
+    <ProductSearch/>
+</Route>
+<Notifications/>
+<Cart></Cart>

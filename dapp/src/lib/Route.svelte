@@ -3,17 +3,19 @@
     export let match:string|RegExp|((x:URL)=>boolean);
 
     let matches = false;
-    let routed = $matched;
     href.subscribe((url)=>{
-        if(routed) return;
+        if($matched) return;
         if(match instanceof RegExp){
             matches = match.test(url.href);
         } else if(typeof match == 'string'){
             matches = url.pathname === match;
+            console.log(url.pathname, match, $matched)
         } else {
             matches = match(url);
         }
-        matched.set(matches)
+        if(matches){
+            matched.set(true)
+        }
     });
 </script>
 

@@ -6,6 +6,7 @@
     <div class="left">
         <Logo></Logo>
     </div>
+    <slot></slot>
     <Wallet></Wallet>
 </div>
 
@@ -16,6 +17,7 @@
        width: 100%;
        padding: 2rem 5%;
        align-items: center;
+       gap: 2rem;
        .left{
            margin-right: auto;
        }

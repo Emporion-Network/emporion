@@ -9,6 +9,7 @@ import { notification } from "./Notifications.svelte";
 import type { ProductMetaData } from "../../../shared-types";
 import stringify from 'json-stable-stringify';
 import { sha256 } from '@cosmjs/crypto';
+import type { AssetInfoBaseForAddr, Product } from "../../../client-ts/Emporion.types";
 
 
 const {
@@ -215,7 +216,6 @@ export const getMetaHash = (meta: ProductMetaData) => {
     const p: Partial<ProductMetaData> = structuredClone(meta);
     delete p.id;
     const h = stringify(p)
-    console.log(h)
     return hash(h)
 }
 
@@ -365,14 +365,6 @@ export const signMessage = async (nonce: string) => {
     return signature;
 }
 
-export const testAuth = async (token: string) => {
-    console.log((await fetch(`${ENDPOINT_BACK_END_API}/auth/test`, {
-        method: "GET",
-        headers: {
-            'Authorization': `bearer ${token}`,
-        }
-    })).json())
-}
 
 export const uploadFile = async (f: File, token: string) => {
     try {
@@ -424,7 +416,7 @@ export const getProductsMeta = async (address: string, collection: string) => {
 }
 
 
-export const getProduct = async (id:number) => {
+export const getProduct = async (id:string) => {
     try {
         const resp = await fetch(`${ENDPOINT_BACK_END_API}/product/${id}`);
         const productsMeta: ProductMetaData = await resp.json();
@@ -488,6 +480,67 @@ export const uploadMeta = async (meta: ProductMetaData, token: string) => {
 }
 
 
+
+export const searchSuggestions = async (query: string) => {
+    try {
+        const url = new URL(`${ENDPOINT_BACK_END_API}/search-suggestions`);
+        url.searchParams.set('q', query);
+        const resp = await fetch(url.href);
+        const products: string[] = await resp.json();
+        if (`error` in products) {
+            return [];
+        }
+        return products;
+    } catch (e: any) {}
+    return []
+}
+
+export const search = async (query: string, categorie:string|undefined) => {
+    try {
+        const url = new URL(`${ENDPOINT_BACK_END_API}/search`);
+        url.searchParams.set('q', query);
+        if(categorie) url.searchParams.set('categorie', categorie);
+
+        const resp = await fetch(url.href);
+        const products: ProductMetaData[] = await resp.json();
+        if (`error` in products) {
+            return [];
+        }
+        return products;
+    } catch (e: any) {}
+    return []
+}
+
+export const listProducts = async (page?:string) => {
+    try {
+        const url = page ? 
+        new URL(`${ENDPOINT_BACK_END_API}/products/${page}`) :  new URL(`${ENDPOINT_BACK_END_API}/products`);
+        const resp = await fetch(url.href);
+        const products: ProductMetaData[] = await resp.json();
+        if (`error` in products) {
+            return [];
+        }
+        return products;
+    } catch (e: any) {}
+    return []
+}
+
 export const swap = <T>(arr:T[], idxA:number, idxB:number) => {
     [arr[idxA], arr[idxB]] = [arr[idxB], arr[idxA]];
   };
+
+export  const getOnChainDenom = (info: AssetInfoBaseForAddr) => {
+    if ("cw20" in info) {
+        return info.cw20;
+    }
+    return info.native;
+};
+export const getPrices = (product: Product, record:Record<string, CoinData>) => {
+    return product.price.map((e) => {
+        let denom = getOnChainDenom(e.info);
+        return {
+            denom: record[denom].coinDenom,
+            amount: Decimal.fromAtomics(e.amount, record[denom].coinDecimals),
+        };
+    });
+};

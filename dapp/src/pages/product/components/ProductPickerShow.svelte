@@ -4,7 +4,7 @@
         Product,
     } from "../../../../../client-ts/Emporion.types";
     import type { ProductMetaData } from "../../../../../shared-types";
-    import { getNames, getProductsMeta, rotateObj } from "../../../lib/utils";
+    import { getNames, getPrices, getProductsMeta, rotateObj } from "../../../lib/utils";
     import { prices } from "../../../stores/coins";
     import markdownit from "markdown-it";
     import { Decimal } from "@cosmjs/math";
@@ -12,13 +12,11 @@
     import OverflowAddress from "../../../lib/OverflowAddress.svelte";
     import Stars from "../../../lib/Stars.svelte";
     import DisplayAttributes from "./DisplayAttributes.svelte";
-    import { user } from "../../../stores/user";
-
-    export let meta: ProductMetaData;
-    export let product: Product;
-    export let productId = meta.id;
-    const creating = productId == '-1' ? product : undefined;
-
+    import { addItem, cart } from "../../../stores/cart";
+    export let metas: ProductMetaData[];
+    export let products: Product[];
+    export let productId: string;
+    
 
     const md = markdownit({
         linkify: false,
@@ -26,43 +24,30 @@
         breaks: true,
     });
 
-    const qClient = $user?.emporionClient;
 
-
-    const getOnChainDenom = (info: AssetInfoBaseForAddr) => {
-        if ("cw20" in info) {
-            return info.cw20;
-        }
-        return info.native;
-    };
-    const getPrices = (product:Product)=>{
-        return product.price.map((e) => {
-        let denom = getOnChainDenom(e.info);
-        return {
-            denom: r[denom].coinDenom,
-            amount: Decimal.fromAtomics(e.amount, r[denom].coinDecimals),
-        };
-    });
-    }
     let r = rotateObj($prices, "onChainDenom");
-    let productPrices = getPrices(product);
-    let sellerNames = getNames(product.seller);
-    let products = getProductsMeta(product.seller, meta.collection_id);
 
-    $:productId, (async ()=>{
-        if(meta.id == productId) return;
-        const p = await products;
-        if(!p.some(p => p.id == meta.id)){
-            p.unshift(meta);
-        }
-        let newMeta = p.find(p => p.id === productId)
-        if(newMeta){
-            product = creating?.id === Number(newMeta.id) ? creating : await qClient?.productById({
-                productId:Number(newMeta.id),
-            }) ?? product;
-            meta = newMeta
-            productPrices = getPrices(product);
-        }
+    let product = products.find((p) => p.id === Number(productId)) as Product;
+    let meta = metas.find((p) => p.id === productId) as ProductMetaData;
+    let sellerNames = getNames(product.seller);
+    let productPrices = getPrices(product, r);
+
+    const addToCart = (denom:string)=>{
+        console.log('heee')
+        addItem({
+            meta:meta,
+            product:product,
+            coinDenom:denom
+        })
+    }
+
+    $:productId,(()=>{
+        if(productId === meta.id) return;
+        console.log('this is')
+        product = products.find((p) => p.id === Number(productId)) as Product;
+        meta = metas.find((p) => p.id === productId) as ProductMetaData;
+        sellerNames = getNames(product.seller);
+        productPrices = getPrices(product, r);
     })()
 
 </script>
@@ -110,18 +95,9 @@
         </div>
         <h1>{meta.name}</h1>
         <Stars bind:rating={product.rating}></Stars>
-        <PricePicker bind:productPrices={productPrices}></PricePicker>
-        {#await products then products}
-            <DisplayAttributes
-                products={[...(product.id === -1 ? [meta] : []), ...products]}
-                bind:selectedProductId={productId}
-            ></DisplayAttributes>
-        {/await}
-        <button
-            on:click={() => {
-                productId = "0";
-            }}>hummm</button
-        >
+        <PricePicker bind:productPrices {addToCart}></PricePicker>
+        <DisplayAttributes products={metas} bind:selectedProductId={productId}
+        ></DisplayAttributes>
         <div class="description">
             {@html md.render(meta.description)}
         </div>
@@ -142,7 +118,7 @@
             .info {
                 width: 100%;
             }
-            .image{
+            .image {
                 width: 100%;
                 position: relative;
                 top: 0;

@@ -11,11 +11,16 @@
 <script lang="ts">
     import { CosmWasmClient } from "@cosmjs/cosmwasm-stargate";
     import Menu from "../../lib/Menu.svelte";
-    import { listProducts } from "../../lib/utils";
+    import { search } from "../../lib/utils";
     import { EmporionQueryClient } from "../../../../client-ts/Emporion.client";
     import ProductCard from "./components/ProductCard.svelte";
     import SearchBar from "../../lib/SearchBar.svelte";
-    const products = listProducts().then(metas => {
+    import { href } from "../../stores/location";
+
+    $:searchText = $href.searchParams.get('q')||"";
+    $:category = $href.searchParams.get('category')||"";
+    
+    $:products = search(searchText, category).then(metas => {
         return Promise.all(metas.map(async m => {
             return {
                 meta: m,
@@ -25,7 +30,7 @@
     });
 </script>
 <Menu>
-    <SearchBar></SearchBar>
+    <SearchBar {searchText} selected={[category]}></SearchBar>
 </Menu>
 <div class="grid">
     {#await products then products}

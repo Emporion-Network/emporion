@@ -1,9 +1,11 @@
 <script lang="ts">
     import { prices, type CoinData } from "../stores/coins";
-    import { logIn, logOut, user } from "../stores/user";
+    import { logIn, user } from "../stores/user";
     import { Decimal } from "@cosmjs/math";
     import { clickOutside } from "./directives";
     import IbcModal from "./IbcModal.svelte";
+    import { toPrefix } from "./utils";
+    import { cart, openCart } from "../stores/cart";
     let isOpen = false;
     let showModal = false;
     let direction: "deposit" | "withdraw" = "deposit";
@@ -36,32 +38,36 @@
         isOpen = false;
         direction = "withdraw";
     };
+
+    const sellectAsset = (coin: CoinData) => () => {
+        if ($user) {
+            $user.selectedCoin = coin.coinDenom;
+        }
+    };
 </script>
 
 {#if $user?.address && $prices[NATIVE_COIN]?.onChainAmount}
     {@const nativeCoin = $prices[NATIVE_COIN]}
+    {@const selectedCoin = $prices[$user.selectedCoin]}
+    {@const addr = toPrefix($user.address, selectedCoin.addressPrefix)}
     <div class="wallet input">
         <button class="header" on:click={open}>
-            <img src={nativeCoin.icon} alt={nativeCoin.coinDenom} />
+            <img src={selectedCoin.icon} alt={selectedCoin.coinDenom} />
             <div class="address">
-                <span
-                    >{$user.address.slice(0, 11)}...{$user.address.slice(
-                        -4,
-                    )}</span
-                >
-                <button on:click={copy($user.address)}
+                <span>{addr.slice(0, 11)}...{addr.slice(-4)}</span>
+                <button on:click={copy(addr)}
                     ><i class="ri-file-copy-line"></i></button
                 >
             </div>
             <div class="amount">
                 <span
-                    >{nativeCoin.onChainAmount.toString()}
-                    {nativeCoin.coinDenom}</span
+                    >{selectedCoin.onChainAmount.toString()}
+                    {selectedCoin.coinDenom}</span
                 >
                 <span class="price">
-                    {nativeCoin.price.toString()} USD
+                    {selectedCoin.price.toString()} USD
                     <i
-                        class={nativeCoin.change24h > 0
+                        class={selectedCoin.change24h > 0
                             ? "up ri-arrow-right-up-line"
                             : "down ri-arrow-right-down-line"}
                     ></i>
@@ -72,8 +78,14 @@
             <div class="fold" use:clickOutside={close}>
                 <div class="assets">
                     {#each Object.values($prices) as coin}
-                        {#if coin !== nativeCoin}
-                            <div class="asset">
+                        {#if coin !== selectedCoin}
+                            <div
+                                class="asset"
+                                on:click={sellectAsset(coin)}
+                                role="button"
+                                tabindex="0"
+                                on:keydown={() => {}}
+                            >
                                 <img src={coin.icon} alt={coin.coinDenom} />
                                 <div class="amount">
                                     <span
@@ -116,11 +128,22 @@
             </div>
         {/if}
     </div>
-    <button class="button-2 logout" on:click={logOut}> 
-        <i class="ri-logout-box-r-line"></i>
+    <button class="button-1 header-button" on:click={openCart}>
+        {#if $cart.length > 0}
+            <span>{$cart.length}</span>
+        {/if}
+        <i class="ri-shopping-cart-2-line"></i>
     </button>
 {:else}
-    <button class="button-1 login" on:click={logIn}> Connect wallet </button>
+    <button class="button-1 header-button" on:click={logIn}>
+        Connect wallet
+    </button>
+    <button class="button-1 header-button" on:click={openCart}>
+        {#if $cart.length > 0}
+            <span>{$cart.length}</span>
+        {/if}
+        <i class="ri-shopping-cart-2-line"></i>
+    </button>
 {/if}
 
 <IbcModal
@@ -140,7 +163,6 @@
         width: max-content;
         z-index: 2;
         border-radius: 5px;
-        margin-right: 0.5rem;
         @include media.for-size(phone) {
             min-width: unset;
             width: 100%;
@@ -289,12 +311,29 @@
             }
         }
     }
-    .login, .logout {
+    .header-button {
         height: 3.6rem;
         background-color: var(--gray-1);
         border: 2px solid var(--gray-5);
         border-radius: 3px;
         color: var(--gray-12);
+        position: relative;
+        span{
+            display: block;
+            width: 16px;
+            height: 16px;
+            background-color: var(--red-10);
+            color: var(--white-12);
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 20px;
+            font-weight: 900;
+            font-size: 0.6rem;
+            top:4px;
+            right: 4px;
+        }
         &:hover {
             border: 2px solid var(--gray-7);
             background-color: var(--gray-2);
