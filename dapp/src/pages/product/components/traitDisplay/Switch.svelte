@@ -26,11 +26,10 @@
 </script>
 
 <div class="wrpr">
-    {#each values.entries() as [label, { ids,isDisabeled }]}
+    {#each values.entries() as [label, { ids }]}
         {#if ids.includes(productId)}
             <button
                 class="toggle"
-                class:disabled={isDisabeled}
                 {disabled}
                 class:on={label}
                 on:click={select(values.get(!label)?.ids || [])}
@@ -45,6 +44,7 @@
         display: flex;
         align-items: center;
         gap: 1rem;
+        padding: 1rem;
     }
     .toggle {
         background-color: var(--gray-a6);
@@ -54,7 +54,7 @@
         border-radius: 2rem;
         position: relative;
         cursor: pointer;
-        &:disabled, &.disabled {
+        &:disabled {
             opacity: 0.3;
         }
         &::after {

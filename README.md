@@ -24,17 +24,23 @@
     - [x] add metadata server
     - [x] proxy the prices
     - [x] add navigation
-    - [ ] add image and location attributes
-    - [ ] update color to have a label
-    - [ ] add tooltips all over
-    - [ ] filter inactive and blacklisted
+    - [x] add gallery images
+    - [x] update color to have a label
+    - [x] filter inactive 
     - [x] add products page
+    - [x] add search
+    - [x] add cart
+    - [x] add is active
+    - [x] add tooltips all over
+    - [ ] create order
+    - [ ] location attribute
+    - [ ] filter blacklisted
+    - [ ] add filters
     - [ ] add investment page
     - [ ] add stats page
     - [ ] add orders page
+    - [ ] add user page 
     - [ ] add home page
-    - [x] add search
-    - [ ] scroll on the animation
-    - [ ] add cart
-- [ ] Write deployement scripts
+    - [ ] add gidelines page
+- [x] Write deployement scripts
 - [ ] Write docs

@@ -65,6 +65,12 @@
     <!-- svelte-ignore a11y-no-static-element-interactions -->
     <div class="modal" use:trapFocus on:mousedown={handleClickOutside}>
         <div class="content" bind:this={content}>
+            <button
+                class="button-3-2 close"
+                on:click={() => (isVisible = false)}
+            >
+                <i class="ri-close-line"></i>
+            </button>
             {#if state == "gallery" && $user?.address}
                 <div class="gallery">
                     {#await getImages($user?.address) then images}
@@ -124,6 +130,14 @@
         background-color: var(--black-a4);
         backdrop-filter: blur(10px);
         z-index: 2;
+        @include media.for-size(phone) {
+            align-items: flex-end;
+            .content{
+                width: 100%;
+                height: 90%;
+                top:10%;
+            }
+        }
     }
     .content {
         border-radius: 5px;
@@ -131,12 +145,26 @@
         width: 70%;
         height: 80%;
         overflow: hidden;
+        position: relative;
+        padding-top: 3rem;
+        background-color: var(--gray-2);
+        .close {
+            position: absolute;
+            aspect-ratio: 1;
+            right: 0;
+            top: 0;
+            border-radius: 3px;
+        }
     }
     .gallery {
         height: 100%;
         background-color: var(--gray-2);
         display: grid;
         grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+        @include media.for-size(phone) {
+            grid-template-columns: 1fr 1fr;
+           
+        }
         align-content: start;
         grid-auto-flow: dense;
         overflow: auto;

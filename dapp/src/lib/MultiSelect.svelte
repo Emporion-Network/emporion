@@ -13,7 +13,9 @@
     export let max = 5;
     export let placeholder = "";
     export let disabled:boolean = false;
+    export let searchable = false;
 
+    let search = "";
 
     let isOpen = false;
     let valueEl: HTMLElement;
@@ -77,7 +79,14 @@
     </button>
     {#if isOpen}
         <div class="options">
+            {#if searchable}
+            <div class="search">
+                <i class="ri-search-line"></i>
+                <input placeholder="Search..." bind:value={search}>
+            </div>
+            {/if}
             {#each options as option (option.value)}
+                {#if option.label.toLocaleLowerCase().startsWith(search.toLocaleLowerCase())}
                 <button
                     class:selected={selected.includes(option.value)}
                     disabled={max !== 1 &&
@@ -90,6 +99,7 @@
                     {/if}
                     <span>{option.label}</span>
                 </button>
+                {/if}
             {/each}
         </div>
     {/if}
@@ -114,6 +124,30 @@
             cursor: default;
             &:hover {
                 border: 1px solid var(--gray-6);
+            }
+        }
+
+        .search{
+            display: flex;
+            width: 100%;
+            gap: 1rem;
+            justify-content: center;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            background-color: var(--gray-3);
+            border-bottom: 1px solid var(--gray-7);
+            padding-left: 1rem;
+            input{
+                flex:1;
+                outline: none;
+                height: 3rem;
+                background-color: transparent;
+                border: none;
+                color: var(--gray-12);
+                &::placeholder{
+                    color: var(--gray-9);
+                }
             }
         }
 

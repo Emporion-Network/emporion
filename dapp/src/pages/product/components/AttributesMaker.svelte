@@ -18,6 +18,7 @@
     import RadioButton from "./traitInputs/RadioButton.svelte";
     import Drag from "../../../lib/Drag.svelte";
     import Draggable from "../../../lib/Draggable.svelte";
+    import Tooltip from "../../../lib/Tooltip.svelte";
 
     export let attributes: Attribute[] = [];
     export let disableNames = false;
@@ -128,8 +129,15 @@
             <p>No attributes</p>
         {/if}
         <div class="wrpr last">
-            <TraitTypePicker bind:value={traitToAdd} disabled={disableNames}
-            ></TraitTypePicker>
+            <div class="label">
+                <div>
+                    Attribute type
+                    <Tooltip text="Configure product attributes to customize how users can interact with and select product variations.">
+                        <i class="ri-information-line"></i>
+                    </Tooltip>
+                </div>
+                <TraitTypePicker bind:value={traitToAdd} disabled={disableNames}/>
+            </div>
             <button
                 class="button-2 create"
                 disabled={disableNames}
@@ -154,6 +162,21 @@
             margin-left: 1rem;
         }
     }
+
+    .label {
+        display: flex;
+        color: var(--gray-11);
+        flex-direction: column;
+        font-weight: 500;
+        gap: 0.5rem;
+        flex:1;
+        div{
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+    }
+
     .attributes {
         display: flex;
         flex-direction: column;
@@ -162,6 +185,10 @@
             color: var(--gray-11);
             padding: 1rem;
             text-align: center;
+            height: 10rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
         .del {
             height: 3rem;
@@ -218,6 +245,7 @@
         }
         &.last {
             border-radius: 0 0 5px 5px;
+            align-items: flex-end;
         }
     }
 </style>

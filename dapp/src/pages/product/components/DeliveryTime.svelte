@@ -27,7 +27,7 @@
         display: flex;
         flex-direction: column;
         position: relative;
-        margin-top: 2rem;
+        margin-bottom: 2rem;
         span{
             align-self: flex-end;
             color: var(--gray-12);
@@ -35,9 +35,9 @@
             padding: 0 1rem;
             position: absolute;
             pointer-events: none;
-            top:-110%;
+            top:110%;
             left: calc(var(--p)  * 100%);
-            transform: translate(-50%, -100%);
+            transform: translate(-50%, 50%);
             min-width: max-content;
         }
     }

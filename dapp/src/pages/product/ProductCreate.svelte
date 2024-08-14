@@ -33,6 +33,7 @@
     } from "../../lib/utils";
     import DeliveryTime from "./components/DeliveryTime.svelte";
     import Menu from "../../lib/Menu.svelte";
+    import Switch from "./components/traitInputs/Switch.svelte";
     const { VITE_ENDPOINT_BACK_END_API: ENDPOINT_BACK_END_API } = import.meta
         .env;
 
@@ -46,6 +47,7 @@
     let collectionId: string = "";
     let deliveryTime: number;
     let preview = false;
+    let isListed = true;
     const create = async () => {
         const meta: ProductMetaData = {
             id: "",
@@ -79,7 +81,7 @@
                 amount: e.amount.atomics,
                 info: e.info,
             })),
-            isListed: true,
+            isListed,
             metaHash: hash,
         });
         if (r == undefined) return;
@@ -123,7 +125,9 @@
     const presetParams = async (collection: string) => {
         metas = await getProductsMeta($user?.address || "", collection);
         if (metas.length === 0) return;
-        attributes = metas[0].attributes.map((a) => ({ ...a, key: id() })).filter(a=>a.display_type !== 'image');
+        attributes = metas[0].attributes
+            .map((a) => ({ ...a, key: id() }))
+            .filter((a) => a.display_type !== "image");
         categories = metas[0].categories;
         products = (
             await Promise.all(
@@ -185,33 +189,67 @@
             </div>
         </div>
         <div class="creation-form">
-            <Description rows={2} placeholder="Product name" bind:value={name}
-            ></Description>
-            <Description
-                rows={5}
-                placeholder="Prodcut description"
-                bind:value={description}
-            ></Description>
-            {#if $user?.address}
-                {#await getSellerCollections($user?.address || "") then suggestions}
-                    <Search
-                        suggestions={suggestions || []}
-                        bind:value={collectionId}
-                        placeholder="Collection name"
-                    ></Search>
-                {/await}
-            {/if}
-            <DeliveryTime bind:value={deliveryTime}></DeliveryTime>
-            <Categories
-                disabled={isFromExistingCollection}
-                bind:selected={categories}
-            ></Categories>
+            <div class="wpr">
+                <Switch bind:value={isListed}></Switch>
+                <Tooltip text="Products can be listed or unlisted at any time. Unlisted products will not be visible to buyers.">
+                    <i class="ri-information-line"></i>
+                </Tooltip>
+                <span>Listed</span>
+            </div>
+
+            <div class="label">
+                <div>Product name</div>
+                <Description
+                    rows={2}
+                    placeholder="Product name"
+                    bind:value={name}
+                />
+            </div>
+            <div class="label">
+                <div>Description</div>
+                <Description
+                    rows={5}
+                    placeholder="Prodcut description"
+                    bind:value={description}
+                />
+            </div>
+           
+            <div class="label">
+                <div>
+                    Collection
+                    <Tooltip text="Products within the same collection will be grouped together and will share the same attributes.">
+                        <i class="ri-information-line"></i>
+                    </Tooltip>
+                </div>
+                {#if $user?.address}
+                    {#await getSellerCollections($user?.address || "") then suggestions}
+                        <Search suggestions={suggestions || []} bind:value={collectionId} placeholder="Collection name"/>
+                    {/await}
+                {/if}
+            </div>
+            <div class="label">
+                <div>
+                    Maximum Delivery Time
+                    <Tooltip text="After this period has elapsed, you are authorized to fulfill the order if the buyer has not completed the process.">
+                        <i class="ri-information-line"></i>
+                    </Tooltip>
+                </div>
+                <DeliveryTime bind:value={deliveryTime}/>
+            </div>
+            <div class="label">
+                <div>Categories (max 5)</div>
+                <Categories disabled={isFromExistingCollection} bind:selected={categories}/>
+            </div>
             <PricePicker bind:price></PricePicker>
             <Attriutes
                 bind:disableNames={isFromExistingCollection}
                 bind:attributes
                 {pickImage}
             ></Attriutes>
+          
+            <p>
+                By submitting this product, you affirm that it adheres to all relevant legal and regulatory requirements and complies with marketplace standards and guidelines.
+            </p>
             <button
                 disabled={!canCreate}
                 class="button-1 create"
@@ -279,6 +317,14 @@
             .create {
                 height: 3rem;
             }
+            p{
+                color: var(--orange-12);
+                background-color: var(--orange-a2);
+                padding: 1rem;
+                border-radius: 5px;
+                border: 1px solid var(--orange-7);
+            }
+            padding-bottom: 3rem;
         }
         .product-images {
             display: flex;
@@ -326,6 +372,28 @@
                 top: 0;
                 width: 100%;
             }
+        }
+    }
+    .wpr {
+        display: flex;
+        align-items: center;
+        color: var(--gray-12);
+        gap: 0.5rem;
+        font-weight: 600;
+        i {
+            color: var(--gray-10);
+        }
+    }
+    .label {
+        display: flex;
+        color: var(--gray-11);
+        flex-direction: column;
+        font-weight: 500;
+        gap: 0.5rem;
+        div{
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
         }
     }
     .action-menu {

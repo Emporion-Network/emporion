@@ -21,7 +21,7 @@
         const rightX = parent.left + parent.width - tooltip.width;
         const leftX = parent.left;
         const bottomY = parent.top + parent.height;
-        const topY = parent.top - tooltip.height;
+        const topY = parent.top - tooltip.height - parent.height/2;
         let finalX = centerX;
         let finalY = bottomY;
         let finalPos = ['bottom','center'];
@@ -97,15 +97,17 @@
       top: calc(var(--y) * 1px);
       pointer-events: none;
       opacity: 0;
-      background-color: var(--gray-4);
+      background-color: var(--gray-7);
       color: var(--gray-12);
       padding: 0.5rem;
       margin: 0.5rem 0;
       border-radius: 3px;
       font-size: 0.9rem;
       z-index: 100;
+      max-width: 300px;
+      font-weight: 500;
       &.left::after{
-        left: 10%;
+        left: 0.5rem;
       }
       &.top::after{
         top: 100%;
@@ -120,7 +122,7 @@
         left: 50%;
         transform: translate(-50%, -50%);
         font-size: 2rem;
-        color: var(--gray-4);
+        color:var(--gray-7);
         pointer-events: none;
       }
       

@@ -5,4 +5,4 @@
     export let disabled:boolean = false;
 </script>
 
-<MultiSelect {disabled} options={CATEGORIES.slice(1)} placeholder="Select product categorie" bind:selected></MultiSelect>
+<MultiSelect {disabled} searchable options={CATEGORIES.slice(1)} placeholder="Select product categorie" bind:selected></MultiSelect>

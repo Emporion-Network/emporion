@@ -3,6 +3,7 @@
     import AmountInput from "../../../lib/AmountInput.svelte";
     import Foldable from "../../../lib/Foldable.svelte";
     import MultiSelect from "../../../lib/MultiSelect.svelte";
+    import Tooltip from "../../../lib/Tooltip.svelte";
     import { prices } from "../../../stores/coins";
     import { Decimal } from "@cosmjs/math";
 
@@ -28,12 +29,19 @@
         </button>
     </div>
     <div class="price-picker" slot="content">
-        <MultiSelect
+        <div class="label">
+            <div>
+                Accepted currencies
+                <Tooltip text="Select the accepted currencies and set the prices for this product. Prices can be updated later.">
+                    <i class="ri-information-line"></i>
+                </Tooltip>
+            </div>
+            <MultiSelect
             placeholder="Select accepted currencies"
             {options}
             max={Infinity}
-            bind:selected={acceptedCurrencies}
-        ></MultiSelect>
+            bind:selected={acceptedCurrencies}/>
+        </div>
         <div class="prices">
             {#each acceptedCurrencies as denom (denom)}
                 {@const _ = price[denom] = price[denom] ?? {info:$prices[denom].isCw20 ? {cw20:$prices[denom].onChainDenom } : {native:$prices[denom].onChainDenom}}}
@@ -55,6 +63,19 @@
         div {
             flex: 1;
             margin-left: 1rem;
+        }
+    }
+
+    .label {
+        display: flex;
+        color: var(--gray-11);
+        flex-direction: column;
+        font-weight: 500;
+        gap: 0.5rem;
+        div{
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
         }
     }
 
