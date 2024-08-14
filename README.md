@@ -27,7 +27,8 @@
     - [ ] add image and location attributes
     - [ ] update color to have a label
     - [ ] add tooltips all over
-    - [ ] add products page
+    - [ ] filter inactive and blacklisted
+    - [x] add products page
     - [ ] add investment page
     - [ ] add stats page
     - [ ] add orders page

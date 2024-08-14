@@ -219,16 +219,16 @@ export const getMetaHash = (meta: ProductMetaData) => {
     return hash(h)
 }
 
-export const uploadImage = (token: string): Promise<string | undefined> => {
+export const uploadImage = (token: string): Promise<string[]> => {
     return new Promise(resolve => {
         let ipt = document.createElement('input');
         ipt.type = "file"
         ipt.accept = "image/*"
-        ipt.multiple = false;
+        ipt.multiple = true;
         ipt.onchange = () => {
-            const f = ipt.files?.[0];
-            if (f === undefined) {
-                return resolve(undefined)
+            const f = Array.from(ipt.files||[]);
+            if (f.length === 0) {
+                return resolve([])
             }
             resolve(uploadFile(f, token))
         }
@@ -366,10 +366,12 @@ export const signMessage = async (nonce: string) => {
 }
 
 
-export const uploadFile = async (f: File, token: string) => {
+export const uploadFile = async (f: File[], token: string) => {
     try {
         const data = new FormData()
-        data.append('file', f);
+        f.forEach(f => {
+            data.append('file[]', f);
+        })
         const resp = await fetch(`${ENDPOINT_BACK_END_API}/auth/upload-image`, {
             method: "POST",
             headers: {
@@ -377,14 +379,15 @@ export const uploadFile = async (f: File, token: string) => {
             },
             body: data,
         });
-        const res: { url: string } = await resp.json()
-        return `${ENDPOINT_BACK_END_API}/image/${res.url}`
+        const res: { urls: string[] } = await resp.json()
+        return res.urls.map(u => `${ENDPOINT_BACK_END_API}/image/${u}`)
     } catch (e: any) {
         notification({
             type: "error",
             text: e.message || "An Error occured"
         })
     }
+    return [];
 }
 
 export const getImages = async (user: string) => {
@@ -495,9 +498,10 @@ export const searchSuggestions = async (query: string) => {
     return []
 }
 
-export const search = async (query: string, categorie:string|undefined) => {
+export const search = async (query: string, categorie?:string, page?:string) => {
     try {
-        const url = new URL(`${ENDPOINT_BACK_END_API}/search`);
+        const url = page ? 
+        new URL(`${ENDPOINT_BACK_END_API}/search/${page}`) : new URL(`${ENDPOINT_BACK_END_API}/search`);
         url.searchParams.set('q', query);
         if(categorie) url.searchParams.set('categorie', categorie);
 

@@ -26,7 +26,7 @@
 
     const selectProduct = (productId:string)=>{
         const productURL = new URL($href.href)
-        productURL.pathname = "/search"
+        productURL.pathname = "/products"
         productURL.searchParams.set('q', productId);
         if(selected[0]) productURL.searchParams.set('category', selected[0]);
         historyPush(productURL.href);

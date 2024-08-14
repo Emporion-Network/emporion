@@ -1,19 +1,22 @@
 <script lang="ts">
+    import { clickOutside, trapFocus } from "../../../lib/directives";
     import { getImages, uploadFile, uploadImage } from "../../../lib/utils";
     import { jwt, user } from "../../../stores/user";
-
-    export let img:string|undefined;
+    let isVisible = false;
     let dragover = false;
-    let state: "gallery" | "show" | "upload" = img ? "show" : "upload";
+    let state: "gallery" | "upload" = "gallery";
+    let selected: string = "";
+    let content: HTMLElement;
     const handleKeydown = async (e: KeyboardEvent) => {
         if (["Enter", " "].includes(e.key)) {
-            img = await uploadImage(jwt.get() || "");
+            await uploadImage(jwt.get() || "");
+            state = "gallery";
         }
     };
 
     const handleClick = async () => {
-        img = await uploadImage(jwt.get() || "");
-        state = "show";
+        await uploadImage(jwt.get() || "");
+        state = "gallery";
     };
 
     const handleDrop = async (e: DragEvent) => {
@@ -22,95 +25,145 @@
         if (!e.dataTransfer?.files) return;
         const f = Array.from(e.dataTransfer?.files || []).filter((e) =>
             e.type.startsWith("image"),
-        )[0];
-        img = await uploadFile(f, jwt.get() || "");
-        state = "show";
+        );
+        await uploadFile(f, jwt.get() || "");
+        state = "gallery";
     };
     const setDragOver = (v: boolean) => () => {
         dragover = v;
     };
+    let resolve = (url: string | undefined) => {};
     const select = (url: string) => () => {
-        img = url;
-        state = "show";
+        resolve(url == selected ? undefined : url);
+        isVisible = false;
+    };
+    const handleClickOutside = (e: MouseEvent) => {
+        if (!e.target) return;
+        let t = e.target as Node;
+        if (content.contains(t) || t === content) {
+            return;
+        }
+        isVisible = false;
+    };
+
+    export const handleExit = () => {
+        isVisible = false;
+        resolve(undefined);
+    };
+
+    export const pick = async (url: string | undefined) => {
+        selected = url || "";
+        isVisible = true;
+        return new Promise<string | undefined>((res) => {
+            resolve = res;
+        });
     };
 </script>
 
-{#if state == "gallery" && $user?.address}
-    <div class="gallery">
-        {#await getImages($user?.address) then images}
-            <button on:click={() => (state = "upload")}>
-                <i class="ri-image-add-line"></i>
-            </button>
-            {#each [...images] as src}
-                <button class:selected={img == src} on:click={select(src)}><img {src} alt="" /></button>
-            {/each}
-        {/await}
-    </div>
-{/if}
-{#if state == "upload"}
-    <div
-        class="image-upload"
-        on:drop={handleDrop}
-        on:dragover|preventDefault={setDragOver(true)}
-        on:dragleave={setDragOver(false)}
-        on:dragend={setDragOver(false)}
-        on:click={handleClick}
-        on:keydown={handleKeydown}
-        class:dragover
-        role="button"
-        tabindex="0"
-    >
-        <i class="ri-image-add-line"></i>
-        <p>Click or drag an image to upload</p>
-        <p>Or</p>
-        <p>
-            Sellect from
-            <button class="button-link" on:click={()=>state = "gallery"}>Gallery</button>
-        </p>
-    </div>
-{/if}
-{#if state == "show" && img}
-    <div class="image-upload"  role="button" tabindex="0" on:click={()=>state = "gallery"} on:keydown={(e)=> ["Enter", " "].includes(e.key) ? state = "gallery" : ""}>
-        <img src={img} alt="" />
+{#if isVisible}
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <!-- svelte-ignore a11y-no-static-element-interactions -->
+    <div class="modal" use:trapFocus on:mousedown={handleClickOutside}>
+        <div class="content" bind:this={content}>
+            {#if state == "gallery" && $user?.address}
+                <div class="gallery">
+                    {#await getImages($user?.address) then images}
+                        <button on:click={() => (state = "upload")}>
+                            <i class="ri-image-add-line"></i>
+                        </button>
+                        {#each [...images] as src}
+                            <button
+                                class:selected={selected == src}
+                                on:click={select(src)}
+                                ><img {src} alt="" /></button
+                            >
+                        {/each}
+                    {/await}
+                </div>
+            {/if}
+            {#if state == "upload"}
+                <div
+                    class="image-upload"
+                    on:drop={handleDrop}
+                    on:dragover|preventDefault={setDragOver(true)}
+                    on:dragleave={setDragOver(false)}
+                    on:dragend={setDragOver(false)}
+                    on:click={handleClick}
+                    on:keydown={handleKeydown}
+                    class:dragover
+                    role="button"
+                    tabindex="0"
+                >
+                    <i class="ri-image-add-line"></i>
+                    <p>Click or drag an image to upload</p>
+                    <p>Or</p>
+                    <p>
+                        Sellect from
+                        <button
+                            class="button-link"
+                            on:click={() => (state = "gallery")}>Gallery</button
+                        >
+                    </p>
+                </div>
+            {/if}
+        </div>
     </div>
 {/if}
 
 <style lang="scss">
     @use "../../../media.scss";
+    .modal {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: var(--black-a4);
+        backdrop-filter: blur(10px);
+        z-index: 2;
+    }
+    .content {
+        border-radius: 5px;
+        border: 1px solid var(--gray-3);
+        width: 70%;
+        height: 80%;
+        overflow: hidden;
+    }
     .gallery {
-        flex: 2;
-        aspect-ratio: 1;
+        height: 100%;
         background-color: var(--gray-2);
         display: grid;
         grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
-        grid-auto-flow: row;
         align-content: start;
-        overflow-y: auto;
+        grid-auto-flow: dense;
+        overflow: auto;
         grid-gap: 5px;
         padding: 1rem;
-        position: sticky;
         top: 3rem;
+
         button {
-            aspect-ratio: 1;
+            width: 100%;
+            aspect-ratio: 1/1;
             background-color: transparent;
             border: 2px solid var(--gray-6);
             border-radius: 3px;
-            overflow: hidden;
             cursor: pointer;
             color: var(--gray-12);
             &.selected {
                 border: 2px solid var(--indigo-10);
             }
             img {
+                border-radius: 2px;
                 width: 100%;
-                height: 100%;
                 object-fit: cover;
             }
         }
     }
     .image-upload {
-        flex: 2;
-        aspect-ratio: 1;
+        height: 100%;
         background-color: var(--gray-2);
         color: var(--gray-12);
         display: flex;
@@ -118,32 +171,15 @@
         justify-content: center;
         align-items: center;
         cursor: pointer;
-        border-radius: 10px;
-        border: 1px solid var(--gray-7);
         overflow: hidden;
-        position: sticky;
         top: 3rem;
         padding: 1rem;
-        &.dragover {
-            outline: 3px solid var(--indigo-10);
-            outline-offset: 3px;
-        }
-       
         i {
             font-size: 2rem;
         }
-        img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            position: absolute;
-        }
-    }
-    .gallery,.image-upload{
-        @include media.for-size(tablet-lg) {
-            position: relative;
-            width: 100%;
-            top: 0;
+        &.dragover {
+            outline: 3px solid var(--indigo-10);
+            outline-offset: 3px;
         }
     }
 </style>

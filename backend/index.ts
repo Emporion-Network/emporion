@@ -26,7 +26,7 @@ const client = new EmporionQueryClient(queryClient, Bun.env.STORE_ADDRESS || "")
 const PRODUCTS = new FileStorage<ProductMetaData>('PRODUCTS', true);
 const COLLECTION_TO_PRODUCTS = new FileStorage<string[]>('COLLECTION_TO_PRODUCTS', true);
 const FILES = new FileStorage<File>('Files', true, true);
-const HASH_TO_PRODUCT_ID =  new FileStorage<Record<string, string>>("HASH_TO_PRODUCT_ID", true);
+const HASH_TO_PRODUCT_ID = new FileStorage<Record<string, string>>("HASH_TO_PRODUCT_ID", true);
 const SELLER_COLLECTIONS = new FileStorage<string[]>('SELLER_COLLECTIONS', true);
 
 
@@ -41,7 +41,7 @@ app.use(
     })
 )
 
-const categories = CATEGORIES.map(e=> e.value) as [typeof CATEGORIES[number]['value'], ...typeof CATEGORIES[number]['value'][]]
+const categories = CATEGORIES.map(e => e.value) as [typeof CATEGORIES[number]['value'], ...typeof CATEGORIES[number]['value'][]]
 const regions = REGIONS as [typeof REGIONS[number], ...typeof REGIONS];
 
 const ValidHash = z.string().regex(/^[0-9a-f]{64}$/, "invalid hash");
@@ -71,7 +71,10 @@ const AttributeSchema = z.object({
             value: z.string().url(),
         })).or(z.object({
             display_type: z.literal("color"),
-            value: z.string().regex(/^#[0-9a-f]{8}$/),
+            value: z.object({
+                color: z.string().regex(/^#[0-9a-f]{8}$/),
+                label: z.string(),
+            })
         }))
     )) satisfies z.ZodSchema<Attribute>;
 const ProductMetaSchema = z.object({
@@ -111,21 +114,21 @@ app.post('/auth/create-product', async (c) => {
         arr.push(productMeta.id)
         return arr;
     }), errors.UNKNOWN_ERROR);
-    assert(await HASH_TO_PRODUCT_ID.update(pHash.slice(0, 3),(record={})=>{
-        record[pHash]=productMeta.id;
+    assert(await HASH_TO_PRODUCT_ID.update(pHash.slice(0, 3), (record = {}) => {
+        record[pHash] = productMeta.id;
         return record;
     }), errors.UNKNOWN_ERROR)
-    assert(await SELLER_COLLECTIONS.update(address, (v=[])=>{
-        if(!v.includes(productMeta.collection_id)){
+    assert(await SELLER_COLLECTIONS.update(address, (v = []) => {
+        if (!v.includes(productMeta.collection_id)) {
             v.push(productMeta.collection_id)
         }
         return v;
-    }),errors.UNKNOWN_ERROR)
+    }), errors.UNKNOWN_ERROR)
     md.render(productMeta.description)
     //@ts-ignore
     const toEmbed = `${productMeta.name}\n${md.plainText}`
     await Embedings.add([{
-        id:BigInt(productMeta.id), vector:await embed(toEmbed)
+        id: BigInt(productMeta.id), vector: await embed(toEmbed)
     }])
     return c.json({})
 })
@@ -197,7 +200,7 @@ app.get('/hash/:hash', async (c) => {
 })
 
 app.get('/collection/:address/:collection', async (c) => {
-    const {address, collection} = c.req.param();
+    const { address, collection } = c.req.param();
     validateAddress(address)
     const productIds = await COLLECTION_TO_PRODUCTS.get(getUniqueCollectionId(address, collection));
     assert(productIds !== undefined, "collection not found", 404);
@@ -205,11 +208,11 @@ app.get('/collection/:address/:collection', async (c) => {
     return c.json(products)
 })
 
-app.get('/collections/:address', async(c)=>{
-    const {address} = c.req.param();
+app.get('/collections/:address', async (c) => {
+    const { address } = c.req.param();
     validateAddress(address)
     const collections = await SELLER_COLLECTIONS.get(address)
-    return c.json(collections||[])
+    return c.json(collections || [])
 })
 
 app.get("/auth/test", async (c) => {
@@ -219,45 +222,49 @@ app.get("/auth/test", async (c) => {
     })
 })
 
-app.get("/products/:page?", async (c)=>{
+app.get("/products/:page?", async (c) => {
     const page = c.req.param('page');
     ProductId.optional().parse(page)
     return c.json(await PRODUCTS.paginated(page))
 })
 
-app.post('/auth/upload-image', async(c)=>{
+app.post('/auth/upload-image', async (c) => {
     const body = await c.req.parseBody();
     let { address }: { address: string } = c.get('jwtPayload');
-    const file = body['file'];
-    assert(file instanceof File, "Sould be file");
-    assert(file.type.startsWith('image/'), "Only images accepted");
-    assert((file.size / (1000 * 1000)) < 5, "file size should be less than 5mb")
-    const files = FILES.prefix(address);
-    const key = randomUUID()
-    await files.set(key, file);
+    const files = body['file[]'] as unknown as File[];
+    const urls = await Promise.all(files.map(async file => {
+        assert(file instanceof File, "Sould be file");
+        assert(file.type.startsWith('image/'), "Only images accepted");
+        assert((file.size / (1000 * 1000)) < 5, "file size should be less than 5mb")
+        const files = FILES.prefix(address);
+        const key = `${Date.now()}-${randomUUID()}`
+        await files.set(key, file);
+        return key
+    }))
+
     return c.json({
-        url:`${address}/${key}`
+        urls: urls.map(u => `${address}/${u}`)
     })
 })
 
-app.get("/images/:address", async(c)=>{
+app.get("/images/:address", async (c) => {
     const address = c.req.param('address');
     validateAddress(address);
     const files = FILES.prefix(address);
     return c.json({
-        images:(await files.keys()).map(key => `${address}/${key}`)
+        images: (await files.keys()).map(key => `${address}/${key}`)
     })
 })
 
 let lastFetch = Date.now();
 
-app.get("/prices", async (c)=>{
-    if(lastFetch + 1000 > Date.now()){
+app.get("/prices", async (c) => {
+    if (lastFetch + 1000 > Date.now()) {
         return c.json(prices);
     }
     const ids = c.req.query('ids');
     const req = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&precision=3&include_24hr_change=true`);
-    if(req.status != 200){
+    if (req.status != 200) {
         return c.json(prices)
     }
     lastFetch = Date.now();
@@ -265,44 +272,48 @@ app.get("/prices", async (c)=>{
     return c.json(prices);
 })
 
-app.get("/image/:address/:key", async(c)=>{
-    const {address, key} = c.req.param();
+app.get("/image/:address/:key", async (c) => {
+    const { address, key } = c.req.param();
     validateAddress(address);
-    z.string().uuid().parse(key);
+    z.string().regex(/^[0-9a-f-]{36,50}$/).parse(key);
     const file = await FILES.get(`${address}/${key}`);
     assert(file !== undefined, "File not found", 404);
-    return stream(c, async (s)=>{
+    return stream(c, async (s) => {
         s.write(file as unknown as Uint8Array)
     })
 })
 
-app.get("/search", async (c)=>{
+app.get("/search/:page?", async (c) => {
+    const page = c.req.param('page');
     const search = c.req.query('q');
     let categorie = c.req.query('categorie');
     categorie = categorie === 'all' ? undefined : categorie;
-    if(!search){
+    if (!search) {
         return c.json([]);
     }
     const vect = embed(search)
-    const ids:any[] = (await Embedings.search(vect)
-    .distanceType('cosine').limit(10).toArray()).filter(e => e._distance < 0.8)
-    const results =  (await PRODUCTS.getList(ids.map(e => e.id.toString())))
-    .filter(e => categorie ? e.categories.includes(categorie) : true);
+    const ids: any[] = (await Embedings.search(vect)
+        .distanceType('cosine')
+        .where(`id >= ${page||'0'}`)
+        .limit(100)
+        .toArray()).filter(e => e._distance < 0.8)
+    const results = (await PRODUCTS.getList(ids.map(e => e.id.toString())))
+        .filter(e => categorie ? e.categories.includes(categorie) : true);
     return c.json(results)
 })
 
-app.get("/search-suggestions", async(c)=>{
+app.get("/search-suggestions", async (c) => {
     const search = c.req.query('q');
-    if(!search){
+    if (!search) {
         return c.json([]);
     }
-    let escaped = sqlstring.escape(`%${search.replaceAll(/[%_]/g,'')}%`)
-    const results:{text:string}[] = await Search.query()
-    .where(`lower(text) LIKE ${escaped}`)
-    .select(["text"])
-    .limit(10).toArray();
+    let escaped = sqlstring.escape(`%${search.replaceAll(/[%_]/g, '')}%`)
+    const results: { text: string }[] = await Search.query()
+        .where(`lower(text) LIKE ${escaped}`)
+        .select(["text"])
+        .limit(10).toArray();
 
-    return c.json(results.map(e=>e.text))
+    return c.json(results.map(e => e.text))
 })
 
 
@@ -312,7 +323,7 @@ app.onError((e, c) => {
             error: e.message
         }, e.code)
     }
-    if(e instanceof z.ZodError){
+    if (e instanceof z.ZodError) {
         return c.json({
             error: e.errors[0].message
         }, 400)

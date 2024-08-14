@@ -13,7 +13,6 @@
     import { id, swap } from "../../../lib/utils";
     import Input from "../../../lib/Input.svelte";
     import TraitTypePicker from "./TraitTypePicker.svelte";
-    import Image from "./traitInputs/Image.svelte";
     import Region from "./traitInputs/Region.svelte";
     import RadioImage from "./traitInputs/RadioImage.svelte";
     import RadioButton from "./traitInputs/RadioButton.svelte";
@@ -22,11 +21,15 @@
 
     export let attributes: Attribute[] = [];
     export let disableNames = false;
+    export let pickImage: (
+        selected: string | undefined,
+    ) => Promise<string | undefined>;
 
-    const traitToComponent: Record<Attribute["display_type"], ComponentType> = {
+    const traitToComponent: Partial<
+        Record<Attribute["display_type"], ComponentType>
+    > = {
         color: Color,
         switch: Switch,
-        image: Image,
         region: Region,
         "radio-image": RadioImage,
         "radio-button": RadioButton,
@@ -58,9 +61,8 @@
     }
     let traitToAdd: Attribute["display_type"];
 
-    const traitToLabel: Record<Attribute["display_type"], string> = {
+    const traitToLabel: Partial<Record<Attribute["display_type"], string>> = {
         color: "Add a color",
-        image: "Add image gallery",
         "radio-button": "Add a radio button",
         "radio-image": "Add a radio image",
         switch: "Add a switch",
@@ -68,10 +70,10 @@
         select: "Add a Select",
     };
 
-    const swapAttributes = (a:number, b:number)=>{
-        swap(attributes, a, b)
+    const swapAttributes = (a: number, b: number) => {
+        swap(attributes, a, b);
         attributes = attributes;
-    }
+    };
 </script>
 
 <Foldable>
@@ -85,37 +87,47 @@
     <div class="attributes" slot="content">
         {#if attributes.length}
             <Drag let:swap onSwap={swapAttributes}>
-            {#each attributes as attribute, i (attribute.key || i)}
-                <Draggable {swap} let:dragger let:moving>
-                <div class="wrpr" class:moving>
-                    <button use:dragger class="dragger">
-                        <i class="ri-draggable" />
-                      </button>
-                    <Input
-                        bind:value={attribute.trait_type}
-                        placeholder="Attribute name"
-                        disabled={disableNames}
-                    />
-                    <svelte:component
-                        this={traitToComponent[attribute.display_type]}
-                        bind:value={attribute.value}
-                    ></svelte:component>
-                    <button
-                        class="button-2 del{''}"
-                        on:click={removeAttribute(attribute)}
-                        disabled={disableNames}
-                    >
-                        <i class="ri-delete-bin-7-line"></i>
-                        <i class="ri-close-line"></i>
-                    </button>
-                </div>
-                </Draggable>
-            {/each}
+                {#each attributes as attribute, i (attribute.key)}
+                    {#if traitToComponent[attribute.display_type]}
+                        <Draggable {swap} let:dragger let:moving>
+                            <div class="wrpr" class:moving>
+                                <button use:dragger class="dragger">
+                                    <i class="ri-draggable" />
+                                </button>
+                                <div class="inputs">
+                                    <Input
+                                        bind:value={attribute.trait_type}
+                                        placeholder="Attribute name"
+                                        disabled={disableNames}
+                                    />
+                                    <svelte:component
+                                        this={traitToComponent[
+                                            attribute.display_type
+                                        ]}
+                                        {...attribute.display_type ==
+                                        "radio-image"
+                                            ? { pickImage }
+                                            : {}}
+                                        bind:value={attribute.value}
+                                    ></svelte:component>
+                                </div>
+                                <button
+                                    class="button-2 del{''}"
+                                    on:click={removeAttribute(attribute)}
+                                    disabled={disableNames}
+                                >
+                                    <i class="ri-delete-bin-7-line"></i>
+                                    <i class="ri-close-line"></i>
+                                </button>
+                            </div>
+                        </Draggable>
+                    {/if}
+                {/each}
             </Drag>
         {:else}
             <p>No attributes</p>
         {/if}
-        <div class="wrpr">
+        <div class="wrpr last">
             <TraitTypePicker bind:value={traitToAdd} disabled={disableNames}
             ></TraitTypePicker>
             <button
@@ -145,8 +157,6 @@
     .attributes {
         display: flex;
         flex-direction: column;
-        gap: 1rem;
-        padding: 1rem;
         border-radius: 5px;
         p {
             color: var(--gray-11);
@@ -179,15 +189,35 @@
         display: flex;
         gap: 1rem;
         align-items: center;
-        flex-wrap: wrap;
-        margin-bottom: 1rem;
-        .dragger{
+        justify-content: flex-start;
+        padding: 1rem;
+        border-bottom: 1px solid var(--gray-6);
+        background-color: var(--gray-2);
+        &.moving {
+            cursor: grabbing;
+            border-top: 1px solid var(--gray-6);
+            .dragger {
+                cursor: grabbing;
+            }
+        }
+        .dragger {
             background-color: transparent;
             color: var(--gray-11);
             border: none;
+            cursor: grab;
+        }
+        .inputs {
+            min-width: 0;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
         }
         .create {
             height: 3rem;
+        }
+        &.last {
+            border-radius: 0 0 5px 5px;
         }
     }
 </style>

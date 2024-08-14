@@ -1,37 +1,40 @@
 <script lang="ts">
     import Input from "../../../../lib/Input.svelte";
-    import { uploadImage } from "../../../../lib/utils";
-    import { jwt } from "../../../../stores/user";
-    
+    export let pickImage: (selected:string|undefined)=>Promise<string|undefined> = async (_:string|undefined)=>undefined;
     export let value:{
-        src:string,
+        src:string|undefined,
         label:string,
     } = {
         src:"",
         label:""
     };
-    export let img: Awaited<ReturnType<typeof uploadImage>>;
 
     const handleClick = async () => {
-        img = (await uploadImage(jwt.get()||""));
+        console.log(pickImage)
+        value.src = await pickImage(value.src);
     };
 </script>
 
-<button class="image-select" class:withImage={!!img} on:click={handleClick}>
-    {#if img}
-        <img src={img} alt="" />
-    {:else}
-        <i class="ri-image-add-line"></i>
-    {/if}
-</button>
-
-<Input bind:value={value.label} placeholder="Image label"/>
-
+<div class="wpr">
+    <button class="image-select" class:withImage={!!value.src} on:click={handleClick}>
+        {#if value.src}
+            <img src={value.src} alt="" />
+        {:else}
+            <i class="ri-image-add-line"></i>
+        {/if}
+    </button>
+    <Input bind:value={value.label} placeholder="Image label"/>
+</div>
 
 <style lang="scss">
+    .wpr{
+        display: flex;
+        gap:1rem;
+        justify-items: flex-start;
+    }
     .image-select {
         height: 3rem;
-        aspect-ratio: 1;
+        width: 3rem;
         background-color: var(--gray-2);
         border: 1px solid var(--gray-6);
         color: var(--gray-12);

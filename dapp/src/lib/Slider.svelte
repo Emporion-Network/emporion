@@ -18,7 +18,7 @@
 <style lang="scss">
     .slider {
         position: relative;
-        height: 10px;
+        min-height: 10px;
         background-color: var(--gray-3);
         border-radius: 10px;
         border: 1px solid var(--gray-6);

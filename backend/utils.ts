@@ -78,7 +78,7 @@ export const validAddress = (address:string)=>{
 const extractor = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
 export const embed = async (t:string)=>{
     const a1 = (await extractor(t, {pooling:"mean", normalize:true})).data;
-    return a1
+    return a1 as number[]
   }
 
   export const textSim = async (a1:number[], a2:number[])=>{

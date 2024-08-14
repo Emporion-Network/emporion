@@ -40,7 +40,9 @@
             if(Number(id) === p.id) return p;
             return client.productById({productId:Number(id)})
         }))).filter(e => e !== undefined)
-        metas = newMetas;
+        .filter(e => e.is_listed)
+        const listed = newProducts.map(e => `${e.id}`);
+        metas = newMetas.filter(i => listed.includes(i.id));
         products = newProducts;
         productId = newPid;
     });

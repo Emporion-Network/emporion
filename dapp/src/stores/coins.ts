@@ -115,7 +115,6 @@ export const watchPrices = async () => {
                     c.ibcTxs.filter(t => t.direction === 'withdraw').forEach(async t => {
                         let r = await c.queryClient.ibc.channel.packetReceipt('transfer', c.depositChanel, t.sequence);
                         if (r.received) {
-                            console.log('withrew!')
                             notification({
                                 type: "success",
                                 text: `Your ${c.coinDenom} have been withdrawn successfully`,

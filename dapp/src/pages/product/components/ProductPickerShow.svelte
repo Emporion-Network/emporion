@@ -1,18 +1,17 @@
 <script lang="ts">
     import type {
-        AssetInfoBaseForAddr,
         Product,
     } from "../../../../../client-ts/Emporion.types";
     import type { ProductMetaData } from "../../../../../shared-types";
-    import { getNames, getPrices, getProductsMeta, rotateObj } from "../../../lib/utils";
+    import { getNames, getPrices, rotateObj } from "../../../lib/utils";
     import { prices } from "../../../stores/coins";
     import markdownit from "markdown-it";
-    import { Decimal } from "@cosmjs/math";
     import PricePicker from "./PricePicker.svelte";
     import OverflowAddress from "../../../lib/OverflowAddress.svelte";
     import Stars from "../../../lib/Stars.svelte";
     import DisplayAttributes from "./DisplayAttributes.svelte";
     import { addItem, cart } from "../../../stores/cart";
+    import ImageSlider from "./ImageSlider.svelte";
     export let metas: ProductMetaData[];
     export let products: Product[];
     export let productId: string;
@@ -69,11 +68,7 @@
                 </div>
             </div>
         {/if}
-        {#if meta.image}
-            <img src={meta.image} alt={meta.name} />
-        {:else}
-            <i class="ri-image-fill"></i>
-        {/if}
+        <ImageSlider imgs={[meta.image, ...meta.attributes.filter(a => a.display_type == 'image').map(e => e.value?.toString()||"")]}></ImageSlider>
     </div>
     <div class="info">
         <div>
@@ -112,7 +107,7 @@
         gap: 3rem;
         padding: 0 5%;
         align-items: flex-start;
-        @include media.for-size(tablet-lg) {
+        @include media.for-size(phone) {
             flex-direction: column;
             gap: 1rem;
             .info {
@@ -167,10 +162,6 @@
         align-items: center;
         position: sticky;
         top: 2rem;
-        i {
-            font-size: 5rem;
-            color: var(--gray-3);
-        }
         .header {
             background-color: var(--black-a3);
             display: flex;

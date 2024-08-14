@@ -17,10 +17,6 @@
             value:"switch"
         },
         {
-            label:"Gallery Image",
-            value:"image"
-        },
-        {
             label:"Region",
             value:"region"
         },

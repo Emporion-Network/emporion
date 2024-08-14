@@ -15,11 +15,28 @@ export type Attribute = (
     value:string[]|undefined,
 }|
 {
-    display_type:|"radio-button"|"image"|"select"|"color",
+    display_type:"color",
+    value:{
+        label:string,
+        color:string,
+    }|undefined,
+}|
+{
+    display_type:|"radio-button"|"image"|"select",
     value:string|undefined,
 }) & {
     trait_type:string,
 }
+
+
+export const displayables = [
+    "color",
+    "radio-button",
+    "radio-image",
+    "select",
+    "switch",
+] as const;
+export type Displayable = (typeof displayables)[number];
 
 export type ProductMetaData = {
     id:string,

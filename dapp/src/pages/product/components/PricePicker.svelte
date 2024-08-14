@@ -19,12 +19,12 @@
         label: e.denom,
         value: e.denom,
     }));
-    let value = [selctedPrice.denom];
+    let value = [selctedPrice?.denom];
     $: showPriceIn = value[0];
     user.subscribe((nu) => {
         if (!nu) return;
         showPriceIn = nu?.selectedCoin;
-        value = [(productPrices.find((p) => p.denom == showPriceIn) || productPrices[0]).denom];
+        value = [(productPrices.find((p) => p.denom == showPriceIn) || productPrices[0])?.denom];
     });
 </script>
 

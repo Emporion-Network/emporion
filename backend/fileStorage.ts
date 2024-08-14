@@ -29,7 +29,7 @@ export class FileStorage<T> {
     private buket: string
     private ACL: "public-read" | "private"
     private isBinary: boolean;
-    static MAX_ELS_PER_PAGE = 10;
+    static MAX_ELS_PER_PAGE = 100;
     constructor(base: string,
         isPublic = false,
         binary = false,

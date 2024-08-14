@@ -1,12 +1,11 @@
 <script lang="ts" context="module">
-    let myCollections:string[] = []
-    user.subscribe(async (u)=>{
-        if(u?.address){
-            myCollections = await getSellerCollections(u.address || "")
+    let myCollections: string[] = [];
+    user.subscribe(async (u) => {
+        if (u?.address) {
+            myCollections = await getSellerCollections(u.address || "");
         }
-    })
+    });
 </script>
-
 
 <script lang="ts">
     import { Decimal } from "@cosmjs/math";
@@ -17,7 +16,10 @@
     import PricePicker from "./components/PriceMaker.svelte";
     import Attriutes from "./components/AttributesMaker.svelte";
     import ProductShow from "./components/ProductPickerShow.svelte";
-    import type { AssetInfoBaseForAddr, Product } from "../../../../client-ts/Emporion.types";
+    import type {
+        AssetInfoBaseForAddr,
+        Product,
+    } from "../../../../client-ts/Emporion.types";
     import Tooltip from "../../lib/Tooltip.svelte";
     import Search from "../../lib/Search.svelte";
     import type { ProductMetaData } from "../../../../shared-types";
@@ -39,7 +41,8 @@
     let img: string | undefined;
     let categories: string[];
     let attributes: ProductMetaData["attributes"] = [];
-    let price: Record<string, { amount: Decimal; info: AssetInfoBaseForAddr }> = {};
+    let price: Record<string, { amount: Decimal; info: AssetInfoBaseForAddr }> =
+        {};
     let collectionId: string = "";
     let deliveryTime: number;
     let preview = false;
@@ -51,11 +54,20 @@
             image: img || "",
             collection_id: collectionId,
             categories: categories,
-            attributes: attributes.map((a) => {
-                //@ts-ignore
-                delete a.key;
-                return a;
-            }),
+            attributes: [
+                ...attributes.map((a) => {
+                    //@ts-ignore
+                    delete a.key;
+                    return a;
+                }),
+                ...galleryImages
+                    .filter((e) => e !== undefined)
+                    .map((e) => ({
+                        value: e,
+                        display_type: IMAGE_TYPE,
+                        trait_type: e,
+                    })),
+            ],
         };
         const hash = getMetaHash(meta);
         let r = await $user?.emporionClient.createProduct({
@@ -77,40 +89,58 @@
         await uploadMeta(meta, jwt.get() || "");
     };
 
-    $: canCreate = 
-    !!img && 
-    img.length > 0 && 
-    collectionId.length > 0 &&
-    name.length > 0 &&
-    description.length > 0 &&
-    categories.length > 0 &&
-    Object.keys(price).length > 0;
+    $: canCreate =
+        !!img &&
+        img.length > 0 &&
+        collectionId.length > 0 &&
+        name.length > 0 &&
+        description.length > 0 &&
+        categories.length > 0 &&
+        Object.keys(price).length > 0;
 
     let isFromExistingCollection = false;
-    let metas:ProductMetaData[] = [];
-    let products:Product[] = [];
+    let metas: ProductMetaData[] = [];
+    let products: Product[] = [];
+    let galleryImages: (string | undefined)[] = [];
 
-    $:collectionId, (()=>{
-        isFromExistingCollection = myCollections.includes(collectionId)
-        if(isFromExistingCollection){
-            presetParams(collectionId)
-        } else {
-            metas = [];
-            products = [];
-        }
-    })()
-   
+    const IMAGE_TYPE = "image" as const;
 
-    const presetParams = async (collection:string)=>{
-        metas = await getProductsMeta($user?.address||"", collection)
-        if(metas.length === 0) return;
-        attributes = metas[0].attributes.map((a)=> ({...a, key:id()}));
+    let pickImage: (
+        selected: string | undefined,
+    ) => Promise<string | undefined>;
+
+    $: collectionId,
+        (() => {
+            isFromExistingCollection = myCollections.includes(collectionId);
+            if (isFromExistingCollection) {
+                presetParams(collectionId);
+            } else {
+                metas = [];
+                products = [];
+            }
+        })();
+
+    const presetParams = async (collection: string) => {
+        metas = await getProductsMeta($user?.address || "", collection);
+        if (metas.length === 0) return;
+        attributes = metas[0].attributes.map((a) => ({ ...a, key: id() })).filter(a=>a.display_type !== 'image');
         categories = metas[0].categories;
-        products = (await Promise.all(metas.map(({id})=>{
-            return $user?.emporionClient.productById({productId:Number(id)})
-        }))).filter(e => e !== undefined)
-    }
-
+        products = (
+            await Promise.all(
+                metas.map(({ id }) => {
+                    return $user?.emporionClient.productById({
+                        productId: Number(id),
+                    });
+                }),
+            )
+        ).filter((e) => e !== undefined);
+    };
+    const setMetaImage = async () => {
+        img = await pickImage(img);
+    };
+    const setGalleryImage = (idx: number) => async () => {
+        galleryImages[idx] = await pickImage(galleryImages[idx]);
+    };
 </script>
 
 <Menu></Menu>
@@ -133,7 +163,27 @@
 </div>
 {#if !preview}
     <div class="page">
-        <ImageUploader bind:img></ImageUploader>
+        <div class="product-images">
+            <button class="main-image" on:click={setMetaImage}>
+                {#if img}
+                    <img src={img} alt="" />
+                {:else}
+                    <i class="ri-image-add-line"></i>
+                {/if}
+            </button>
+            <div class="other-images">
+                {#each { length: 10 } as _, i}
+                    {@const img = galleryImages[i]}
+                    <button class="gallery-img" on:click={setGalleryImage(i)}>
+                        {#if img}
+                            <img src={img} alt="" />
+                        {:else}
+                            <i class="ri-image-add-line"></i>
+                        {/if}
+                    </button>
+                {/each}
+            </div>
+        </div>
         <div class="creation-form">
             <Description rows={2} placeholder="Product name" bind:value={name}
             ></Description>
@@ -152,44 +202,67 @@
                 {/await}
             {/if}
             <DeliveryTime bind:value={deliveryTime}></DeliveryTime>
-            <Categories disabled={isFromExistingCollection} bind:selected={categories}></Categories>
+            <Categories
+                disabled={isFromExistingCollection}
+                bind:selected={categories}
+            ></Categories>
             <PricePicker bind:price></PricePicker>
-            <Attriutes bind:disableNames={isFromExistingCollection} bind:attributes></Attriutes>
-            <button 
-            disabled={!canCreate}
-            class="button-1 create" 
-            on:click={create}
-                >Create Product</button
+            <Attriutes
+                bind:disableNames={isFromExistingCollection}
+                bind:attributes
+                {pickImage}
+            ></Attriutes>
+            <button
+                disabled={!canCreate}
+                class="button-1 create"
+                on:click={create}>Create Product</button
             >
         </div>
     </div>
 {:else}
     <ProductShow
-        metas={[{
-            id: "-1",
-            name,
-            description,
-            collection_id: collectionId || "some collection",
-            image: img || "",
-            categories,
-            attributes,
-        }, ...metas]}
-        products={[{
-            meta: "",
-            id: -1,
-            delivery_time: { time: deliveryTime },
-            is_listed: true,
-            price: Object.values(price).map((e) => ({
-                amount: e.amount.atomics,
-                info: e.info,
-            })),
-            rating: [4, 500],
-            seller: $user?.address || "",
-            meta_hash: "",
-        }, ...products]}
+        metas={[
+            {
+                id: "-1",
+                name,
+                description,
+                collection_id: collectionId || "some collection",
+                image: img || "",
+                categories,
+                attributes: [
+                    ...attributes,
+                    ...galleryImages
+                        .filter((e) => e !== undefined)
+                        .map((e) => ({
+                            value: e,
+                            display_type: IMAGE_TYPE,
+                            trait_type: e,
+                        })),
+                ],
+            },
+            ...metas,
+        ]}
+        products={[
+            {
+                meta: "",
+                id: -1,
+                delivery_time: { time: deliveryTime },
+                is_listed: true,
+                price: Object.values(price).map((e) => ({
+                    amount: e.amount.atomics,
+                    info: e.info,
+                })),
+                rating: [4, 500],
+                seller: $user?.address || "",
+                meta_hash: "",
+            },
+            ...products,
+        ]}
         productId="-1"
     ></ProductShow>
 {/if}
+
+<ImageUploader bind:pick={pickImage}></ImageUploader>
 
 <style lang="scss">
     @use "../../media.scss";
@@ -207,11 +280,50 @@
                 height: 3rem;
             }
         }
+        .product-images {
+            display: flex;
+            flex: 2;
+            flex-direction: column;
+            overflow: hidden;
+            gap: 0.5rem;
+            position: sticky;
+            top: 3rem;
 
+            button {
+                aspect-ratio: 1;
+                border: 1px solid var(--gray-7);
+                background-color: var(--gray-2);
+                color: var(--gray-11);
+                cursor: pointer;
+                border-radius: 3px;
+                img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                }
+            }
+            .main-image {
+                aspect-ratio: 1;
+                font-size: 2rem;
+                border-radius: 5px;
+            }
+            .other-images {
+                height: 80px;
+                overflow-y: auto;
+                display: flex;
+                max-width: 100%;
+                gap: 0.5rem;
+            }
+        }
         @include media.for-size(tablet-lg) {
             flex-direction: column;
             gap: 1rem;
             .creation-form {
+                width: 100%;
+            }
+            .product-images {
+                position: relative;
+                top: 0;
                 width: 100%;
             }
         }

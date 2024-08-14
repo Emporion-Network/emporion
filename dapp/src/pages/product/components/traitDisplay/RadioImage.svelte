@@ -2,8 +2,8 @@
     import Radio from "../../../../lib/Radio.svelte";
     import Tooltip from "../../../../lib/Tooltip.svelte";
     import type {Attribute} from "../AttributesMaker.svelte";
-    type ColorAttribute = Exclude<Extract<Attribute, {display_type:"radio-image"}>['value'], undefined>;
-    export let values:Map<ColorAttribute, {ids:string[], isDisabeled:boolean}>;
+    type RadioImage = Exclude<Extract<Attribute, {display_type:"radio-image"}>['value'], undefined>;
+    export let values:Map<RadioImage, {ids:string[], isDisabeled:boolean}>;
     export let productId:string;
     export let label:string;
     export let selected = Array.from(values.values()).find(e => {
@@ -13,9 +13,12 @@
     $:selected = Array.from(values.values()).find(e => {
         return e.ids.includes(productId)
     })?.ids;
+    $:imageLabel = Array.from(values.entries()).find(([_, {ids}])=>{
+        return ids.includes(productId)
+    })?.[0].label||""
 
 </script>
-<h4>{label}</h4>
+<h4>{label} {imageLabel}</h4>
 <Radio bind:selected="{selected}" let:select>
     {#each values.entries() as [{label, src}, {ids, isDisabeled}]}
         {#if isDisabeled}

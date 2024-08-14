@@ -1,8 +1,12 @@
 <script lang="ts">
     import type { FormEventHandler } from "svelte/elements";
+    import Input from "../../../../lib/Input.svelte";
 
-    export let value="#eeeeeeff";
-    let formated = value;
+    export let value={
+        color:"#eeeeeeff",
+        label:"",
+    };
+    let formated = value.color;
     let el:HTMLInputElement;
 
     const handleInput = (e:Parameters<FormEventHandler<HTMLInputElement>>[0])=>{
@@ -24,11 +28,11 @@
         e.currentTarget.value = formated;
 
         if(formated.length == 4){
-            value = '#' + formated.slice(1).split('').map(e => e.repeat(2)).join('') + 'ff';
+            value.color = '#' + formated.slice(1).split('').map(e => e.repeat(2)).join('') + 'ff';
         } else if(formated.length == 7){
-            value = formated + 'ff';
+            value.color = formated + 'ff';
         } else if(formated.length == 9) {
-            value =  formated;
+            value.color =  formated;
         }
     }
 
@@ -40,17 +44,26 @@
         } else if(formated.length !== 9) {
             el.value = '#eeeeeeff';
         }
-        value = el.value;
+        value.color = el.value;
     }
 
 </script>
 
-<div class="input" style="--color:{value}" tabindex="0" role="textbox">
+<div class="wpr">
+<Input placeholder="Color name" bind:value={value.label}></Input>
+<div class="input" style="--color:{value.color}" tabindex="0" role="textbox">
     <div class="color"></div>
     <input type="text" bind:this={el} on:input={handleInput} on:blur={handleOut} value="{formated}">
 </div>
+</div>
 
 <style lang="scss">
+    .wpr{
+        flex:1;
+        display: flex;
+        flex-wrap: wrap;
+        gap:1rem;
+    }
     .input{
         display: flex;
         background-color: var(--gray-2);
@@ -77,6 +90,8 @@
         .color{
             min-width: 3rem;
             min-height: 3rem;
+            width: 3rem;
+            height: 3rem;
             background-color: var(--color);
             border-right: 1px solid var(--gray-6);
         }

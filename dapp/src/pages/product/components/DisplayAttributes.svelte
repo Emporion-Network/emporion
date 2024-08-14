@@ -1,6 +1,6 @@
 <script lang="ts">
     import type { ComponentType } from "svelte";
-    import type { ProductMetaData } from "../../../../../shared-types";
+    import { displayables, type Displayable, type ProductMetaData } from "../../../../../shared-types";
     import type { Attribute } from "./AttributesMaker.svelte";
     import Color from "./traitDisplay/Color.svelte";
     import RadioButton from "./traitDisplay/RadioButton.svelte";
@@ -8,14 +8,6 @@
     import Switch from "./traitDisplay/Switch.svelte";
     import { eq, intersect, Map2, LMap } from "../../../lib/utils";
 
-    const displayables = [
-        "color",
-        "radio-button",
-        "radio-image",
-        "select",
-        "switch",
-    ] as const;
-    type Displayable = (typeof displayables)[number];
 
     const traitToComponent: Record<Displayable, ComponentType> = {
         color: Color,

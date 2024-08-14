@@ -8,35 +8,49 @@
         STORE_ADDRESS,
     );
 </script>
+
 <script lang="ts">
     import { CosmWasmClient } from "@cosmjs/cosmwasm-stargate";
     import Menu from "../../lib/Menu.svelte";
-    import { listProducts } from "../../lib/utils";
+    import { listProducts, search } from "../../lib/utils";
     import { EmporionQueryClient } from "../../../../client-ts/Emporion.client";
     import ProductCard from "./components/ProductCard.svelte";
     import SearchBar from "../../lib/SearchBar.svelte";
-    const products = listProducts().then(metas => {
-        return Promise.all(metas.map(async m => {
-            return {
-                meta: m,
-                product: await client.productById({productId:Number(m.id)})
-            }
-        }))
+    import { href } from "../../stores/location";
+
+    $: searchText = $href.searchParams.get("q");
+    $: category = $href.searchParams.get("category") || "";
+    $: page = $href.searchParams.get("page") || ""
+
+    $: products = (searchText ? search(searchText, category, page) : listProducts(page)).then((metas) => {
+        return Promise.all(
+            metas.map(async (m) => {
+                return {
+                    meta: m,
+                    product: await client.productById({
+                        productId: Number(m.id),
+                    }),
+                };
+            }),
+        );
     });
 </script>
+
 <Menu>
-    <SearchBar></SearchBar>
+    <SearchBar searchText={searchText||""} selected={[category]}></SearchBar>
 </Menu>
 <div class="grid">
     {#await products then products}
-        {#each products as {meta, product}}
-            <ProductCard {product} {meta}></ProductCard>
+        {#each products as { meta, product }}
+            {#if product.is_listed}
+                <ProductCard {product} {meta}></ProductCard>
+            {/if}
         {/each}
     {/await}
 </div>
 
 <style lang="scss">
-    .grid{
+    .grid {
         padding: 0 5%;
         display: grid;
         grid-template-columns: 1fr 1fr 1fr 1fr;

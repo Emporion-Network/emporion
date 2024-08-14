@@ -15,6 +15,7 @@
         padding: 0.5rem;
         min-height: 3rem;
         font-weight: bold;
+        min-width: 70px;
         &:disabled{
             opacity: 0.3;
             cursor: default;

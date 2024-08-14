@@ -1,7 +1,11 @@
 <script lang="ts">
     import Radio from "../../../../lib/Radio.svelte";
     import Tooltip from "../../../../lib/Tooltip.svelte";
-    export let values: Map<string, { ids: string[]; isDisabeled: boolean }>;
+    import type { Attribute } from "../AttributesMaker.svelte";
+
+    type Color = Exclude<Extract<Attribute, {display_type:"color"}>['value'], undefined>;
+
+    export let values: Map<Color, { ids: string[]; isDisabeled: boolean }>;
     export let productId: string;
     export let selected = Array.from(values.values()).find((e) => {
         return e.ids.includes(productId);
@@ -11,9 +15,12 @@
     $: selected = Array.from(values.values()).find((e) => {
         return e.ids.includes(productId);
     })?.ids;
+    $:colorLabel = Array.from(values.entries()).find(([_, {ids}])=>{
+        return ids.includes(productId)
+    })?.[0].label||""
 </script>
 
-<h4>{label}</h4>
+<h4>{label} {colorLabel}</h4>
 <Radio bind:selected let:select>
     {#each values.entries() as [color, { ids, isDisabeled }]}
         {#if isDisabeled}
@@ -21,7 +28,7 @@
                 <button
                     class="color button-2"
                     class:selected={ids.indexOf(productId) !== -1}
-                    style="--color:{color}"
+                    style="--color:{color.color}"
                     class:disable={isDisabeled}
                     on:click={select(ids)}
                 ></button>
@@ -30,7 +37,7 @@
             <button
                 class="color button-2"
                 class:selected={ids.indexOf(productId) !== -1}
-                style="--color:{color}"
+                style="--color:{color.color}"
                 class:disable={isDisabeled}
                 on:click={select(ids)}
             ></button>
