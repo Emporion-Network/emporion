@@ -54,6 +54,8 @@ pub fn query(deps: Deps, env: Env, msg: QueryMsg) -> Result<QueryResponse, Contr
         }
         QueryMsg::ProductAll { start_from } => Product::msg_query_all(deps, start_from),
         QueryMsg::ProductById { product_id } => Product::msg_query_by_id(deps, product_id),
+        QueryMsg::Blacklisted { start_from } => Blacklist::msg_query_all(deps, start_from),
+        QueryMsg::BlacklistedCheck { addrs } => Blacklist::msg_query_check(deps, addrs),
     }
 }
 

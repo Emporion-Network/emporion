@@ -161,16 +161,16 @@
         background-color: var(--gray-2);
         display: grid;
         grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
-        @include media.for-size(phone) {
-            grid-template-columns: 1fr 1fr;
-           
-        }
         align-content: start;
         grid-auto-flow: dense;
         overflow: auto;
         grid-gap: 5px;
         padding: 1rem;
         top: 3rem;
+        @include media.for-size(phone) {
+            grid-template-columns: 1fr 1fr;
+        }
+        
 
         button {
             width: 100%;

@@ -6,11 +6,12 @@
     "buyer",
     "buyer_risk_share",
     "cart",
+    "created_at",
     "expected_delivery",
     "id",
-    "products",
     "seller",
-    "status"
+    "status",
+    "total"
   ],
   "properties": {
     "buyer": {
@@ -34,7 +35,25 @@
       "minItems": 2
     },
     "cart": {
-      "$ref": "#/definitions/AssetListBase_for_Addr"
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": [
+          {
+            "type": "integer",
+            "format": "uint64",
+            "minimum": 0.0
+          },
+          {
+            "$ref": "#/definitions/AssetBase_for_Addr"
+          }
+        ],
+        "maxItems": 2,
+        "minItems": 2
+      }
+    },
+    "created_at": {
+      "$ref": "#/definitions/Timestamp"
     },
     "expected_delivery": {
       "$ref": "#/definitions/Expiration"
@@ -44,19 +63,14 @@
       "format": "uint64",
       "minimum": 0.0
     },
-    "products": {
-      "type": "array",
-      "items": {
-        "type": "integer",
-        "format": "uint64",
-        "minimum": 0.0
-      }
-    },
     "seller": {
       "$ref": "#/definitions/Addr"
     },
     "status": {
       "$ref": "#/definitions/OrderStatus"
+    },
+    "total": {
+      "$ref": "#/definitions/AssetListBase_for_Addr"
     }
   },
   "additionalProperties": false,

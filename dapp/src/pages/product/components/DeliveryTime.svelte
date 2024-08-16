@@ -1,5 +1,7 @@
+<script lang="ts" context="module">
+    export const DAY = 86400;
+</script>
 <script lang="ts">
-    const DAY = 86400;
     import Slider from "../../../lib/Slider.svelte";
     export let value = 7*DAY;
     const s = (n:number)=> n > 1 ? "s" :"";

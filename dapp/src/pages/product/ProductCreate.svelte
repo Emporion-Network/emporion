@@ -31,9 +31,10 @@
         id,
         uploadMeta,
     } from "../../lib/utils";
-    import DeliveryTime from "./components/DeliveryTime.svelte";
+    import DeliveryTime, { DAY } from "./components/DeliveryTime.svelte";
     import Menu from "../../lib/Menu.svelte";
     import Switch from "./components/traitInputs/Switch.svelte";
+    import { notification } from "../../lib/Notifications.svelte";
     const { VITE_ENDPOINT_BACK_END_API: ENDPOINT_BACK_END_API } = import.meta
         .env;
 
@@ -48,7 +49,14 @@
     let deliveryTime: number;
     let preview = false;
     let isListed = true;
+    let isFromExistingCollection = false;
+    let metas: ProductMetaData[] = [];
+    let products: Product[] = [];
+    let galleryImages: (string | undefined)[] = [];
+    let creating = false;
+
     const create = async () => {
+        creating = true;
         const meta: ProductMetaData = {
             id: "",
             name,
@@ -72,23 +80,53 @@
             ],
         };
         const hash = getMetaHash(meta);
-        let r = await $user?.emporionClient.createProduct({
-            deliveryTime: {
-                time: deliveryTime,
-            },
-            meta: `${ENDPOINT_BACK_END_API}/hash/${hash}`,
-            price: Object.values(price).map((e) => ({
-                amount: e.amount.atomics,
-                info: e.info,
-            })),
-            isListed,
-            metaHash: hash,
-        });
-        if (r == undefined) return;
-        let id = extractAttr("product_id", r);
-        if (!id) return;
-        meta.id = id;
-        await uploadMeta(meta, jwt.get() || "");
+        try {
+            let r = await $user?.emporionClient.create_product(
+                {
+                    delivery_time: {
+                        time: deliveryTime,
+                    },
+                    meta: `${ENDPOINT_BACK_END_API}/hash/${hash}`,
+                    price: Object.values(price).map((e) => ({
+                        amount: e.amount.atomics,
+                        info: e.info,
+                    })),
+                    is_listed: isListed,
+                    meta_hash: hash,
+                },
+                "auto",
+            );
+            if (r == undefined) throw Error("Unknown error");
+            let id = extractAttr("product_id", r);
+            if (!id) throw Error("Unknown error");
+            meta.id = id;
+            if (await uploadMeta(meta, jwt.get() || "")) {
+                clear();
+            }
+        } catch (e) {
+            let text = "Unknown error"
+            console.log(e);
+            if(e instanceof Error) text = e.message.length > 20 ? text : e.message;
+            notification({
+                type:"error",
+                text,
+            })
+        }
+
+        creating = false;
+    };
+
+    const clear = () => {
+        name = "";
+        description = "";
+        img = undefined;
+        categories = [];
+        attributes = [];
+        price = {};
+        collectionId = "";
+        deliveryTime = 7 * DAY;
+        isListed = true;
+        galleryImages = [];
     };
 
     $: canCreate =
@@ -99,11 +137,6 @@
         description.length > 0 &&
         categories.length > 0 &&
         Object.keys(price).length > 0;
-
-    let isFromExistingCollection = false;
-    let metas: ProductMetaData[] = [];
-    let products: Product[] = [];
-    let galleryImages: (string | undefined)[] = [];
 
     const IMAGE_TYPE = "image" as const;
 
@@ -132,8 +165,8 @@
         products = (
             await Promise.all(
                 metas.map(({ id }) => {
-                    return $user?.emporionClient.productById({
-                        productId: Number(id),
+                    return $user?.emporionClient.product_by_id({
+                        product_id: Number(id),
                     });
                 }),
             )
@@ -188,10 +221,12 @@
                 {/each}
             </div>
         </div>
-        <div class="creation-form">
+        <div class="creation-form" class:creating>
             <div class="wpr">
                 <Switch bind:value={isListed}></Switch>
-                <Tooltip text="Products can be listed or unlisted at any time. Unlisted products will not be visible to buyers.">
+                <Tooltip
+                    text="Products can be listed or unlisted at any time. Unlisted products will not be visible to buyers."
+                >
                     <i class="ri-information-line"></i>
                 </Tooltip>
                 <span>Listed</span>
@@ -213,32 +248,43 @@
                     bind:value={description}
                 />
             </div>
-           
+
             <div class="label">
                 <div>
                     Collection
-                    <Tooltip text="Products within the same collection will be grouped together and will share the same attributes.">
+                    <Tooltip
+                        text="Products within the same collection will be grouped together and will share the same attributes."
+                    >
                         <i class="ri-information-line"></i>
                     </Tooltip>
                 </div>
                 {#if $user?.address}
                     {#await getSellerCollections($user?.address || "") then suggestions}
-                        <Search suggestions={suggestions || []} bind:value={collectionId} placeholder="Collection name"/>
+                        <Search
+                            suggestions={suggestions || []}
+                            bind:value={collectionId}
+                            placeholder="Collection name"
+                        />
                     {/await}
                 {/if}
             </div>
             <div class="label">
                 <div>
                     Maximum Delivery Time
-                    <Tooltip text="After this period has elapsed, you are authorized to fulfill the order if the buyer has not completed the process.">
+                    <Tooltip
+                        text="After this period has elapsed, you are authorized to fulfill the order if the buyer has not completed the process."
+                    >
                         <i class="ri-information-line"></i>
                     </Tooltip>
                 </div>
-                <DeliveryTime bind:value={deliveryTime}/>
+                <DeliveryTime bind:value={deliveryTime} />
             </div>
             <div class="label">
                 <div>Categories (max 5)</div>
-                <Categories disabled={isFromExistingCollection} bind:selected={categories}/>
+                <Categories
+                    disabled={isFromExistingCollection}
+                    bind:selected={categories}
+                />
             </div>
             <PricePicker bind:price></PricePicker>
             <Attriutes
@@ -246,15 +292,22 @@
                 bind:attributes
                 {pickImage}
             ></Attriutes>
-          
             <p>
-                By submitting this product, you affirm that it adheres to all relevant legal and regulatory requirements and complies with marketplace standards and guidelines.
+                By submitting this product, you affirm that it adheres to all
+                relevant legal and regulatory requirements and complies with
+                marketplace standards and guidelines.
             </p>
             <button
                 disabled={!canCreate}
                 class="button-1 create"
-                on:click={create}>Create Product</button
+                on:click={create}
             >
+                {#if creating}
+                    <i class="rotate ri-loader-4-fill"></i>
+                {:else}
+                    Create Product
+                {/if}
+            </button>
         </div>
     </div>
 {:else}
@@ -304,6 +357,9 @@
 
 <style lang="scss">
     @use "../../media.scss";
+    :global(.creation-form.creating > *) {
+        opacity: 0.2;
+    }
     .page {
         padding: 0 5%;
         display: flex;
@@ -314,17 +370,19 @@
             display: flex;
             flex-direction: column;
             gap: 1rem;
+            position: relative;
+            padding-bottom: 3rem;
+
             .create {
                 height: 3rem;
             }
-            p{
+            p {
                 color: var(--orange-12);
                 background-color: var(--orange-a2);
                 padding: 1rem;
                 border-radius: 5px;
                 border: 1px solid var(--orange-7);
             }
-            padding-bottom: 3rem;
         }
         .product-images {
             display: flex;
@@ -390,7 +448,7 @@
         flex-direction: column;
         font-weight: 500;
         gap: 0.5rem;
-        div{
+        div {
             display: flex;
             gap: 0.5rem;
             align-items: center;

@@ -171,7 +171,7 @@ export class FileStorage<T> {
 
 const EmbedingsDb = await lancedb.connect(
     {
-        uri: `s3://${Bun.env.STORAGE_BUKET}/embedings`,
+        uri: `s3://${Bun.env.STORAGE_BUKET}/${Bun.env.NODE_ENV}/embedings`,
         storageOptions: {
             aws_endpoint: Bun.env.BUKET_ENDPOINT,
             aws_access_key_id: Bun.env.STORAGE_KEY,

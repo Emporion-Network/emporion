@@ -187,19 +187,6 @@
         align-items: center;
         outline: none;
 
-        @keyframes rotate {
-            from {
-                transform: rotate(0deg);
-            }
-            to {
-                transform: rotate(360deg);
-            }
-        }
-        .rotate {
-            animation: rotate 1000ms linear infinite;
-            display: block;
-        }
-
         .info {
             background-color: var(--gray-2);
             width: 100%;

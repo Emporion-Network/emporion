@@ -1,5 +1,5 @@
 use cosmwasm_schema::{cw_serde, QueryResponses};
-use cosmwasm_std::Uint128;
+use cosmwasm_std::{Addr, Uint128};
 use cw2::ContractVersion;
 use cw20::Cw20ReceiveMsg;
 use cw_asset::{AssetInfoUnchecked, AssetListUnchecked};
@@ -99,7 +99,14 @@ pub enum QueryMsg {
     ProductAll { start_from: Option<u64> },
 
     #[returns(Product)]
-    ProductById{product_id:u64}
+    ProductById{product_id:u64},
+
+    #[returns((Vec<Addr>, Option<Addr>))]
+    Blacklisted{start_from:Option<String>},
+
+    #[returns(Vec<Addr>)]
+    BlacklistedCheck{addrs:Vec<String>}
+
 }
 
 ///////////////////////

@@ -78,7 +78,7 @@ export function trapFocus(node: HTMLElement) {
     node.focus()
     let last:HTMLElement;
     const evt = (e:FocusEvent) => {
-        let n = e.relatedTarget as HTMLElement;
+        let n = e.target as HTMLElement;
         if(!n) return;
         if(n !== node && !node.contains(n)) {
             const focusables = getAllfocusables(node);
@@ -94,13 +94,13 @@ export function trapFocus(node: HTMLElement) {
         }
         last = n;
     }
-    document.addEventListener('focusout', evt)
+    document.addEventListener('focusin', evt)
     document.body.classList.add('stop-scrolling')
 
     return {
         destroy() {
             document.body.classList.remove('stop-scrolling')
-            document.removeEventListener('focusout', evt);
+            document.removeEventListener('focusin', evt);
         }
     };
 

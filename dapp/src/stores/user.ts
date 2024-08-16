@@ -7,11 +7,14 @@ import { GasPrice } from "@cosmjs/stargate";
 const {
     VITE_NATIVE_COIN: NATIVE_COIN,
     VITE_ENDPOINT_BACK_END_API:ENDPOINT_BACK_END_API,
+    VITE_ENDPOINT_RPC: ENDPOINT_RPC,
+    VITE_STORE_ADDRESS: STORE_ADDRESS,
 } = import.meta.env;
 
 import { EmporionClient } from "../../../client-ts/Emporion.client"
 import { getNames, signMessage } from "../lib/utils";
 import { notification } from "../lib/Notifications.svelte";
+import { cart } from "./cart";
 
 declare global {
     // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -22,7 +25,7 @@ type OfflineSigner = ReturnType<Keplr['getOfflineSigner']>
 
 const user = writable<{
     offlineSigner: OfflineSigner,
-    emporionClient: EmporionClient,
+    emporionClient: EmporionClient<SigningCosmWasmClient>,
     cosmWasmClient: CosmWasmClient,
     selectedCoin: string,
     address: string,
@@ -72,11 +75,6 @@ const jwt = {
 const setUser = async () => {
     try {
         if (!window.keplr) return;
-        const {
-            VITE_ENDPOINT_RPC: ENDPOINT_RPC,
-            VITE_STORE_ADDRESS: STORE_ADDRESS,
-        } = import.meta.env;
-
         const qc = await StargateClient.connect(ENDPOINT_RPC);
 
         const chainId = await qc.getChainId()
@@ -88,7 +86,6 @@ const setUser = async () => {
         });
         const address = (await offlineSigner.getAccounts())[0].address;
         const emporionClient = new EmporionClient(cosmWasmClient, address, STORE_ADDRESS);
-       
 
         user.set({
             offlineSigner,
@@ -99,17 +96,16 @@ const setUser = async () => {
             names:await getNames(address),
         })
         autoLogIn.set(true);
-
-        if(!jwt.isExp()){
+        if(!jwt.isExp() && jwt.decoded()?.address == address){
             return;
         }
+        cart.set([]);
 
         try {
             const {nonce}:{nonce:string} = await (await fetch(`${ENDPOINT_BACK_END_API}/nonce`, {
                 method:"POST",
                 body: JSON.stringify({ address:address }),
             })).json()
-    
             let signature = await signMessage(nonce);
     
             const {token} = await (await fetch(`${ENDPOINT_BACK_END_API}/check-nonce`, {
@@ -133,6 +129,7 @@ const setUser = async () => {
         }
 
     } catch (e) {
+        console.log(e);
         autoLogIn.set(false)
         jwt.clear();
         console.log(e);
@@ -153,11 +150,6 @@ const logOut = async () => {
     autoLogIn.set(false);
 }
 
-// window.addEventListener('load',() => {
-//     if (window.keplr && autoLogIn.get()) {
-//         setUser()
-//     }
-// })
 
 if (window.keplr && autoLogIn.get()) {
     setUser()

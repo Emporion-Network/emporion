@@ -474,12 +474,14 @@ export const uploadMeta = async (meta: ProductMetaData, token: string) => {
             text: "Product created successfuly",
             type: "success"
         })
-        return;
+    } else {
+        notification({
+            text: "An error occured",
+            type: "error"
+        })
     }
-    notification({
-        text: "An error occured",
-        type: "error"
-    })
+   
+    return resp.status == 200;
 }
 
 

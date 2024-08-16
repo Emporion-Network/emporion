@@ -34,11 +34,11 @@
         const newPid = newHref.searchParams.get("p");
         if(!newPid || productId == newPid) return;
         const mp = await getProduct(newPid) as ProductMetaData;
-        const p = await client.productById({productId:Number(newPid)})
+        const p = await client.product_by_id({product_id:Number(newPid)})
         const newMetas = await getProductsMeta(p.seller, mp.collection_id);
         const newProducts = (await Promise.all(newMetas.map(({id})=>{
             if(Number(id) === p.id) return p;
-            return client.productById({productId:Number(id)})
+            return client.product_by_id({product_id:Number(id)})
         }))).filter(e => e !== undefined)
         .filter(e => e.is_listed)
         const listed = newProducts.map(e => `${e.id}`);

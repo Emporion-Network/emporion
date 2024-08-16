@@ -4,746 +4,663 @@
 * and run the @cosmwasm/ts-codegen generate command to regenerate this file.
 */
 
-import { CosmWasmClient, SigningCosmWasmClient, ExecuteResult } from "@cosmjs/cosmwasm-stargate";
-import { Coin, StdFee } from "@cosmjs/amino";
-import { Uint128, AssetInfoBaseForString, AssetListBaseForString, Duration, InstantiateMsg, Distribution, AssetBaseForString, ExecuteMsg, Binary, CreateOrderExecuteMsg, ReviewUserExecuteMsg, ReviewProductExecuteMsg, CreateProductExecuteMessage, Cw20ReceiveMsg, QueryMsg, MigrateMsg, AssetInfoBaseForAddr, Addr, AssetListBaseForAddr, Bank, AssetBaseForAddr, InfoResponse, ContractVersion, Expiration, Timestamp, Uint64, OrderStatus, Order, TupleOfArrayOfOrderAndNullableUint64, ContractParams, TupleOfArrayOfProductAndNullableUint64, Product, TupleOfArrayOfReviewAndNullableUint64, ReviewOf, Review, TotalPowerAtHeightResponse, User, VotingPowerAtHeightResponse } from "./Emporion.types";
-export interface EmporionReadOnlyInterface {
-  contractAddress: string;
-  info: () => Promise<InfoResponse>;
-  totalPowerAtHeight: ({
-    height
-  }: {
-    height?: number;
-  }) => Promise<TotalPowerAtHeightResponse>;
-  params: () => Promise<ContractParams>;
-  bank: () => Promise<Bank>;
-  votingPowerAtHeight: ({
-    address,
-    height
-  }: {
-    address: string;
-    height?: number;
-  }) => Promise<VotingPowerAtHeightResponse>;
-  userStats: ({
-    addr
-  }: {
-    addr: string;
-  }) => Promise<User>;
-  ordersFromBuyer: ({
-    addr,
-    startFrom
-  }: {
-    addr: string;
-    startFrom?: number;
-  }) => Promise<TupleOfArrayOfOrderAndNullableUint64>;
-  order: ({
-    orderId
-  }: {
-    orderId: number;
-  }) => Promise<Order>;
-  ordersForSeller: ({
-    addr,
-    startFrom
-  }: {
-    addr: string;
-    startFrom?: number;
-  }) => Promise<TupleOfArrayOfOrderAndNullableUint64>;
-  reviewsOfProduct: ({
-    productId,
-    startFrom
-  }: {
-    productId: number;
-    startFrom?: number;
-  }) => Promise<TupleOfArrayOfReviewAndNullableUint64>;
-  reviewsOfReviewed: ({
-    addr,
-    startFrom
-  }: {
-    addr: string;
-    startFrom?: number;
-  }) => Promise<TupleOfArrayOfReviewAndNullableUint64>;
-  reviewsFromReviewer: ({
-    addr,
-    startFrom
-  }: {
-    addr: string;
-    startFrom?: number;
-  }) => Promise<TupleOfArrayOfReviewAndNullableUint64>;
-  productsOfSeller: ({
-    addr,
-    startFrom
-  }: {
-    addr: string;
-    startFrom?: number;
-  }) => Promise<TupleOfArrayOfProductAndNullableUint64>;
-  productAll: ({
-    startFrom
-  }: {
-    startFrom?: number;
-  }) => Promise<TupleOfArrayOfProductAndNullableUint64>;
-  productById: ({
-    productId
-  }: {
-    productId: number;
-  }) => Promise<Product>;
+export type Uint128 = string;
+export type AssetInfoBaseForString = {
+  native: string;
+} | {
+  cw20: string;
+};
+export type AssetListBaseForString = AssetBaseForString[];
+export type Duration = {
+  height: number;
+} | {
+  time: number;
+};
+export interface InstantiateMsg {
+  admin: string;
+  dev: string;
+  fee_distribution: Distribution;
+  fee_ratio: [number, number];
+  investment_distribution: Distribution;
+  max_contract_risk_share: [number, number];
+  publication_fee: AssetListBaseForString;
+  publication_fee_distribution: Distribution;
+  reward_rate: Duration;
+  unbounding_duration: Duration;
+  weighted_accepted_assets: [AssetInfoBaseForString, number][];
 }
-export class EmporionQueryClient implements EmporionReadOnlyInterface {
-  client: CosmWasmClient;
-  contractAddress: string;
-  constructor(client: CosmWasmClient, contractAddress: string) {
-    this.client = client;
-    this.contractAddress = contractAddress;
-    this.info = this.info.bind(this);
-    this.totalPowerAtHeight = this.totalPowerAtHeight.bind(this);
-    this.params = this.params.bind(this);
-    this.bank = this.bank.bind(this);
-    this.votingPowerAtHeight = this.votingPowerAtHeight.bind(this);
-    this.userStats = this.userStats.bind(this);
-    this.ordersFromBuyer = this.ordersFromBuyer.bind(this);
-    this.order = this.order.bind(this);
-    this.ordersForSeller = this.ordersForSeller.bind(this);
-    this.reviewsOfProduct = this.reviewsOfProduct.bind(this);
-    this.reviewsOfReviewed = this.reviewsOfReviewed.bind(this);
-    this.reviewsFromReviewer = this.reviewsFromReviewer.bind(this);
-    this.productsOfSeller = this.productsOfSeller.bind(this);
-    this.productAll = this.productAll.bind(this);
-    this.productById = this.productById.bind(this);
-  }
-  info = async (): Promise<InfoResponse> => {
-    return this.client.queryContractSmart(this.contractAddress, {
-      info: {}
-    });
-  };
-  totalPowerAtHeight = async ({
-    height
-  }: {
-    height?: number;
-  }): Promise<TotalPowerAtHeightResponse> => {
-    return this.client.queryContractSmart(this.contractAddress, {
-      total_power_at_height: {
-        height
-      }
-    });
-  };
-  params = async (): Promise<ContractParams> => {
-    return this.client.queryContractSmart(this.contractAddress, {
-      params: {}
-    });
-  };
-  bank = async (): Promise<Bank> => {
-    return this.client.queryContractSmart(this.contractAddress, {
-      bank: {}
-    });
-  };
-  votingPowerAtHeight = async ({
-    address,
-    height
-  }: {
-    address: string;
-    height?: number;
-  }): Promise<VotingPowerAtHeightResponse> => {
-    return this.client.queryContractSmart(this.contractAddress, {
-      voting_power_at_height: {
-        address,
-        height
-      }
-    });
-  };
-  userStats = async ({
-    addr
-  }: {
-    addr: string;
-  }): Promise<User> => {
-    return this.client.queryContractSmart(this.contractAddress, {
-      user_stats: {
-        addr
-      }
-    });
-  };
-  ordersFromBuyer = async ({
-    addr,
-    startFrom
-  }: {
-    addr: string;
-    startFrom?: number;
-  }): Promise<TupleOfArrayOfOrderAndNullableUint64> => {
-    return this.client.queryContractSmart(this.contractAddress, {
-      orders_from_buyer: {
-        addr,
-        start_from: startFrom
-      }
-    });
-  };
-  order = async ({
-    orderId
-  }: {
-    orderId: number;
-  }): Promise<Order> => {
-    return this.client.queryContractSmart(this.contractAddress, {
-      order: {
-        order_id: orderId
-      }
-    });
-  };
-  ordersForSeller = async ({
-    addr,
-    startFrom
-  }: {
-    addr: string;
-    startFrom?: number;
-  }): Promise<TupleOfArrayOfOrderAndNullableUint64> => {
-    return this.client.queryContractSmart(this.contractAddress, {
-      orders_for_seller: {
-        addr,
-        start_from: startFrom
-      }
-    });
-  };
-  reviewsOfProduct = async ({
-    productId,
-    startFrom
-  }: {
-    productId: number;
-    startFrom?: number;
-  }): Promise<TupleOfArrayOfReviewAndNullableUint64> => {
-    return this.client.queryContractSmart(this.contractAddress, {
-      reviews_of_product: {
-        product_id: productId,
-        start_from: startFrom
-      }
-    });
-  };
-  reviewsOfReviewed = async ({
-    addr,
-    startFrom
-  }: {
-    addr: string;
-    startFrom?: number;
-  }): Promise<TupleOfArrayOfReviewAndNullableUint64> => {
-    return this.client.queryContractSmart(this.contractAddress, {
-      reviews_of_reviewed: {
-        addr,
-        start_from: startFrom
-      }
-    });
-  };
-  reviewsFromReviewer = async ({
-    addr,
-    startFrom
-  }: {
-    addr: string;
-    startFrom?: number;
-  }): Promise<TupleOfArrayOfReviewAndNullableUint64> => {
-    return this.client.queryContractSmart(this.contractAddress, {
-      reviews_from_reviewer: {
-        addr,
-        start_from: startFrom
-      }
-    });
-  };
-  productsOfSeller = async ({
-    addr,
-    startFrom
-  }: {
-    addr: string;
-    startFrom?: number;
-  }): Promise<TupleOfArrayOfProductAndNullableUint64> => {
-    return this.client.queryContractSmart(this.contractAddress, {
-      products_of_seller: {
-        addr,
-        start_from: startFrom
-      }
-    });
-  };
-  productAll = async ({
-    startFrom
-  }: {
-    startFrom?: number;
-  }): Promise<TupleOfArrayOfProductAndNullableUint64> => {
-    return this.client.queryContractSmart(this.contractAddress, {
-      product_all: {
-        start_from: startFrom
-      }
-    });
-  };
-  productById = async ({
-    productId
-  }: {
-    productId: number;
-  }): Promise<Product> => {
-    return this.client.queryContractSmart(this.contractAddress, {
-      product_by_id: {
-        product_id: productId
-      }
-    });
-  };
+export interface Distribution {
+  to_claim_reserve: [number, number];
+  to_dev: [number, number];
+  to_investors: [number, number];
 }
-export interface EmporionInterface extends EmporionReadOnlyInterface {
-  contractAddress: string;
-  sender: string;
-  blacklist: (fee?: number | StdFee | "auto", memo?: string, _funds?: Coin[]) => Promise<ExecuteResult>;
-  unblacklist: (fee?: number | StdFee | "auto", memo?: string, _funds?: Coin[]) => Promise<ExecuteResult>;
-  invest: (fee?: number | StdFee | "auto", memo?: string, _funds?: Coin[]) => Promise<ExecuteResult>;
-  divest: ({
-    toDivest
-  }: {
-    toDivest: AssetListBaseForString;
-  }, fee?: number | StdFee | "auto", memo?: string, _funds?: Coin[]) => Promise<ExecuteResult>;
-  withdraw: (fee?: number | StdFee | "auto", memo?: string, _funds?: Coin[]) => Promise<ExecuteResult>;
-  createOrder: ({
-    buyerRiskShare,
-    cart,
-    ready,
-    seller
-  }: {
-    buyerRiskShare: number[][];
-    cart: number[][];
-    ready: boolean;
-    seller: string;
-  }, fee?: number | StdFee | "auto", memo?: string, _funds?: Coin[]) => Promise<ExecuteResult>;
-  acceptOrder: ({
-    orderId
-  }: {
-    orderId: number;
-  }, fee?: number | StdFee | "auto", memo?: string, _funds?: Coin[]) => Promise<ExecuteResult>;
-  finalizeOrder: ({
-    orderId
-  }: {
-    orderId: number;
-  }, fee?: number | StdFee | "auto", memo?: string, _funds?: Coin[]) => Promise<ExecuteResult>;
-  addProductsToOrder: ({
-    cart,
-    orderId
-  }: {
-    cart: number[][];
-    orderId: number;
-  }, fee?: number | StdFee | "auto", memo?: string, _funds?: Coin[]) => Promise<ExecuteResult>;
-  rejectOrder: ({
-    orderId
-  }: {
-    orderId: number;
-  }, fee?: number | StdFee | "auto", memo?: string, _funds?: Coin[]) => Promise<ExecuteResult>;
-  fulfillOrder: ({
-    orderId
-  }: {
-    orderId: number;
-  }, fee?: number | StdFee | "auto", memo?: string, _funds?: Coin[]) => Promise<ExecuteResult>;
-  disputeOrder: ({
-    orderId
-  }: {
-    orderId: number;
-  }, fee?: number | StdFee | "auto", memo?: string, _funds?: Coin[]) => Promise<ExecuteResult>;
-  reviewUser: ({
-    message,
-    orderId,
-    rating
-  }: {
-    message: string;
-    orderId: number;
-    rating: number;
-  }, fee?: number | StdFee | "auto", memo?: string, _funds?: Coin[]) => Promise<ExecuteResult>;
-  reviewProduct: ({
-    message,
-    orderId,
-    productId,
-    rating
-  }: {
-    message: string;
-    orderId: number;
-    productId: number;
-    rating: number;
-  }, fee?: number | StdFee | "auto", memo?: string, _funds?: Coin[]) => Promise<ExecuteResult>;
-  createProduct: ({
-    deliveryTime,
-    isListed,
-    meta,
-    metaHash,
-    price
-  }: {
-    deliveryTime: Duration;
-    isListed: boolean;
-    meta: string;
-    metaHash: string;
-    price: AssetListBaseForString;
-  }, fee?: number | StdFee | "auto", memo?: string, _funds?: Coin[]) => Promise<ExecuteResult>;
-  listProduct: ({
-    productId
-  }: {
-    productId: number;
-  }, fee?: number | StdFee | "auto", memo?: string, _funds?: Coin[]) => Promise<ExecuteResult>;
-  unListProduct: ({
-    productId
-  }: {
-    productId: number;
-  }, fee?: number | StdFee | "auto", memo?: string, _funds?: Coin[]) => Promise<ExecuteResult>;
-  receive: ({
-    amount,
-    msg,
-    sender
-  }: {
-    amount: Uint128;
-    msg: Binary;
-    sender: string;
-  }, fee?: number | StdFee | "auto", memo?: string, _funds?: Coin[]) => Promise<ExecuteResult>;
-  distributeRewards: (fee?: number | StdFee | "auto", memo?: string, _funds?: Coin[]) => Promise<ExecuteResult>;
-  updateParams: ({
-    admin,
-    dev,
-    feeDistribution,
-    feeRatio,
-    investmentDistribution,
-    maxContractRiskShare,
-    publicationFee,
-    publicationFeeDistribution,
-    rewardRate,
-    unboundingDuration,
-    weightedAcceptedAssets
-  }: {
-    admin: string;
-    dev: string;
-    feeDistribution: Distribution;
-    feeRatio: number[][];
-    investmentDistribution: Distribution;
-    maxContractRiskShare: number[][];
-    publicationFee: AssetListBaseForString;
-    publicationFeeDistribution: Distribution;
-    rewardRate: Duration;
-    unboundingDuration: Duration;
-    weightedAcceptedAssets: AssetInfoBaseForString[][];
-  }, fee?: number | StdFee | "auto", memo?: string, _funds?: Coin[]) => Promise<ExecuteResult>;
-  updateAdmin: ({
-    newAdmin
-  }: {
-    newAdmin: string;
-  }, fee?: number | StdFee | "auto", memo?: string, _funds?: Coin[]) => Promise<ExecuteResult>;
-  withdrawToDev: ({
-    amount,
-    to
-  }: {
+export interface AssetBaseForString {
+  amount: Uint128;
+  info: AssetInfoBaseForString;
+}
+export type ExecuteMsg = {
+  blacklist: string[];
+} | {
+  unblacklist: string[];
+} | {
+  invest: {};
+} | {
+  divest: {
+    to_divest: AssetListBaseForString;
+  };
+} | {
+  withdraw: {};
+} | {
+  create_order: CreateOrderExecuteMsg;
+} | {
+  accept_order: {
+    order_id: number;
+  };
+} | {
+  finalize_order: {
+    order_id: number;
+  };
+} | {
+  add_products_to_order: {
+    cart: [number, AssetInfoBaseForString][];
+    order_id: number;
+  };
+} | {
+  reject_order: {
+    order_id: number;
+  };
+} | {
+  fulfill_order: {
+    order_id: number;
+  };
+} | {
+  dispute_order: {
+    order_id: number;
+  };
+} | {
+  review_user: ReviewUserExecuteMsg;
+} | {
+  review_product: ReviewProductExecuteMsg;
+} | {
+  create_product: CreateProductExecuteMessage;
+} | {
+  list_product: {
+    product_id: number;
+  };
+} | {
+  un_list_product: {
+    product_id: number;
+  };
+} | {
+  receive: Cw20ReceiveMsg;
+} | {
+  distribute_rewards: {};
+} | {
+  update_params: InstantiateMsg;
+} | {
+  update_admin: {
+    new_admin: string;
+  };
+} | {
+  withdraw_to_dev: {
     amount: AssetListBaseForString;
     to: string;
-  }, fee?: number | StdFee | "auto", memo?: string, _funds?: Coin[]) => Promise<ExecuteResult>;
+  };
+};
+export type Binary = string;
+export interface CreateOrderExecuteMsg {
+  buyer_risk_share: [number, number];
+  cart: [number, AssetInfoBaseForString][];
+  ready: boolean;
+  seller: string;
 }
-export class EmporionClient extends EmporionQueryClient implements EmporionInterface {
-  client: SigningCosmWasmClient;
+export interface ReviewUserExecuteMsg {
+  message: string;
+  order_id: number;
+  rating: number;
+}
+export interface ReviewProductExecuteMsg {
+  message: string;
+  order_id: number;
+  product_id: number;
+  rating: number;
+}
+export interface CreateProductExecuteMessage {
+  delivery_time: Duration;
+  is_listed: boolean;
+  meta: string;
+  meta_hash: string;
+  price: AssetListBaseForString;
+}
+export interface Cw20ReceiveMsg {
+  amount: Uint128;
+  msg: Binary;
   sender: string;
-  contractAddress: string;
-  constructor(client: SigningCosmWasmClient, sender: string, contractAddress: string) {
-    super(client, contractAddress);
-    this.client = client;
-    this.sender = sender;
-    this.contractAddress = contractAddress;
-    this.blacklist = this.blacklist.bind(this);
-    this.unblacklist = this.unblacklist.bind(this);
-    this.invest = this.invest.bind(this);
-    this.divest = this.divest.bind(this);
-    this.withdraw = this.withdraw.bind(this);
-    this.createOrder = this.createOrder.bind(this);
-    this.acceptOrder = this.acceptOrder.bind(this);
-    this.finalizeOrder = this.finalizeOrder.bind(this);
-    this.addProductsToOrder = this.addProductsToOrder.bind(this);
-    this.rejectOrder = this.rejectOrder.bind(this);
-    this.fulfillOrder = this.fulfillOrder.bind(this);
-    this.disputeOrder = this.disputeOrder.bind(this);
-    this.reviewUser = this.reviewUser.bind(this);
-    this.reviewProduct = this.reviewProduct.bind(this);
-    this.createProduct = this.createProduct.bind(this);
-    this.listProduct = this.listProduct.bind(this);
-    this.unListProduct = this.unListProduct.bind(this);
-    this.receive = this.receive.bind(this);
-    this.distributeRewards = this.distributeRewards.bind(this);
-    this.updateParams = this.updateParams.bind(this);
-    this.updateAdmin = this.updateAdmin.bind(this);
-    this.withdrawToDev = this.withdrawToDev.bind(this);
-  }
-  blacklist = async (fee: number | StdFee | "auto" = "auto", memo?: string, _funds?: Coin[]): Promise<ExecuteResult> => {
-    return await this.client.execute(this.sender, this.contractAddress, {
-      blacklist: {}
-    }, fee, memo, _funds);
+}
+export type QueryMsg = {
+  info: {};
+} | {
+  total_power_at_height: {
+    height?: number | null;
   };
-  unblacklist = async (fee: number | StdFee | "auto" = "auto", memo?: string, _funds?: Coin[]): Promise<ExecuteResult> => {
-    return await this.client.execute(this.sender, this.contractAddress, {
-      unblacklist: {}
-    }, fee, memo, _funds);
+} | {
+  params: {};
+} | {
+  bank: {};
+} | {
+  voting_power_at_height: {
+    address: string;
+    height?: number | null;
   };
-  invest = async (fee: number | StdFee | "auto" = "auto", memo?: string, _funds?: Coin[]): Promise<ExecuteResult> => {
-    return await this.client.execute(this.sender, this.contractAddress, {
-      invest: {}
-    }, fee, memo, _funds);
+} | {
+  user_stats: {
+    addr: string;
   };
-  divest = async ({
-    toDivest
-  }: {
-    toDivest: AssetListBaseForString;
-  }, fee: number | StdFee | "auto" = "auto", memo?: string, _funds?: Coin[]): Promise<ExecuteResult> => {
-    return await this.client.execute(this.sender, this.contractAddress, {
-      divest: {
-        to_divest: toDivest
-      }
-    }, fee, memo, _funds);
+} | {
+  orders_from_buyer: {
+    addr: string;
+    start_from?: number | null;
   };
-  withdraw = async (fee: number | StdFee | "auto" = "auto", memo?: string, _funds?: Coin[]): Promise<ExecuteResult> => {
-    return await this.client.execute(this.sender, this.contractAddress, {
-      withdraw: {}
-    }, fee, memo, _funds);
+} | {
+  order: {
+    order_id: number;
   };
-  createOrder = async ({
-    buyerRiskShare,
-    cart,
-    ready,
-    seller
-  }: {
-    buyerRiskShare: number[][];
-    cart: number[][];
-    ready: boolean;
-    seller: string;
-  }, fee: number | StdFee | "auto" = "auto", memo?: string, _funds?: Coin[]): Promise<ExecuteResult> => {
-    return await this.client.execute(this.sender, this.contractAddress, {
-      create_order: {
-        buyer_risk_share: buyerRiskShare,
-        cart,
-        ready,
-        seller
-      }
-    }, fee, memo, _funds);
+} | {
+  orders_for_seller: {
+    addr: string;
+    start_from?: number | null;
   };
-  acceptOrder = async ({
-    orderId
-  }: {
-    orderId: number;
-  }, fee: number | StdFee | "auto" = "auto", memo?: string, _funds?: Coin[]): Promise<ExecuteResult> => {
-    return await this.client.execute(this.sender, this.contractAddress, {
-      accept_order: {
-        order_id: orderId
-      }
-    }, fee, memo, _funds);
+} | {
+  reviews_of_product: {
+    product_id: number;
+    start_from?: number | null;
   };
-  finalizeOrder = async ({
-    orderId
-  }: {
-    orderId: number;
-  }, fee: number | StdFee | "auto" = "auto", memo?: string, _funds?: Coin[]): Promise<ExecuteResult> => {
-    return await this.client.execute(this.sender, this.contractAddress, {
-      finalize_order: {
-        order_id: orderId
-      }
-    }, fee, memo, _funds);
+} | {
+  reviews_of_reviewed: {
+    addr: string;
+    start_from?: number | null;
   };
-  addProductsToOrder = async ({
-    cart,
-    orderId
-  }: {
-    cart: number[][];
-    orderId: number;
-  }, fee: number | StdFee | "auto" = "auto", memo?: string, _funds?: Coin[]): Promise<ExecuteResult> => {
-    return await this.client.execute(this.sender, this.contractAddress, {
-      add_products_to_order: {
-        cart,
-        order_id: orderId
-      }
-    }, fee, memo, _funds);
+} | {
+  reviews_from_reviewer: {
+    addr: string;
+    start_from?: number | null;
   };
-  rejectOrder = async ({
-    orderId
-  }: {
-    orderId: number;
-  }, fee: number | StdFee | "auto" = "auto", memo?: string, _funds?: Coin[]): Promise<ExecuteResult> => {
-    return await this.client.execute(this.sender, this.contractAddress, {
-      reject_order: {
-        order_id: orderId
-      }
-    }, fee, memo, _funds);
+} | {
+  products_of_seller: {
+    addr: string;
+    start_from?: number | null;
   };
-  fulfillOrder = async ({
-    orderId
-  }: {
-    orderId: number;
-  }, fee: number | StdFee | "auto" = "auto", memo?: string, _funds?: Coin[]): Promise<ExecuteResult> => {
-    return await this.client.execute(this.sender, this.contractAddress, {
-      fulfill_order: {
-        order_id: orderId
-      }
-    }, fee, memo, _funds);
+} | {
+  product_all: {
+    start_from?: number | null;
   };
-  disputeOrder = async ({
-    orderId
-  }: {
-    orderId: number;
-  }, fee: number | StdFee | "auto" = "auto", memo?: string, _funds?: Coin[]): Promise<ExecuteResult> => {
-    return await this.client.execute(this.sender, this.contractAddress, {
-      dispute_order: {
-        order_id: orderId
-      }
-    }, fee, memo, _funds);
+} | {
+  product_by_id: {
+    product_id: number;
   };
-  reviewUser = async ({
-    message,
-    orderId,
-    rating
-  }: {
-    message: string;
-    orderId: number;
-    rating: number;
-  }, fee: number | StdFee | "auto" = "auto", memo?: string, _funds?: Coin[]): Promise<ExecuteResult> => {
-    return await this.client.execute(this.sender, this.contractAddress, {
-      review_user: {
-        message,
-        order_id: orderId,
-        rating
-      }
-    }, fee, memo, _funds);
+} | {
+  blacklisted: {
+    start_from?: string | null;
   };
-  reviewProduct = async ({
-    message,
-    orderId,
-    productId,
-    rating
-  }: {
-    message: string;
-    orderId: number;
-    productId: number;
-    rating: number;
-  }, fee: number | StdFee | "auto" = "auto", memo?: string, _funds?: Coin[]): Promise<ExecuteResult> => {
-    return await this.client.execute(this.sender, this.contractAddress, {
-      review_product: {
-        message,
-        order_id: orderId,
-        product_id: productId,
-        rating
-      }
-    }, fee, memo, _funds);
+} | {
+  blacklisted_check: {
+    addrs: string[];
   };
-  createProduct = async ({
-    deliveryTime,
-    isListed,
-    meta,
-    metaHash,
-    price
-  }: {
-    deliveryTime: Duration;
-    isListed: boolean;
-    meta: string;
-    metaHash: string;
-    price: AssetListBaseForString;
-  }, fee: number | StdFee | "auto" = "auto", memo?: string, _funds?: Coin[]): Promise<ExecuteResult> => {
-    return await this.client.execute(this.sender, this.contractAddress, {
-      create_product: {
-        delivery_time: deliveryTime,
-        is_listed: isListed,
-        meta,
-        meta_hash: metaHash,
-        price
-      }
-    }, fee, memo, _funds);
-  };
-  listProduct = async ({
-    productId
-  }: {
-    productId: number;
-  }, fee: number | StdFee | "auto" = "auto", memo?: string, _funds?: Coin[]): Promise<ExecuteResult> => {
-    return await this.client.execute(this.sender, this.contractAddress, {
-      list_product: {
-        product_id: productId
-      }
-    }, fee, memo, _funds);
-  };
-  unListProduct = async ({
-    productId
-  }: {
-    productId: number;
-  }, fee: number | StdFee | "auto" = "auto", memo?: string, _funds?: Coin[]): Promise<ExecuteResult> => {
-    return await this.client.execute(this.sender, this.contractAddress, {
-      un_list_product: {
-        product_id: productId
-      }
-    }, fee, memo, _funds);
-  };
-  receive = async ({
-    amount,
-    msg,
-    sender
-  }: {
-    amount: Uint128;
-    msg: Binary;
+};
+export interface MigrateMsg {}
+export type AssetInfoBaseForAddr = {
+  native: string;
+} | {
+  cw20: Addr;
+};
+export type Addr = string;
+export type AssetListBaseForAddr = AssetBaseForAddr[];
+export interface Bank {
+  to_claim_reserve: AssetListBaseForAddr;
+  to_dev: AssetListBaseForAddr;
+  to_investors: AssetListBaseForAddr;
+  total_invested: AssetListBaseForAddr;
+}
+export interface AssetBaseForAddr {
+  amount: Uint128;
+  info: AssetInfoBaseForAddr;
+}
+export type TupleOfArrayOfAddrAndNullable_Addr = [Addr[], Addr | null];
+export type ArrayOfAddr = Addr[];
+export interface InfoResponse {
+  info: ContractVersion;
+}
+export interface ContractVersion {
+  contract: string;
+  version: string;
+}
+export type Timestamp = Uint64;
+export type Uint64 = string;
+export type Expiration = {
+  at_height: number;
+} | {
+  at_time: Timestamp;
+} | {
+  never: {};
+};
+export type OrderStatus = "creating" | "pending" | "accepted" | "rejected" | "fulfilled" | "disputed";
+export interface Order {
+  buyer: Addr;
+  buyer_risk_share: [number, number];
+  cart: [number, AssetBaseForAddr][];
+  created_at: Timestamp;
+  expected_delivery: Expiration;
+  id: number;
+  seller: Addr;
+  status: OrderStatus;
+  total: AssetListBaseForAddr;
+}
+export type TupleOfArrayOfOrderAndNullableUint64 = [Order[], number | null];
+export interface ContractParams {
+  admin: Addr;
+  dev: Addr;
+  fee: [number, number];
+  fee_distribution: Distribution;
+  investment_distribution: Distribution;
+  max_contract_risk_share: [number, number];
+  publication_fee: AssetListBaseForAddr;
+  publication_fee_distribution: Distribution;
+  reward_rate: Duration;
+  unbounding_duration: Duration;
+  weighted_accepted_assets: [AssetInfoBaseForAddr, number][];
+}
+export type TupleOfArrayOfProductAndNullableUint64 = [Product[], number | null];
+export interface Product {
+  delivery_time: Duration;
+  id: number;
+  is_listed: boolean;
+  meta: string;
+  meta_hash: string;
+  price: AssetListBaseForAddr;
+  rating: [number, number];
+  seller: Addr;
+}
+export type TupleOfArrayOfReviewAndNullableUint64 = [Review[], number | null];
+export type ReviewOf = {
+  user: Addr;
+} | {
+  product: number;
+};
+export interface Review {
+  from: Addr;
+  id: number;
+  message: string;
+  of: ReviewOf;
+  rating: number;
+}
+export interface TotalPowerAtHeightResponse {
+  height: number;
+  power: Uint128;
+}
+export interface User {
+  addr: Addr;
+  generated_fees: AssetListBaseForAddr;
+  invested: AssetListBaseForAddr;
+  nb_disputed_orders: number;
+  nb_fulfilled_orders: number;
+  nb_orders: number;
+  nb_rejected_orders: number;
+  rating: [number, number];
+  unbonding: [AssetBaseForAddr, Expiration][];
+}
+export interface VotingPowerAtHeightResponse {
+  height: number;
+  power: Uint128;
+}
+export class EmporionQueryClient<T extends {queryContractSmart:(address:string, msg:any)=>Promise<any>}> {
+    client: T;
+    contractAddress: string;
+    constructor(client: T, contractAddress: string) {
+        this.client = client;
+        this.contractAddress = contractAddress;
+    }
+    async info(msg:Extract<QueryMsg, {info:any}>["info"]):Promise<InfoResponse>{
+        return this.client.queryContractSmart(this.contractAddress, {
+            info:msg
+        });
+    }
+
+    async total_power_at_height(msg:Extract<QueryMsg, {total_power_at_height:any}>["total_power_at_height"]):Promise<TotalPowerAtHeightResponse>{
+        return this.client.queryContractSmart(this.contractAddress, {
+            total_power_at_height:msg
+        });
+    }
+
+    async params(msg:Extract<QueryMsg, {params:any}>["params"]):Promise<ContractParams>{
+        return this.client.queryContractSmart(this.contractAddress, {
+            params:msg
+        });
+    }
+
+    async bank(msg:Extract<QueryMsg, {bank:any}>["bank"]):Promise<Bank>{
+        return this.client.queryContractSmart(this.contractAddress, {
+            bank:msg
+        });
+    }
+
+    async voting_power_at_height(msg:Extract<QueryMsg, {voting_power_at_height:any}>["voting_power_at_height"]):Promise<VotingPowerAtHeightResponse>{
+        return this.client.queryContractSmart(this.contractAddress, {
+            voting_power_at_height:msg
+        });
+    }
+
+    async user_stats(msg:Extract<QueryMsg, {user_stats:any}>["user_stats"]):Promise<User>{
+        return this.client.queryContractSmart(this.contractAddress, {
+            user_stats:msg
+        });
+    }
+
+    async orders_from_buyer(msg:Extract<QueryMsg, {orders_from_buyer:any}>["orders_from_buyer"]):Promise<TupleOfArrayOfOrderAndNullableUint64>{
+        return this.client.queryContractSmart(this.contractAddress, {
+            orders_from_buyer:msg
+        });
+    }
+
+    async order(msg:Extract<QueryMsg, {order:any}>["order"]):Promise<Order>{
+        return this.client.queryContractSmart(this.contractAddress, {
+            order:msg
+        });
+    }
+
+    async orders_for_seller(msg:Extract<QueryMsg, {orders_for_seller:any}>["orders_for_seller"]):Promise<TupleOfArrayOfOrderAndNullableUint64>{
+        return this.client.queryContractSmart(this.contractAddress, {
+            orders_for_seller:msg
+        });
+    }
+
+    async reviews_of_product(msg:Extract<QueryMsg, {reviews_of_product:any}>["reviews_of_product"]):Promise<TupleOfArrayOfReviewAndNullableUint64>{
+        return this.client.queryContractSmart(this.contractAddress, {
+            reviews_of_product:msg
+        });
+    }
+
+    async reviews_of_reviewed(msg:Extract<QueryMsg, {reviews_of_reviewed:any}>["reviews_of_reviewed"]):Promise<TupleOfArrayOfReviewAndNullableUint64>{
+        return this.client.queryContractSmart(this.contractAddress, {
+            reviews_of_reviewed:msg
+        });
+    }
+
+    async reviews_from_reviewer(msg:Extract<QueryMsg, {reviews_from_reviewer:any}>["reviews_from_reviewer"]):Promise<TupleOfArrayOfReviewAndNullableUint64>{
+        return this.client.queryContractSmart(this.contractAddress, {
+            reviews_from_reviewer:msg
+        });
+    }
+
+    async products_of_seller(msg:Extract<QueryMsg, {products_of_seller:any}>["products_of_seller"]):Promise<TupleOfArrayOfProductAndNullableUint64>{
+        return this.client.queryContractSmart(this.contractAddress, {
+            products_of_seller:msg
+        });
+    }
+
+    async product_all(msg:Extract<QueryMsg, {product_all:any}>["product_all"]):Promise<TupleOfArrayOfProductAndNullableUint64>{
+        return this.client.queryContractSmart(this.contractAddress, {
+            product_all:msg
+        });
+    }
+
+    async product_by_id(msg:Extract<QueryMsg, {product_by_id:any}>["product_by_id"]):Promise<Product>{
+        return this.client.queryContractSmart(this.contractAddress, {
+            product_by_id:msg
+        });
+    }
+
+    async blacklisted(msg:Extract<QueryMsg, {blacklisted:any}>["blacklisted"]):Promise<TupleOfArrayOfAddrAndNullable_Addr>{
+        return this.client.queryContractSmart(this.contractAddress, {
+            blacklisted:msg
+        });
+    }
+
+    async blacklisted_check(msg:Extract<QueryMsg, {blacklisted_check:any}>["blacklisted_check"]):Promise<ArrayOfAddr>{
+        return this.client.queryContractSmart(this.contractAddress, {
+            blacklisted_check:msg
+        });
+    }
+}
+export class EmporionClient<T extends {execute:(sender:string,contractAddress:string, msg:any, fee:any, memo:any, funds:any)=>Promise<any>,queryContractSmart:(address:string, msg:any)=>Promise<any>}> {
+    client: T;
+    contractAddress: string;
     sender: string;
-  }, fee: number | StdFee | "auto" = "auto", memo?: string, _funds?: Coin[]): Promise<ExecuteResult> => {
-    return await this.client.execute(this.sender, this.contractAddress, {
-      receive: {
-        amount,
-        msg,
-        sender
-      }
-    }, fee, memo, _funds);
-  };
-  distributeRewards = async (fee: number | StdFee | "auto" = "auto", memo?: string, _funds?: Coin[]): Promise<ExecuteResult> => {
-    return await this.client.execute(this.sender, this.contractAddress, {
-      distribute_rewards: {}
-    }, fee, memo, _funds);
-  };
-  updateParams = async ({
-    admin,
-    dev,
-    feeDistribution,
-    feeRatio,
-    investmentDistribution,
-    maxContractRiskShare,
-    publicationFee,
-    publicationFeeDistribution,
-    rewardRate,
-    unboundingDuration,
-    weightedAcceptedAssets
-  }: {
-    admin: string;
-    dev: string;
-    feeDistribution: Distribution;
-    feeRatio: number[][];
-    investmentDistribution: Distribution;
-    maxContractRiskShare: number[][];
-    publicationFee: AssetListBaseForString;
-    publicationFeeDistribution: Distribution;
-    rewardRate: Duration;
-    unboundingDuration: Duration;
-    weightedAcceptedAssets: AssetInfoBaseForString[][];
-  }, fee: number | StdFee | "auto" = "auto", memo?: string, _funds?: Coin[]): Promise<ExecuteResult> => {
-    return await this.client.execute(this.sender, this.contractAddress, {
-      update_params: {
-        admin,
-        dev,
-        fee_distribution: feeDistribution,
-        fee_ratio: feeRatio,
-        investment_distribution: investmentDistribution,
-        max_contract_risk_share: maxContractRiskShare,
-        publication_fee: publicationFee,
-        publication_fee_distribution: publicationFeeDistribution,
-        reward_rate: rewardRate,
-        unbounding_duration: unboundingDuration,
-        weighted_accepted_assets: weightedAcceptedAssets
-      }
-    }, fee, memo, _funds);
-  };
-  updateAdmin = async ({
-    newAdmin
-  }: {
-    newAdmin: string;
-  }, fee: number | StdFee | "auto" = "auto", memo?: string, _funds?: Coin[]): Promise<ExecuteResult> => {
-    return await this.client.execute(this.sender, this.contractAddress, {
-      update_admin: {
-        new_admin: newAdmin
-      }
-    }, fee, memo, _funds);
-  };
-  withdrawToDev = async ({
-    amount,
-    to
-  }: {
-    amount: AssetListBaseForString;
-    to: string;
-  }, fee: number | StdFee | "auto" = "auto", memo?: string, _funds?: Coin[]): Promise<ExecuteResult> => {
-    return await this.client.execute(this.sender, this.contractAddress, {
-      withdraw_to_dev: {
-        amount,
-        to
-      }
-    }, fee, memo, _funds);
-  };
+    constructor(client: T, sender: string, contractAddress: string) {
+        this.client = client;
+        this.sender = sender;
+        this.contractAddress = contractAddress;
+    }
+    async info(msg:Extract<QueryMsg, {info:any}>["info"]):Promise<InfoResponse>{
+        return this.client.queryContractSmart(this.contractAddress, {
+            info:msg
+        });
+    }
+
+    async total_power_at_height(msg:Extract<QueryMsg, {total_power_at_height:any}>["total_power_at_height"]):Promise<TotalPowerAtHeightResponse>{
+        return this.client.queryContractSmart(this.contractAddress, {
+            total_power_at_height:msg
+        });
+    }
+
+    async params(msg:Extract<QueryMsg, {params:any}>["params"]):Promise<ContractParams>{
+        return this.client.queryContractSmart(this.contractAddress, {
+            params:msg
+        });
+    }
+
+    async bank(msg:Extract<QueryMsg, {bank:any}>["bank"]):Promise<Bank>{
+        return this.client.queryContractSmart(this.contractAddress, {
+            bank:msg
+        });
+    }
+
+    async voting_power_at_height(msg:Extract<QueryMsg, {voting_power_at_height:any}>["voting_power_at_height"]):Promise<VotingPowerAtHeightResponse>{
+        return this.client.queryContractSmart(this.contractAddress, {
+            voting_power_at_height:msg
+        });
+    }
+
+    async user_stats(msg:Extract<QueryMsg, {user_stats:any}>["user_stats"]):Promise<User>{
+        return this.client.queryContractSmart(this.contractAddress, {
+            user_stats:msg
+        });
+    }
+
+    async orders_from_buyer(msg:Extract<QueryMsg, {orders_from_buyer:any}>["orders_from_buyer"]):Promise<TupleOfArrayOfOrderAndNullableUint64>{
+        return this.client.queryContractSmart(this.contractAddress, {
+            orders_from_buyer:msg
+        });
+    }
+
+    async order(msg:Extract<QueryMsg, {order:any}>["order"]):Promise<Order>{
+        return this.client.queryContractSmart(this.contractAddress, {
+            order:msg
+        });
+    }
+
+    async orders_for_seller(msg:Extract<QueryMsg, {orders_for_seller:any}>["orders_for_seller"]):Promise<TupleOfArrayOfOrderAndNullableUint64>{
+        return this.client.queryContractSmart(this.contractAddress, {
+            orders_for_seller:msg
+        });
+    }
+
+    async reviews_of_product(msg:Extract<QueryMsg, {reviews_of_product:any}>["reviews_of_product"]):Promise<TupleOfArrayOfReviewAndNullableUint64>{
+        return this.client.queryContractSmart(this.contractAddress, {
+            reviews_of_product:msg
+        });
+    }
+
+    async reviews_of_reviewed(msg:Extract<QueryMsg, {reviews_of_reviewed:any}>["reviews_of_reviewed"]):Promise<TupleOfArrayOfReviewAndNullableUint64>{
+        return this.client.queryContractSmart(this.contractAddress, {
+            reviews_of_reviewed:msg
+        });
+    }
+
+    async reviews_from_reviewer(msg:Extract<QueryMsg, {reviews_from_reviewer:any}>["reviews_from_reviewer"]):Promise<TupleOfArrayOfReviewAndNullableUint64>{
+        return this.client.queryContractSmart(this.contractAddress, {
+            reviews_from_reviewer:msg
+        });
+    }
+
+    async products_of_seller(msg:Extract<QueryMsg, {products_of_seller:any}>["products_of_seller"]):Promise<TupleOfArrayOfProductAndNullableUint64>{
+        return this.client.queryContractSmart(this.contractAddress, {
+            products_of_seller:msg
+        });
+    }
+
+    async product_all(msg:Extract<QueryMsg, {product_all:any}>["product_all"]):Promise<TupleOfArrayOfProductAndNullableUint64>{
+        return this.client.queryContractSmart(this.contractAddress, {
+            product_all:msg
+        });
+    }
+
+    async product_by_id(msg:Extract<QueryMsg, {product_by_id:any}>["product_by_id"]):Promise<Product>{
+        return this.client.queryContractSmart(this.contractAddress, {
+            product_by_id:msg
+        });
+    }
+
+    async blacklisted(msg:Extract<QueryMsg, {blacklisted:any}>["blacklisted"]):Promise<TupleOfArrayOfAddrAndNullable_Addr>{
+        return this.client.queryContractSmart(this.contractAddress, {
+            blacklisted:msg
+        });
+    }
+
+    async blacklisted_check(msg:Extract<QueryMsg, {blacklisted_check:any}>["blacklisted_check"]):Promise<ArrayOfAddr>{
+        return this.client.queryContractSmart(this.contractAddress, {
+            blacklisted_check:msg
+        });
+    }
+    async blacklist(msg:Extract<ExecuteMsg, {blacklist:any}>["blacklist"], fee?:Parameters<T['execute']>[3] , memo?:Parameters<T['execute']>[4], funds?:Parameters<T['execute']>[5]):Promise<ReturnType<T['execute']>>{
+        return this.client.execute(this.sender, this.contractAddress, {
+            blacklist:msg
+        },fee, memo, funds);
+    }
+
+    async unblacklist(msg:Extract<ExecuteMsg, {unblacklist:any}>["unblacklist"], fee?:Parameters<T['execute']>[3] , memo?:Parameters<T['execute']>[4], funds?:Parameters<T['execute']>[5]):Promise<ReturnType<T['execute']>>{
+        return this.client.execute(this.sender, this.contractAddress, {
+            unblacklist:msg
+        },fee, memo, funds);
+    }
+
+    async invest(msg:Extract<ExecuteMsg, {invest:any}>["invest"], fee?:Parameters<T['execute']>[3] , memo?:Parameters<T['execute']>[4], funds?:Parameters<T['execute']>[5]):Promise<ReturnType<T['execute']>>{
+        return this.client.execute(this.sender, this.contractAddress, {
+            invest:msg
+        },fee, memo, funds);
+    }
+
+    async divest(msg:Extract<ExecuteMsg, {divest:any}>["divest"], fee?:Parameters<T['execute']>[3] , memo?:Parameters<T['execute']>[4], funds?:Parameters<T['execute']>[5]):Promise<ReturnType<T['execute']>>{
+        return this.client.execute(this.sender, this.contractAddress, {
+            divest:msg
+        },fee, memo, funds);
+    }
+
+    async withdraw(msg:Extract<ExecuteMsg, {withdraw:any}>["withdraw"], fee?:Parameters<T['execute']>[3] , memo?:Parameters<T['execute']>[4], funds?:Parameters<T['execute']>[5]):Promise<ReturnType<T['execute']>>{
+        return this.client.execute(this.sender, this.contractAddress, {
+            withdraw:msg
+        },fee, memo, funds);
+    }
+
+    async create_order(msg:Extract<ExecuteMsg, {create_order:any}>["create_order"], fee?:Parameters<T['execute']>[3] , memo?:Parameters<T['execute']>[4], funds?:Parameters<T['execute']>[5]):Promise<ReturnType<T['execute']>>{
+        return this.client.execute(this.sender, this.contractAddress, {
+            create_order:msg
+        },fee, memo, funds);
+    }
+
+    async accept_order(msg:Extract<ExecuteMsg, {accept_order:any}>["accept_order"], fee?:Parameters<T['execute']>[3] , memo?:Parameters<T['execute']>[4], funds?:Parameters<T['execute']>[5]):Promise<ReturnType<T['execute']>>{
+        return this.client.execute(this.sender, this.contractAddress, {
+            accept_order:msg
+        },fee, memo, funds);
+    }
+
+    async finalize_order(msg:Extract<ExecuteMsg, {finalize_order:any}>["finalize_order"], fee?:Parameters<T['execute']>[3] , memo?:Parameters<T['execute']>[4], funds?:Parameters<T['execute']>[5]):Promise<ReturnType<T['execute']>>{
+        return this.client.execute(this.sender, this.contractAddress, {
+            finalize_order:msg
+        },fee, memo, funds);
+    }
+
+    async add_products_to_order(msg:Extract<ExecuteMsg, {add_products_to_order:any}>["add_products_to_order"], fee?:Parameters<T['execute']>[3] , memo?:Parameters<T['execute']>[4], funds?:Parameters<T['execute']>[5]):Promise<ReturnType<T['execute']>>{
+        return this.client.execute(this.sender, this.contractAddress, {
+            add_products_to_order:msg
+        },fee, memo, funds);
+    }
+
+    async reject_order(msg:Extract<ExecuteMsg, {reject_order:any}>["reject_order"], fee?:Parameters<T['execute']>[3] , memo?:Parameters<T['execute']>[4], funds?:Parameters<T['execute']>[5]):Promise<ReturnType<T['execute']>>{
+        return this.client.execute(this.sender, this.contractAddress, {
+            reject_order:msg
+        },fee, memo, funds);
+    }
+
+    async fulfill_order(msg:Extract<ExecuteMsg, {fulfill_order:any}>["fulfill_order"], fee?:Parameters<T['execute']>[3] , memo?:Parameters<T['execute']>[4], funds?:Parameters<T['execute']>[5]):Promise<ReturnType<T['execute']>>{
+        return this.client.execute(this.sender, this.contractAddress, {
+            fulfill_order:msg
+        },fee, memo, funds);
+    }
+
+    async dispute_order(msg:Extract<ExecuteMsg, {dispute_order:any}>["dispute_order"], fee?:Parameters<T['execute']>[3] , memo?:Parameters<T['execute']>[4], funds?:Parameters<T['execute']>[5]):Promise<ReturnType<T['execute']>>{
+        return this.client.execute(this.sender, this.contractAddress, {
+            dispute_order:msg
+        },fee, memo, funds);
+    }
+
+    async review_user(msg:Extract<ExecuteMsg, {review_user:any}>["review_user"], fee?:Parameters<T['execute']>[3] , memo?:Parameters<T['execute']>[4], funds?:Parameters<T['execute']>[5]):Promise<ReturnType<T['execute']>>{
+        return this.client.execute(this.sender, this.contractAddress, {
+            review_user:msg
+        },fee, memo, funds);
+    }
+
+    async review_product(msg:Extract<ExecuteMsg, {review_product:any}>["review_product"], fee?:Parameters<T['execute']>[3] , memo?:Parameters<T['execute']>[4], funds?:Parameters<T['execute']>[5]):Promise<ReturnType<T['execute']>>{
+        return this.client.execute(this.sender, this.contractAddress, {
+            review_product:msg
+        },fee, memo, funds);
+    }
+
+    async create_product(msg:Extract<ExecuteMsg, {create_product:any}>["create_product"], fee?:Parameters<T['execute']>[3] , memo?:Parameters<T['execute']>[4], funds?:Parameters<T['execute']>[5]):Promise<ReturnType<T['execute']>>{
+        return this.client.execute(this.sender, this.contractAddress, {
+            create_product:msg
+        },fee, memo, funds);
+    }
+
+    async list_product(msg:Extract<ExecuteMsg, {list_product:any}>["list_product"], fee?:Parameters<T['execute']>[3] , memo?:Parameters<T['execute']>[4], funds?:Parameters<T['execute']>[5]):Promise<ReturnType<T['execute']>>{
+        return this.client.execute(this.sender, this.contractAddress, {
+            list_product:msg
+        },fee, memo, funds);
+    }
+
+    async un_list_product(msg:Extract<ExecuteMsg, {un_list_product:any}>["un_list_product"], fee?:Parameters<T['execute']>[3] , memo?:Parameters<T['execute']>[4], funds?:Parameters<T['execute']>[5]):Promise<ReturnType<T['execute']>>{
+        return this.client.execute(this.sender, this.contractAddress, {
+            un_list_product:msg
+        },fee, memo, funds);
+    }
+
+    async receive(msg:Extract<ExecuteMsg, {receive:any}>["receive"], fee?:Parameters<T['execute']>[3] , memo?:Parameters<T['execute']>[4], funds?:Parameters<T['execute']>[5]):Promise<ReturnType<T['execute']>>{
+        return this.client.execute(this.sender, this.contractAddress, {
+            receive:msg
+        },fee, memo, funds);
+    }
+
+    async distribute_rewards(msg:Extract<ExecuteMsg, {distribute_rewards:any}>["distribute_rewards"], fee?:Parameters<T['execute']>[3] , memo?:Parameters<T['execute']>[4], funds?:Parameters<T['execute']>[5]):Promise<ReturnType<T['execute']>>{
+        return this.client.execute(this.sender, this.contractAddress, {
+            distribute_rewards:msg
+        },fee, memo, funds);
+    }
+
+    async update_params(msg:Extract<ExecuteMsg, {update_params:any}>["update_params"], fee?:Parameters<T['execute']>[3] , memo?:Parameters<T['execute']>[4], funds?:Parameters<T['execute']>[5]):Promise<ReturnType<T['execute']>>{
+        return this.client.execute(this.sender, this.contractAddress, {
+            update_params:msg
+        },fee, memo, funds);
+    }
+
+    async update_admin(msg:Extract<ExecuteMsg, {update_admin:any}>["update_admin"], fee?:Parameters<T['execute']>[3] , memo?:Parameters<T['execute']>[4], funds?:Parameters<T['execute']>[5]):Promise<ReturnType<T['execute']>>{
+        return this.client.execute(this.sender, this.contractAddress, {
+            update_admin:msg
+        },fee, memo, funds);
+    }
+
+    async withdraw_to_dev(msg:Extract<ExecuteMsg, {withdraw_to_dev:any}>["withdraw_to_dev"], fee?:Parameters<T['execute']>[3] , memo?:Parameters<T['execute']>[4], funds?:Parameters<T['execute']>[5]):Promise<ReturnType<T['execute']>>{
+        return this.client.execute(this.sender, this.contractAddress, {
+            withdraw_to_dev:msg
+        },fee, memo, funds);
+    }
+
 }

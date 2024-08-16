@@ -1,6 +1,0 @@
-{
-  "dependencies": { "@cosmjs/cosmwasm-stargate": "^0.32.4" },
-  "devDependencies": {
-    "@types/bun": "^1.1.6"
-  }
-}

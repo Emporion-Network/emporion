@@ -198,6 +198,14 @@ export type QueryMsg = {
   product_by_id: {
     product_id: number;
   };
+} | {
+  blacklisted: {
+    start_from?: string | null;
+  };
+} | {
+  blacklisted_check: {
+    addrs: string[];
+  };
 };
 export interface MigrateMsg {}
 export type AssetInfoBaseForAddr = {
@@ -217,6 +225,8 @@ export interface AssetBaseForAddr {
   amount: Uint128;
   info: AssetInfoBaseForAddr;
 }
+export type TupleOfArrayOfAddrAndNullable_Addr = [Addr[], Addr | null];
+export type ArrayOfAddr = Addr[];
 export interface InfoResponse {
   info: ContractVersion;
 }
@@ -224,6 +234,8 @@ export interface ContractVersion {
   contract: string;
   version: string;
 }
+export type Timestamp = Uint64;
+export type Uint64 = string;
 export type Expiration = {
   at_height: number;
 } | {
@@ -231,18 +243,17 @@ export type Expiration = {
 } | {
   never: {};
 };
-export type Timestamp = Uint64;
-export type Uint64 = string;
 export type OrderStatus = "creating" | "pending" | "accepted" | "rejected" | "fulfilled" | "disputed";
 export interface Order {
   buyer: Addr;
   buyer_risk_share: [number, number];
-  cart: AssetListBaseForAddr;
+  cart: [number, AssetBaseForAddr][];
+  created_at: Timestamp;
   expected_delivery: Expiration;
   id: number;
-  products: number[];
   seller: Addr;
   status: OrderStatus;
+  total: AssetListBaseForAddr;
 }
 export type TupleOfArrayOfOrderAndNullableUint64 = [Order[], number | null];
 export interface ContractParams {

@@ -8,25 +8,31 @@
     import ProductShow from "./pages/product/ProductShow.svelte";
     import ProductIndex from "./pages/product/ProductIndex.svelte";
     import Cart from "./lib/Cart.svelte";
+    import UserShow from "./pages/user/UserShow.svelte";
+    import { user } from "./stores/user";
 
-    watchPrices()
-    onMount(()=>{
-        return clean
-    })
-
+    watchPrices();
+    onMount(() => {
+        return clean;
+    });
 </script>
 
 <Route match="/">
- <Home></Home>
-</Route>
-<Route match="/create">
-    <ProductCreate/>
+    <Home></Home>
 </Route>
 <Route match="/product">
     <ProductShow></ProductShow>
 </Route>
 <Route match="/products">
-    <ProductIndex/>
+    <ProductIndex />
 </Route>
-<Notifications/>
+{#if $user}
+    <Route match="/create">
+        <ProductCreate />
+    </Route>
+    <Route match="/account">
+        <UserShow />
+    </Route>
+{/if}
+<Notifications />
 <Cart></Cart>

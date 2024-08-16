@@ -9,6 +9,7 @@ import { CosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 const {
     VITE_NATIVE_COIN: NATIVE_COIN,
     VITE_ENDPOINT_BACK_END_API: ENDPOINT_BACK_END_API,
+    VITE_ENDPOINT_RPC: ENDPOINT_RPC,
 
 } = import.meta.env;
 
@@ -71,6 +72,7 @@ export const watchPrices = async () => {
     let ids = Object.values(COIN_DATA).map(e => e.coinGeckoId).join(',');
 
     let userAddress = '';
+    const cwQuery = await CosmWasmClient.connect(ENDPOINT_RPC);
 
 
     const updatePrices = async () => {
@@ -93,7 +95,12 @@ export const watchPrices = async () => {
                 .map(c => c.ibcTxs.filter(e => e.direction === 'deposit').map(e => ({ sequence: e.sequence, coin: c }))).flat();
             await Promise.all(Object.values(COIN_DATA).map(async c => {
                 let offchainAddress = toPrefix(userAddress, c.addressPrefix);
-                if (c.coinDenom === NATIVE_COIN) {
+                if(c.isCw20){
+                    const {balance} = await cwQuery.queryContractSmart(c.onChainDenom, {
+                        balance:{address:userAddress}
+                    })
+                    c.onChainAmount = Decimal.fromAtomics(balance, c.coinDecimals);
+                } else if (c.coinDenom === NATIVE_COIN) {
                     let onChainBalance = await COIN_DATA[NATIVE_COIN].queryClient.getBalance(userAddress, c.onChainDenom);
                     c.onChainAmount = Decimal.fromAtomics(onChainBalance.amount, c.coinDecimals);
                     c.nativeAmount = Decimal.fromAtomics(onChainBalance.amount, c.coinDecimals);

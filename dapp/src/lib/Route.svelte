@@ -9,7 +9,6 @@
             matches = match.test(url.href);
         } else if(typeof match == 'string'){
             matches = url.pathname === match;
-            console.log(url.pathname, match, $matched)
         } else {
             matches = match(url);
         }

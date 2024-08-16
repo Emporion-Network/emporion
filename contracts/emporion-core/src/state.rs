@@ -1,7 +1,7 @@
 use cosmwasm_schema::cw_serde;
 use cosmwasm_std::{
     to_json_binary, Addr, Deps, DepsMut, Empty, Env, Fraction, MessageInfo, QueryResponse,
-    Response, Uint128,
+    Response, Timestamp, Uint128,
 };
 use cw2::{get_contract_version, set_contract_version};
 use cw_asset::{Asset, AssetInfo, AssetInfoUnchecked, AssetList, AssetListUnchecked};
@@ -138,11 +138,12 @@ pub struct Order {
     pub id: u64,
     pub buyer: Addr,
     pub seller: Addr,
-    pub cart: AssetList,
-    pub products: Vec<u64>,
+    pub total: AssetList,
+    pub cart: Vec<(u64, Asset)>,
     pub status: OrderStatus,
     pub buyer_risk_share: (u64, u64),
     pub expected_delivery: Expiration,
+    pub created_at: Timestamp,
 }
 
 ///////////////////////
@@ -158,7 +159,7 @@ pub struct Product {
     pub meta: String,
     pub is_listed: bool,
     pub delivery_time: Duration,
-    pub meta_hash:String,
+    pub meta_hash: String,
 }
 
 ///////////////////////
@@ -374,10 +375,9 @@ impl ContractParams {
         params.admin = new_admin.clone();
         params.save(deps)?;
         Ok(Response::new()
-        .add_attribute("action", "update-admin")
-        .add_attribute("sender", info.sender)
-        .add_attribute("new-admin", new_admin)
-        )
+            .add_attribute("action", "update-admin")
+            .add_attribute("sender", info.sender)
+            .add_attribute("new-admin", new_admin))
     }
 
     pub fn msg_query_info(deps: Deps) -> Result<QueryResponse, ContractError> {
@@ -452,6 +452,44 @@ impl Blacklist {
             return Err(ContractError::AddressIsBlacklisted { addr: addr.clone() });
         }
         Ok(())
+    }
+
+    pub fn msg_query_all(
+        deps: Deps,
+        start_from: Option<String>,
+    ) -> Result<QueryResponse, ContractError> {
+        let start_from = start_from
+            .and_then(|s| deps.api.addr_validate(&s).ok())
+            .map(|a| Bound::inclusive(a));
+
+        let mut res = BLACKLIST
+            .keys(
+                deps.storage,
+                start_from,
+                None,
+                cosmwasm_std::Order::Ascending,
+            )
+            .take(MAX_ITEMS_PER_PAGE + 1)
+            .collect::<Result<Vec<_>, _>>()?;
+        let start_from = if res.len() > MAX_ITEMS_PER_PAGE {
+            res.pop()
+        } else {
+            None
+        };
+        Ok(to_json_binary(&(res, start_from))?)
+    }
+
+
+    pub fn msg_query_check(
+        deps: Deps,
+        addrs:Vec<String>,
+    ) -> Result<QueryResponse, ContractError>{
+        let res = addrs.iter().filter_map(|a|{
+            deps.api.addr_validate(a).ok()
+        }).filter(|a| {
+            BLACKLIST.has(deps.storage, a.clone())
+        }).collect::<Vec<_>>();
+        Ok(to_json_binary(&res)?)
     }
 
     pub fn msg_blacklist(
@@ -922,7 +960,7 @@ impl Product {
         if price.is_empty() {
             return Err(ContractError::InvalidPrice {});
         }
-        
+
         if !prms.publication_fee.is_empty() {
             let mut bnk = Bank::load(deps.as_ref())?;
             sent_publication_fee
@@ -947,11 +985,11 @@ impl Product {
             bnk.to_investors.add_many(&to_investors)?;
             bnk.save(deps)?;
         }
-        
-        if msg.meta_hash.len() != 64 || msg.meta_hash.chars().any(|c| !c.is_ascii_hexdigit()){
-            return Err(ContractError::InvalidMetaHash {  });
+
+        if msg.meta_hash.len() != 64 || msg.meta_hash.chars().any(|c| !c.is_ascii_hexdigit()) {
+            return Err(ContractError::InvalidMetaHash {});
         }
-       
+
         let prd = Product {
             id: get_index(deps)?,
             meta: msg.meta,
@@ -960,7 +998,7 @@ impl Product {
             is_listed: msg.is_listed,
             rating: (0, 0),
             delivery_time: msg.delivery_time,
-            meta_hash:msg.meta_hash,
+            meta_hash: msg.meta_hash,
         };
         prd.save(deps)?;
         User::load_or_new(deps, prd.seller.clone())?;
@@ -1129,17 +1167,18 @@ impl Order {
             })
             .collect::<Result<Vec<_>, _>>()?;
         let (products, checked_cart, expected_delivery) =
-            Order::check_cart(deps.as_ref(), env, &seller.addr, cart, &sent_assets)?;
+            Order::check_cart(deps.as_ref(), &env, &seller.addr, cart, &sent_assets)?;
 
         let odr = Order {
             id,
-            cart: checked_cart,
+            total: checked_cart,
             buyer: order.buyer,
             seller: order.seller,
             status: order.status,
             buyer_risk_share: order.buyer_risk_share,
-            products,
+            cart: products,
             expected_delivery,
+            created_at: env.block.time,
         };
         SELLER_TO_ORDER.save(deps.storage, (odr.seller.clone(), odr.id), &Empty {})?;
         BUYER_TO_ORDER.save(deps.storage, (odr.buyer.clone(), odr.id), &Empty {})?;
@@ -1152,18 +1191,18 @@ impl Order {
 
     pub fn check_cart(
         deps: Deps,
-        env: Env,
+        env: &Env,
         seller: &Addr,
         cart: Vec<(u64, AssetInfo)>,
         sent_assets: &AssetList,
-    ) -> Result<(Vec<u64>, AssetList, Expiration), ContractError> {
+    ) -> Result<(Vec<(u64, Asset)>, AssetList, Expiration), ContractError> {
         if cart.len() == 0 {
             return Err(ContractError::InvalidCart {});
         }
         let mut assets = sent_assets.clone();
         let mut checked_cart = AssetList::new();
         let mut products = vec![];
-        let block = env.block;
+        let block = &env.block;
         let mut expected_delivery = Expiration::AtTime(block.time);
         cart.iter().try_for_each(|(product_id, asset_to_use)| {
             let pdt = Product::load(deps, *product_id)?;
@@ -1182,7 +1221,7 @@ impl Order {
                 .ok_or(ContractError::AssetNotAccepted {})?;
             assets.deduct(price)?;
             checked_cart.add(price)?;
-            products.push(*product_id);
+            products.push((*product_id, price.clone()));
             Ok(())
         })?;
         expected_delivery = (expected_delivery + WEEK)?;
@@ -1220,10 +1259,10 @@ impl Order {
             .collect::<Result<Vec<_>, _>>()?;
 
         let (mut prducts, checked_assets, expected_delivery) =
-            Order::check_cart(deps.as_ref(), env, &ord.seller, cart, &sent_assets)?;
+            Order::check_cart(deps.as_ref(), &env, &ord.seller, cart, &sent_assets)?;
 
-        ord.products.append(&mut prducts);
-        ord.cart.add_many(&checked_assets)?;
+        ord.cart.append(&mut prducts);
+        ord.total.add_many(&checked_assets)?;
         if ord.expected_delivery < expected_delivery {
             ord.expected_delivery = expected_delivery;
         }
@@ -1313,7 +1352,7 @@ impl Order {
         ordr.status = OrderStatus::Rejected;
         ordr.save(deps)?;
         usr.save(deps)?;
-        let msgs = ordr.cart.transfer_msgs(ordr.buyer)?;
+        let msgs = ordr.total.transfer_msgs(ordr.buyer)?;
 
         Ok(Response::new()
             .add_attribute("action", "order_rejected")
@@ -1349,8 +1388,8 @@ impl Order {
         let mut seller = User::load(deps.as_ref(), ord.seller.clone())?;
 
         let mut bnk = Bank::load(deps.as_ref())?;
-        let mut to_send = ord.cart.clone();
-        let mut fee = ord.cart.clone();
+        let mut to_send = ord.total.clone();
+        let mut fee = ord.total.clone();
         fee.apply(|a| {
             a.amount = a
                 .amount
@@ -1408,7 +1447,7 @@ impl Order {
         let mut buyer = User::load(deps.as_ref(), ord.buyer.clone())?;
         let mut seller = User::load(deps.as_ref(), ord.seller.clone())?;
 
-        let mut fee = ord.cart.clone();
+        let mut fee = ord.total.clone();
         fee.apply(|a| {
             a.amount = a
                 .amount
@@ -1418,7 +1457,7 @@ impl Order {
         half_fee.apply(|a| {
             a.amount = a.amount.multiply_ratio(1u128, 2u128);
         });
-        let mut to_share = ord.cart.clone();
+        let mut to_share = ord.total.clone();
         to_share.deduct_many(&fee)?;
         let buyer_share = (
             ord.buyer_risk_share.denominator() - ord.buyer_risk_share.numerator(),
@@ -1812,7 +1851,7 @@ impl Review {
         if ordr.status != OrderStatus::Fulfilled && ordr.status != OrderStatus::Disputed {
             return Err(ContractError::Unauthorized {});
         }
-        if !ordr.products.contains(&msg.product_id) {
+        if ordr.cart.iter().all(|(id, _)| id != &msg.product_id) {
             return Err(ContractError::Unauthorized {});
         }
         let mut to_be_rated = Product::load(deps.as_ref(), msg.product_id)?;

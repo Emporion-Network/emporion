@@ -1,6 +1,7 @@
 #[cfg(test)]
 mod tests {
 
+
     use cosmwasm_std::{coins, to_json_binary, Addr, Coin, Empty, Uint128};
     use cw20::{BalanceResponse, Cw20Coin, Cw20ExecuteMsg, Cw20QueryMsg};
     use cw20_base::ContractError;
@@ -794,6 +795,18 @@ mod tests {
         Ok(res)
     }
 
+    fn query_check_blacklisted(
+        app: &mut App,
+        store_addr: &Addr,
+        addrs: Vec<String>,
+    ) -> Result<Vec<Addr>, ContractError> {
+        let res: Vec<Addr> = app.wrap().query_wasm_smart(
+            store_addr.clone(),
+            &QueryMsg::BlacklistedCheck { addrs }
+        )?;
+        Ok(res)
+    }
+
     ///////////////////////////////////////////////////////////////////
     //////////////////////////      Tests      ////////////////////////
     ///////////////////////////////////////////////////////////////////
@@ -894,6 +907,11 @@ mod tests {
         let nb_blacklisted =
             exec_blacklist(&mut app, &store_addr, &admin, vec![seller.to_string()])?;
         assert_eq!(nb_blacklisted, 1);
+
+        assert_eq!(query_check_blacklisted(&mut app, &store_addr, vec![seller.to_string()])?.len(), 1);
+
+        assert_eq!(query_check_blacklisted(&mut app, &store_addr, vec![buyer.to_string()])?.len(), 0);
+
 
         let should_be_err = exec_cw20_create_product(
             &mut app,
@@ -1490,7 +1508,7 @@ mod tests {
 
         let order = query_order(&app, &store_addr, to_be_updated_id)?;
         assert_eq!(order.status, OrderStatus::Creating);
-        assert_eq!(order.products.len(), 1);
+        assert_eq!(order.cart.len(), 1);
 
         let product_id = exec_create_product(
             &mut app,
@@ -1733,9 +1751,9 @@ mod tests {
 
         let order = query_order(&app, &store_addr, to_be_updated_id)?;
         assert_eq!(order.status, OrderStatus::Creating);
-        assert_eq!(order.products.len(), 2);
+        assert_eq!(order.cart.len(), 2);
         assert_eq!(
-            order.cart.find(&AssetInfo::cw20(cash_addr.clone())),
+            order.total.find(&AssetInfo::cw20(cash_addr.clone())),
             Some(Asset::cw20(cash_addr.clone(), 1600u128)).as_ref()
         );
 
@@ -2445,7 +2463,7 @@ mod tests {
     }
 
     ///////////////////////
-    ///      Params     ///
+    ///      Reviews    ///
     ///////////////////////
     #[test]
     fn review_test() -> Result<(), AnyError> {

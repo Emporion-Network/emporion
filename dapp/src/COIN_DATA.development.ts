@@ -109,6 +109,17 @@ export const COIN_DATA = {
         chainName:"Axelar",
         rpc:"https://tm.axelar.lava.build",
         isCw20:false,
-
+    },
+    "CW20":{
+        icon:"https://raw.githubusercontent.com/cosmos/chain-registry/master/juno/images/neta.png",
+        coinGeckoId:"neta",
+        coinDenom:"CW20",
+        coinMinimalDenom:"neutron1gf6chyc0s0twfhuv2dej6dnn33n8dvlnwh7vnrez5h3qd9apac4qh42a8t",
+        onChainDenom:"neutron1gf6chyc0s0twfhuv2dej6dnn33n8dvlnwh7vnrez5h3qd9apac4qh42a8t",
+        coinDecimals: 6,
+        addressPrefix:"neutron",
+        chainName:"Neutron",
+        rpc:"http://localhost:5173/rpc",
+        isCw20:true,
     },
 }

@@ -32,14 +32,14 @@
     - [x] add cart
     - [x] add is active
     - [x] add tooltips all over
-    - [ ] create order
+    - [x] add query blacklist
+    - [x] create order
     - [ ] location attribute
     - [ ] filter blacklisted
     - [ ] add filters
     - [ ] add investment page
     - [ ] add stats page
-    - [ ] add orders page
-    - [ ] add user page 
+    - [ ] add user page with orders stats and reviews
     - [ ] add home page
     - [ ] add gidelines page
 - [x] Write deployement scripts

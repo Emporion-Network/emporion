@@ -33,6 +33,8 @@ let signer = await SigningCosmWasmClient.connectWithSigner(ENDPOINT, adminClient
 
 
 const deploy = async () => {
+
+
     const DAY = 24 * 60 * 60;
     let emporion_core_wasm = new Uint8Array(await Bun.file('artifacts/emporion_core.wasm').arrayBuffer());
     let emporion_voting_module_wasm = new Uint8Array(await Bun.file('artifacts/emporion_voting_module.wasm').arrayBuffer());
@@ -45,6 +47,24 @@ const deploy = async () => {
     let { codeId: DAO_CODE_ID } = await signer.upload(adminAddress, dao_core_wasm, "auto");
     let { codeId: PRE_PROPOSE_SINGLE_CODE_ID } = await signer.upload(adminAddress, dao_pre_propose_single_wasm, "auto");
     let { codeId: PROPOSE_SINGLE_CODE_ID } = await signer.upload(adminAddress, dao_proposal_single_wasm, "auto");
+
+    let cw20:string|undefined = "";
+    if(Bun.env.NODE_ENV === 'development'){
+        let cw20_base = new Uint8Array(await Bun.file('artifacts/cw20_base.wasm').arrayBuffer());
+        let { codeId: CW_20_CODE_ID } = await signer.upload(adminAddress, cw20_base, "auto");
+        let result = await signer.instantiate(adminAddress, CW_20_CODE_ID, {
+            name:"CW20",
+            symbol:"CWT",
+            decimals:6,
+            initial_balances:[{
+                address:adminAddress,
+                amount:"1000000000000"
+            }]
+
+        }, "CW20", "auto")
+        cw20 = result.contractAddress;
+        console.log('CW20 address:', result.contractAddress);
+    }
 
     let instantiate_core: InstantiateMsg = {
         admin: adminAddress,
@@ -77,6 +97,8 @@ const deploy = async () => {
             [{ native: "untrn" }, 1],
             [{ native: "uibcusdc" }, 1],
             [{ native: "uibcatom" }, 1],
+            //@ts-ignore
+            ...(cw20 ? [[{cw20}, 1]] : []),
         ],
     };
 
@@ -140,7 +162,6 @@ const deploy = async () => {
     }
 
     
-
     let result = await signer.instantiate(adminAddress, CORE_CODE_ID, instantiate_core, "Emporion Core", "auto")
     let STORE_ADDRESS = result.contractAddress;
 
@@ -177,9 +198,9 @@ const deploy = async () => {
     env['DAO_ADDRESS'] = DAO_ADDRESS;
 
 
-    await new EmporionClient(signer, adminAddress, STORE_ADDRESS).updateAdmin({
-        newAdmin:DAO_ADDRESS,
-    });
+    await new EmporionClient(signer, adminAddress, STORE_ADDRESS).update_admin({
+        new_admin:DAO_ADDRESS,
+    }, "auto");
 
     await Bun.write(`.env.${Bun.env.NODE_ENV}`, envToString(env))
     /// update front env
@@ -187,11 +208,16 @@ const deploy = async () => {
     env['VITE_STORE_ADDRESS'] = STORE_ADDRESS;
     await Bun.write(`dapp/.env.${Bun.env.NODE_ENV}`, envToString(env))
 
+
+   
+
     /// update back env 
     env = loadEnvFile(await Bun.file(`backend/.env.${Bun.env.NODE_ENV}`).text());
     env['STORE_ADDRESS'] = STORE_ADDRESS;
     env['DAO_ADDRESS'] = DAO_ADDRESS;
     await Bun.write(`backend/.env.${Bun.env.NODE_ENV}`, envToString(env))
+
+
 
     return {
         STORE_ADDRESS,
@@ -200,14 +226,13 @@ const deploy = async () => {
 }
 
 const testDeployement = async ({ DAO_ADDRESS, STORE_ADDRESS }: { DAO_ADDRESS: string, STORE_ADDRESS: string }) => {
-    let params = await new EmporionClient(signer, adminAddress, STORE_ADDRESS).params();
+    let params = await new EmporionClient(signer, adminAddress, STORE_ADDRESS).params({});
     assert(params.admin === DAO_ADDRESS, "DAO should be the admin");
     console.log('✅ Deployement is ready!')
 }
 
 
 await $`bun scripts/build.ts`;
-
 await testDeployement(await deploy())
 
 

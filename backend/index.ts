@@ -23,11 +23,11 @@ const app = new Hono<{ Variables: JwtVariables }>();
 const queryClient = await CosmWasmClient.connect(Bun.env.ENDPOINT || "");
 const client = new EmporionQueryClient(queryClient, Bun.env.STORE_ADDRESS || "");
 
-const PRODUCTS = new FileStorage<ProductMetaData>('PRODUCTS', true);
-const COLLECTION_TO_PRODUCTS = new FileStorage<string[]>('COLLECTION_TO_PRODUCTS', true);
-const FILES = new FileStorage<File>('Files', true, true);
-const HASH_TO_PRODUCT_ID = new FileStorage<Record<string, string>>("HASH_TO_PRODUCT_ID", true);
-const SELLER_COLLECTIONS = new FileStorage<string[]>('SELLER_COLLECTIONS', true);
+const PRODUCTS = new FileStorage<ProductMetaData>(`${Bun.env.NODE_ENV}/PRODUCTS`, true);
+const COLLECTION_TO_PRODUCTS = new FileStorage<string[]>(`${Bun.env.NODE_ENV}/COLLECTION_TO_PRODUCTS`, true);
+const FILES = new FileStorage<File>(`${Bun.env.NODE_ENV}/Files`, true, true);
+const HASH_TO_PRODUCT_ID = new FileStorage<Record<string, string>>(`${Bun.env.NODE_ENV}/HASH_TO_PRODUCT_ID`, true);
+const SELLER_COLLECTIONS = new FileStorage<string[]>(`${Bun.env.NODE_ENV}/SELLER_COLLECTIONS`, true);
 
 
 app.use('*', cors({
@@ -105,7 +105,7 @@ app.post('/auth/create-product', async (c) => {
     let tohash: Partial<ProductMetaData> = structuredClone(productMeta);
     delete tohash.id;
     let pHash = hash(stringify(tohash)).toLowerCase();
-    const onChainProduct = await client.productById({ productId: Number(productMeta.id) });
+    const onChainProduct = await client.product_by_id({ product_id: Number(productMeta.id) });
     assert(onChainProduct.seller === address, errors.UNAUTHORIZED);
     assert(onChainProduct.meta_hash.toLowerCase() === pHash.toLocaleLowerCase(), "Invalid hash")
     assert(await PRODUCTS.has(productMeta.id) === false, "Product already created")

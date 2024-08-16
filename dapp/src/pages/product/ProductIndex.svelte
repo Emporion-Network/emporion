@@ -20,15 +20,17 @@
 
     $: searchText = $href.searchParams.get("q");
     $: category = $href.searchParams.get("category") || "";
-    $: page = $href.searchParams.get("page") || ""
+    $: page = $href.searchParams.get("page") || "";
 
-    $: products = (searchText ? search(searchText, category, page) : listProducts(page)).then((metas) => {
+    $: products = (
+        searchText ? search(searchText, category, page) : listProducts(page)
+    ).then((metas) => {
         return Promise.all(
             metas.map(async (m) => {
                 return {
                     meta: m,
-                    product: await client.productById({
-                        productId: Number(m.id),
+                    product: await client.product_by_id({
+                        product_id: Number(m.id),
                     }),
                 };
             }),
@@ -37,7 +39,7 @@
 </script>
 
 <Menu>
-    <SearchBar searchText={searchText||""} selected={[category]}></SearchBar>
+    <SearchBar searchText={searchText || ""} selected={[category]}></SearchBar>
 </Menu>
 <div class="grid">
     {#await products then products}
@@ -50,10 +52,20 @@
 </div>
 
 <style lang="scss">
+    @use "../../media.scss";
     .grid {
         padding: 0 5%;
         display: grid;
         grid-template-columns: 1fr 1fr 1fr 1fr;
         gap: 2rem;
+        @include media.for-size(tablet-lg) {
+            grid-template-columns: 1fr 1fr 1fr;
+        }
+        @include media.for-size(phone) {
+            grid-template-columns: 1fr 1fr;
+        }
+        @include media.for-size(phone-sm) {
+            grid-template-columns: 1fr;
+        }
     }
 </style>
