@@ -359,7 +359,7 @@ impl ContractParams {
         let params = ContractParams::check(deps.as_ref(), msg)?;
         CONTRACT_PARAMS.save(deps.storage, &params)?;
         Ok(Response::new()
-            .add_attribute("action", "update-params")
+            .add_attribute("action", "update_params")
             .add_attribute("sender", info.sender))
     }
 
@@ -375,9 +375,9 @@ impl ContractParams {
         params.admin = new_admin.clone();
         params.save(deps)?;
         Ok(Response::new()
-            .add_attribute("action", "update-admin")
+            .add_attribute("action", "update_admin")
             .add_attribute("sender", info.sender)
-            .add_attribute("new-admin", new_admin))
+            .add_attribute("new_admin", new_admin))
     }
 
     pub fn msg_query_info(deps: Deps) -> Result<QueryResponse, ContractError> {
@@ -1569,7 +1569,7 @@ impl Order {
         Ok(Response::new()
             .add_attribute("action", "order_disputed")
             .add_attribute("sender", info.sender)
-            .add_attribute("order-id", ord.id.to_string())
+            .add_attribute("order_id", ord.id.to_string())
             .add_messages(buyer_msgs)
             .add_messages(seller_msgs))
     }

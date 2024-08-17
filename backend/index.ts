@@ -231,7 +231,10 @@ app.get("/products/:page?", async (c) => {
 app.post('/auth/upload-image', async (c) => {
     const body = await c.req.parseBody();
     let { address }: { address: string } = c.get('jwtPayload');
-    const files = body['file[]'] as unknown as File[];
+    let files = body['file[]'] as unknown as File[];
+    if(!Array.isArray(files)){
+        files = [files]
+    }
     const urls = await Promise.all(files.map(async file => {
         assert(file instanceof File, "Sould be file");
         assert(file.type.startsWith('image/'), "Only images accepted");

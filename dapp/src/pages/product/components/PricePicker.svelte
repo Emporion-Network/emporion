@@ -50,12 +50,11 @@
     .price{
         background-color: var(--gray-2);
         padding: 1rem;
-        border-radius: 3px;
+        border-radius: 5px;
         border: 1px solid var(--gray-6);
         display: flex;
         flex-direction: column;
         gap:0.5rem;
-        margin-top: 1rem;
         .wpr{
             display: flex;
             .button-1{

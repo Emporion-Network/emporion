@@ -10,19 +10,6 @@
 <script lang="ts">
     import { Decimal } from "@cosmjs/math";
     import { jwt, user } from "../../stores/user";
-    import ImageUploader from "./components/ImageUploader.svelte";
-    import Description from "./components/Description.svelte";
-    import Categories from "./components/Categories.svelte";
-    import PricePicker from "./components/PriceMaker.svelte";
-    import Attriutes from "./components/AttributesMaker.svelte";
-    import ProductShow from "./components/ProductPickerShow.svelte";
-    import type {
-        AssetInfoBaseForAddr,
-        Product,
-    } from "../../../../client-ts/Emporion.types";
-    import Tooltip from "../../lib/Tooltip.svelte";
-    import Search from "../../lib/Search.svelte";
-    import type { ProductMetaData } from "../../../../shared-types";
     import {
         extractAttr,
         getMetaHash,
@@ -30,13 +17,31 @@
         getSellerCollections,
         id,
         uploadMeta,
+        DAY,
+        trimStrings,
     } from "../../lib/utils";
-    import DeliveryTime, { DAY } from "./components/DeliveryTime.svelte";
+    import type { ProductMetaData } from "../../../../shared-types";
+    import type {
+        AssetInfoBaseForAddr,
+        Product,
+    } from "../../../../client-ts/Emporion.types";
+    const { 
+        VITE_ENDPOINT_BACK_END_API: ENDPOINT_BACK_END_API 
+    } = import.meta.env;
+    import ImageUploader from "./components/ImageUploader.svelte";
+    import Description from "./components/Description.svelte";
+    import Categories from "./components/Categories.svelte";
+    import PricePicker from "./components/PriceMaker.svelte";
+    import Attriutes from "./components/AttributesMaker.svelte";
+    import ProductShow from "./components/ProductPickerShow.svelte";
+    import Tooltip from "../../lib/Tooltip.svelte";
+    import Search from "../../lib/Search.svelte";
     import Menu from "../../lib/Menu.svelte";
     import Switch from "./components/traitInputs/Switch.svelte";
+    import DeliveryTime from "./components/DeliveryTime.svelte";
     import { notification } from "../../lib/Notifications.svelte";
-    const { VITE_ENDPOINT_BACK_END_API: ENDPOINT_BACK_END_API } = import.meta
-        .env;
+   
+
 
     let name: string;
     let description: string;
@@ -57,10 +62,10 @@
 
     const create = async () => {
         creating = true;
-        const meta: ProductMetaData = {
+        const meta: ProductMetaData = trimStrings({
             id: "",
-            name,
-            description,
+            name:name.trim(),
+            description:description,
             image: img || "",
             collection_id: collectionId,
             categories: categories,
@@ -68,6 +73,7 @@
                 ...attributes.map((a) => {
                     //@ts-ignore
                     delete a.key;
+
                     return a;
                 }),
                 ...galleryImages
@@ -78,7 +84,7 @@
                         trait_type: e,
                     })),
             ],
-        };
+        });
         const hash = getMetaHash(meta);
         try {
             let r = await $user?.emporionClient.create_product(
@@ -105,7 +111,6 @@
             }
         } catch (e) {
             let text = "Unknown error"
-            console.log(e);
             if(e instanceof Error) text = e.message.length > 20 ? text : e.message;
             notification({
                 type:"error",

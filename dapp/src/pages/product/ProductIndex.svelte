@@ -35,6 +35,11 @@
                 };
             }),
         );
+    }).then(async (metas) => {
+        const addrs = await client.blacklisted_check({
+            addrs:metas.map(e => e.product.seller),
+        })
+        return metas.filter(e => !addrs.includes(e.product.seller));
     });
 </script>
 

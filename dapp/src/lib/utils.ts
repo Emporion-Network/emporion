@@ -10,6 +10,7 @@ import type { ProductMetaData } from "../../../shared-types";
 import stringify from 'json-stable-stringify';
 import { sha256 } from '@cosmjs/crypto';
 import type { AssetInfoBaseForAddr, Product } from "../../../client-ts/Emporion.types";
+import type { Duration, Expiration } from "../../../client-ts/Emporion.client";
 
 
 const {
@@ -226,7 +227,7 @@ export const uploadImage = (token: string): Promise<string[]> => {
         ipt.accept = "image/*"
         ipt.multiple = true;
         ipt.onchange = () => {
-            const f = Array.from(ipt.files||[]);
+            const f = Array.from(ipt.files || []);
             if (f.length === 0) {
                 return resolve([])
             }
@@ -419,7 +420,7 @@ export const getProductsMeta = async (address: string, collection: string) => {
 }
 
 
-export const getProduct = async (id:string) => {
+export const getProduct = async (id: string) => {
     try {
         const resp = await fetch(`${ENDPOINT_BACK_END_API}/product/${id}`);
         const productsMeta: ProductMetaData = await resp.json();
@@ -480,7 +481,7 @@ export const uploadMeta = async (meta: ProductMetaData, token: string) => {
             type: "error"
         })
     }
-   
+
     return resp.status == 200;
 }
 
@@ -496,16 +497,16 @@ export const searchSuggestions = async (query: string) => {
             return [];
         }
         return products;
-    } catch (e: any) {}
+    } catch (e: any) { }
     return []
 }
 
-export const search = async (query: string, categorie?:string, page?:string) => {
+export const search = async (query: string, categorie?: string, page?: string) => {
     try {
-        const url = page ? 
-        new URL(`${ENDPOINT_BACK_END_API}/search/${page}`) : new URL(`${ENDPOINT_BACK_END_API}/search`);
+        const url = page ?
+            new URL(`${ENDPOINT_BACK_END_API}/search/${page}`) : new URL(`${ENDPOINT_BACK_END_API}/search`);
         url.searchParams.set('q', query);
-        if(categorie) url.searchParams.set('categorie', categorie);
+        if (categorie) url.searchParams.set('categorie', categorie);
 
         const resp = await fetch(url.href);
         const products: ProductMetaData[] = await resp.json();
@@ -513,35 +514,35 @@ export const search = async (query: string, categorie?:string, page?:string) => 
             return [];
         }
         return products;
-    } catch (e: any) {}
+    } catch (e: any) { }
     return []
 }
 
-export const listProducts = async (page?:string) => {
+export const listProducts = async (page?: string) => {
     try {
-        const url = page ? 
-        new URL(`${ENDPOINT_BACK_END_API}/products/${page}`) :  new URL(`${ENDPOINT_BACK_END_API}/products`);
+        const url = page ?
+            new URL(`${ENDPOINT_BACK_END_API}/products/${page}`) : new URL(`${ENDPOINT_BACK_END_API}/products`);
         const resp = await fetch(url.href);
         const products: ProductMetaData[] = await resp.json();
         if (`error` in products) {
             return [];
         }
         return products;
-    } catch (e: any) {}
+    } catch (e: any) { }
     return []
 }
 
-export const swap = <T>(arr:T[], idxA:number, idxB:number) => {
+export const swap = <T>(arr: T[], idxA: number, idxB: number) => {
     [arr[idxA], arr[idxB]] = [arr[idxB], arr[idxA]];
-  };
+};
 
-export  const getOnChainDenom = (info: AssetInfoBaseForAddr) => {
+export const getOnChainDenom = (info: AssetInfoBaseForAddr) => {
     if ("cw20" in info) {
         return info.cw20;
     }
     return info.native;
 };
-export const getPrices = (product: Product, record:Record<string, CoinData>) => {
+export const getPrices = (product: Product, record: Record<string, CoinData>) => {
     return product.price.map((e) => {
         let denom = getOnChainDenom(e.info);
         return {
@@ -550,3 +551,63 @@ export const getPrices = (product: Product, record:Record<string, CoinData>) => 
         };
     });
 };
+
+export const getDeliveryDate = (expiration: Expiration) => {
+    if ('at_time' in expiration) {
+        return new Date(Number(expiration.at_time.slice(0, 13)))
+    }
+}
+
+export const DAY = 86400;
+
+
+export const s = (n: number) => n > 1 ? "s" : "";
+
+export const msToStr = (t: number) => {
+    const days = t / DAY;
+    if (days % 7 == 0) {
+        const weeks = days / 7
+        return `${weeks} week${s(weeks)}`
+    }
+    if (days % 30 == 0) {
+        const monts = days / 30
+        return `${monts} month${s(monts)}`
+    }
+    return `${days} day${s(days)}`
+}
+
+export const getDeliveryDuration = (duration: Duration) => {
+    if ('time' in duration) {
+        return msToStr(duration.time)
+    }
+    return "";
+}
+
+
+export const getDeliveryFormatedDate = (duration: Duration) =>{
+    if ('time' in duration) {
+        const date = new Date()
+        date.setDate(date.getDate() + Math.floor(duration.time/DAY))
+        return date.toLocaleDateString("en-US", {
+            month:'short',
+            day:'numeric'
+        })
+    } 
+}
+
+export const trimStrings = <T>(o:T):T=>{
+    if(Array.isArray(o)){
+        return o.map(i => trimStrings(i)) as T;
+    }
+    if(typeof o == 'object' && o && Object.prototype.toString.call(o) === '[object Object]'){
+        Object.keys(o).forEach((k) => {
+            let key = k as keyof typeof o;
+            o[key] = trimStrings(o[key])
+        })
+        return o;
+    }
+    if(typeof o === 'string'){
+        return o.trim() as T;
+    }
+    return o;
+}

@@ -1,28 +1,25 @@
 <script lang="ts">
-    import type {
-        Product,
-    } from "../../../../../client-ts/Emporion.types";
+    import type { Product } from "../../../../../client-ts/Emporion.types";
     import type { ProductMetaData } from "../../../../../shared-types";
-    import { getNames, getPrices, rotateObj } from "../../../lib/utils";
+    import { getDeliveryDuration, getDeliveryFormatedDate, getNames, getPrices, rotateObj } from "../../../lib/utils";
     import { prices } from "../../../stores/coins";
     import markdownit from "markdown-it";
     import PricePicker from "./PricePicker.svelte";
     import OverflowAddress from "../../../lib/OverflowAddress.svelte";
     import Stars from "../../../lib/Stars.svelte";
     import DisplayAttributes from "./DisplayAttributes.svelte";
-    import { addItem, cart } from "../../../stores/cart";
+    import { addItem } from "../../../stores/cart";
     import ImageSlider from "./ImageSlider.svelte";
+    import Foldable from "../../../lib/Foldable.svelte";
     export let metas: ProductMetaData[];
     export let products: Product[];
     export let productId: string;
-    
 
     const md = markdownit({
         linkify: false,
         html: false,
         breaks: true,
     });
-
 
     let r = rotateObj($prices, "onChainDenom");
 
@@ -31,24 +28,26 @@
     let sellerNames = getNames(product.seller);
     let productPrices = getPrices(product, r);
 
-    const addToCart = (denom:string)=>{
-        console.log('heee')
+    const addToCart = (denom: string) => {
+        console.log("heee");
         addItem({
-            meta:meta,
-            product:product,
-            coinDenom:denom
-        })
-    }
+            meta: meta,
+            product: product,
+            coinDenom: denom,
+        });
+    };
 
-    $:productId,(()=>{
-        if(productId === meta.id) return;
-        console.log('this is')
-        product = products.find((p) => p.id === Number(productId)) as Product;
-        meta = metas.find((p) => p.id === productId) as ProductMetaData;
-        sellerNames = getNames(product.seller);
-        productPrices = getPrices(product, r);
-    })()
-
+    $: productId,
+        (() => {
+            if (productId === meta.id) return;
+            console.log("this is");
+            product = products.find(
+                (p) => p.id === Number(productId),
+            ) as Product;
+            meta = metas.find((p) => p.id === productId) as ProductMetaData;
+            sellerNames = getNames(product.seller);
+            productPrices = getPrices(product, r);
+        })();
 </script>
 
 <div class="page">
@@ -68,34 +67,67 @@
                 </div>
             </div>
         {/if}
-        <ImageSlider imgs={[meta.image, ...meta.attributes.filter(a => a.display_type == 'image').map(e => e.value?.toString()||"")]}></ImageSlider>
+        <ImageSlider
+            imgs={[
+                meta.image,
+                ...meta.attributes
+                    .filter((a) => a.display_type == "image")
+                    .map((e) => e.value?.toString() || ""),
+            ]}
+        ></ImageSlider>
     </div>
     <div class="info">
-        <div>
-            Sold by:
-            {#await sellerNames}
-                <button class="button-link">
-                    <OverflowAddress address={product.seller}></OverflowAddress>
-                </button>
-            {:then [name]}
-                {#if name}
-                    <button class="button-link">{name}</button>
-                {:else}
+        <div class="quick-info">
+            <div>
+                Sold by:
+                {#await sellerNames}
                     <button class="button-link">
                         <OverflowAddress address={product.seller}
                         ></OverflowAddress>
                     </button>
-                {/if}
-            {/await}
+                {:then [name]}
+                    {#if name}
+                        <button class="button-link">{name}</button>
+                    {:else}
+                        <button class="button-link">
+                            <OverflowAddress address={product.seller}
+                            ></OverflowAddress>
+                        </button>
+                    {/if}
+                {/await}
+            </div>
+            <h1>{meta.name}</h1>
+            <div>Expected Delivery: <span class="bold">{getDeliveryFormatedDate(product.delivery_time)}</span> <span class="small">({getDeliveryDuration(product.delivery_time)})</span></div>
+            <Stars bind:rating={product.rating}></Stars>
         </div>
-        <h1>{meta.name}</h1>
-        <Stars bind:rating={product.rating}></Stars>
+
         <PricePicker bind:productPrices {addToCart}></PricePicker>
-        <DisplayAttributes products={metas} bind:selectedProductId={productId}
-        ></DisplayAttributes>
-        <div class="description">
-            {@html md.render(meta.description)}
-        </div>
+        <Foldable>
+            <div slot="header" class="description-title" let:isOpen let:toggle>
+                <i class="ri-equalizer-3-line"></i>
+                <div>Configure your product</div>
+                <button class="button-ghost" on:click={toggle}>
+                    <i class="ri-arrow-{isOpen ? 'up' : 'down'}-s-line"></i>
+                </button>
+            </div>
+            <DisplayAttributes
+                slot="content"
+                products={metas}
+                bind:selectedProductId={productId}
+            ></DisplayAttributes>
+        </Foldable>
+        <Foldable>
+            <div slot="header" class="description-title" let:isOpen let:toggle>
+                <i class="ri-file-paper-2-line"></i>
+                <div>Description</div>
+                <button class="button-ghost" on:click={toggle}>
+                    <i class="ri-arrow-{isOpen ? 'up' : 'down'}-s-line"></i>
+                </button>
+            </div>
+            <div class="description" slot="content">
+                {@html md.render(meta.description)}
+            </div>
+        </Foldable>
     </div>
 </div>
 
@@ -125,11 +157,25 @@
         color: var(--gray-12);
         display: flex;
         flex-direction: column;
+        gap: 2rem;
         h1 {
             color: var(--gray-12);
             font-weight: bolder;
         }
+        .description-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            flex: 1;
+            div {
+                flex: 1;
+                margin-left: 1rem;
+            }
+        }
         .description {
+            padding: 1rem;
             color: var(--gray-11);
             :global(ul),
             :global(ol) {
@@ -172,6 +218,7 @@
             width: 100%;
             backdrop-filter: blur(4px);
             top: 0;
+            z-index: 1;
             .accepted-coins {
                 display: flex;
                 width: max-content;

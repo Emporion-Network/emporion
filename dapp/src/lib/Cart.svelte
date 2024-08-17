@@ -26,6 +26,7 @@
         seller,
         {
             riskRatio: number;
+            total:Record<string, Decimal>;
             products: Map<
                 productId,
                 Map<coin, (typeof $cart)[number] & { qty: number }>
@@ -40,12 +41,9 @@
         if (!acc.has(p.product.seller)) {
             const m = new Map();
             m.set(p.product.id, new Map());
-            let riskRatio = 50;
-            const exists = bySeller.get(p.product.seller);
-            if (exists) {
-                riskRatio = exists.riskRatio;
-            }
-            acc.set(p.product.seller, { products: m, riskRatio });
+            let riskRatio = bySeller.get(p.product.seller)?.riskRatio || 50;
+
+            acc.set(p.product.seller, { products: m, riskRatio, total:Object.create(null) });
         }
         if (!acc.get(p.product.seller)?.products.has(p.product.id)) {
             acc.get(p.product.seller)?.products.set(p.product.id, new Map());
@@ -57,6 +55,11 @@
             ...p,
             qty: 0,
         };
+        const price= getPrices(p.product, r).find((c) => c.denom == p.coinDenom)!.amount;
+        acc.get(p.product.seller)!.total[p.coinDenom] = 
+        (acc.get(p.product.seller)!.total[p.coinDenom] || Decimal.zero($prices[p.coinDenom].coinDecimals))
+        .plus(price)
+
         v.qty += 1;
         acc.get(p.product.seller)
             ?.products.get(p.product.id)
@@ -72,6 +75,19 @@
         }
         $isVisible = false;
     };
+
+    const isDisabeled = (addr?:string)=>{
+        if(addr){
+            return !Object.keys(bySeller.get(addr)!.total).reduce((acc, c)=>{
+                return acc && bySeller.get(addr)!.total[c].isLessThanOrEqual($prices[c].onChainAmount)
+            }, true)
+        }
+        return ![...bySeller.keys()].reduce((curr, addr)=>{
+            return curr && Object.keys(bySeller.get(addr)!.total).reduce((acc, c)=>{
+                return acc && bySeller.get(addr)!.total[c].isLessThanOrEqual($prices[c].onChainAmount)
+            }, true)
+        }, true)
+    }
 
     type Cart = CreateOrderExecuteMsg["cart"];
 
@@ -154,7 +170,8 @@
                         }).sort((a,b) => a.denom.localeCompare(b.denom)),
                     );
                     if (!r) throw Error("Unknown error");
-                    orderId = Number(extractAttr("order-id", r));
+                    console.log(r);
+                    orderId = Number(extractAttr("order_id", r));
                 }
                 if (cw20Cart.length > 0 && orderId === -1) {
                     const denom =
@@ -190,17 +207,17 @@
                     );
                     if (!r) throw Error("Unknown error");
                     cw20Cart.shift();
-                    orderId = Number(extractAttr("order-id", r));
+                    orderId = Number(extractAttr("order_id", r));
                 }
                 if (cw20Cart.length > 0) {
+                    console.log(orderId);
                     const instructions = Object.keys(cw20).map((denom) => {
                         return {
                             contractAddress: denom,
                             msg: {
                                 send: {
                                     amount: cw20[denom].atomics,
-                                    contract:
-                                        $user?.emporionClient.contractAddress,
+                                    contract:$user!.emporionClient.contractAddress,
                                     msg: btoa(
                                         JSON.stringify({
                                             add_products_to_order: {
@@ -223,11 +240,10 @@
                         };
                     });
                     instructions.push({
-                        contractAddress:
-                            $user?.emporionClient.contractAddress || "",
+                        contractAddress:$user!.emporionClient.contractAddress,
                         msg: { finalize_order: { order_id: orderId } },
                     });
-                    $user?.emporionClient.client.executeMultiple(
+                    await $user?.emporionClient.client.executeMultiple(
                         $user?.emporionClient.sender,
                         instructions,
                         "auto",
@@ -266,7 +282,7 @@
                     console.log(coins);
                     return {
                         contractAddress:
-                            $user?.emporionClient.contractAddress || "",
+                            $user!.emporionClient.contractAddress,
                         msg: {
                             create_order: {
                                 buyer_risk_share: [
@@ -323,12 +339,14 @@
                     {#if bySeller.size > 1}
                         <button
                             class="button-1 buy-button"
+                            disabled={isDisabeled()}
                             on:click={createOrder()}>Buy all</button
                         >
                     {:else}
                         <button
                             class="button-1 buy-button"
                             on:click={createOrder([...bySeller.keys()][0])}
+                            disabled={isDisabeled([...bySeller.keys()][0])}
                             >Buy</button
                         >
                     {/if}
@@ -376,6 +394,7 @@
                             <button
                                 class="button-2"
                                 on:click={createOrder(seller)}
+                                disabled={isDisabeled(seller)}
                                 >Pay this seller only</button
                             >
                         {/if}
