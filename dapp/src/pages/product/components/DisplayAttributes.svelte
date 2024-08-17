@@ -11,12 +11,13 @@
     import RadioImage from "./traitDisplay/RadioImage.svelte";
     import Switch from "./traitDisplay/Switch.svelte";
     import { eq, intersect, Map2, LMap } from "../../../lib/utils";
+    import Select from "./traitDisplay/Select.svelte";
 
     const traitToComponent: Record<Displayable, ComponentType> = {
         color: Color,
         "radio-button": RadioButton,
         "radio-image": RadioImage,
-        select: RadioImage,
+        select: Select,
         switch: Switch,
     };
 

@@ -10,7 +10,6 @@
     };
 
     const handleClick = async () => {
-        console.log(pickImage)
         value.src = await pickImage(value.src);
     };
 </script>

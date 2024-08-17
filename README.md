@@ -35,6 +35,7 @@
     - [x] add query blacklist
     - [x] create order
     - [ ] location attribute
+    - [ ] select attribute
     - [ ] filter blacklisted
     - [ ] add filters
     - [ ] add investment page

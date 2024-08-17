@@ -52,7 +52,7 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        gap:1rem;
+        gap:0.5rem;
         background-color: transparent;
         color: var(--gray-12);
         border: none;

@@ -170,7 +170,6 @@
                         }).sort((a,b) => a.denom.localeCompare(b.denom)),
                     );
                     if (!r) throw Error("Unknown error");
-                    console.log(r);
                     orderId = Number(extractAttr("order_id", r));
                 }
                 if (cw20Cart.length > 0 && orderId === -1) {
@@ -210,7 +209,6 @@
                     orderId = Number(extractAttr("order_id", r));
                 }
                 if (cw20Cart.length > 0) {
-                    console.log(orderId);
                     const instructions = Object.keys(cw20).map((denom) => {
                         return {
                             contractAddress: denom,
@@ -279,7 +277,6 @@
                                 { native: coin.onChainDenom },
                             ]);
                         });
-                    console.log(coins);
                     return {
                         contractAddress:
                             $user!.emporionClient.contractAddress,
@@ -300,7 +297,6 @@
                         })).sort((a,b) => a.denom.localeCompare(b.denom)),
                     };
                 });
-                console.log(nativeOnly);
                 await $user?.emporionClient.client.executeMultiple(
                     $user?.emporionClient.sender,
                     instructions,
@@ -309,7 +305,6 @@
             }
             clear();
         } catch (e) {
-            console.log(e);
             let text = "Unknown error";
             if (e instanceof Error) {
                 text = e.message;

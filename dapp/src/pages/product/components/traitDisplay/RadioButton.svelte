@@ -3,6 +3,7 @@
     import Tooltip from "../../../../lib/Tooltip.svelte";
     export let values:Map<string, {ids:string[], isDisabeled:boolean}>;
     export let productId:string;
+    export let label:string;
     export let selected = Array.from(values.values()).find(e => {
         return e.ids.includes(productId)
     })?.ids;
@@ -10,10 +11,12 @@
     $:selected = Array.from(values.values()).find(e => {
         return e.ids.includes(productId)
     })?.ids;
-    export let label:string;
 
+    $:selectedLabel = Array.from(values.entries()).find(([_, {ids}])=>{
+        return ids.includes(productId)
+    })![0]
 </script>
-<h4>{label}</h4>
+<h4>{label} {selectedLabel}</h4>
 <Radio bind:selected="{selected}" let:select>
     {#each values.entries() as [label, {ids, isDisabeled}]}
         {#if isDisabeled}

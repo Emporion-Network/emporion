@@ -19,6 +19,7 @@
     import Drag from "../../../lib/Drag.svelte";
     import Draggable from "../../../lib/Draggable.svelte";
     import Tooltip from "../../../lib/Tooltip.svelte";
+    import Select from "./traitInputs/Select.svelte";
 
     export let attributes: Attribute[] = [];
     export let disableNames = false;
@@ -34,7 +35,7 @@
         region: Region,
         "radio-image": RadioImage,
         "radio-button": RadioButton,
-        select: Color,
+        select: Select,
     };
 
     const addAttribute = () => {

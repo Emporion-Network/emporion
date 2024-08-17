@@ -108,6 +108,7 @@
             meta.id = id;
             if (await uploadMeta(meta, jwt.get() || "")) {
                 clear();
+                myCollections = await getSellerCollections($user!.address || "");
             }
         } catch (e) {
             let text = "Unknown error"
@@ -164,7 +165,7 @@
         metas = await getProductsMeta($user?.address || "", collection);
         if (metas.length === 0) return;
         attributes = metas[0].attributes
-            .map((a) => ({ ...a, key: id() }))
+            .map((a) => ({ ...structuredClone(a), key: id() }))
             .filter((a) => a.display_type !== "image");
         categories = metas[0].categories;
         products = (

@@ -29,7 +29,6 @@
     let productPrices = getPrices(product, r);
 
     const addToCart = (denom: string) => {
-        console.log("heee");
         addItem({
             meta: meta,
             product: product,
@@ -40,7 +39,6 @@
     $: productId,
         (() => {
             if (productId === meta.id) return;
-            console.log("this is");
             product = products.find(
                 (p) => p.id === Number(productId),
             ) as Product;

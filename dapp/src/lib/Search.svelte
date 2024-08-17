@@ -54,6 +54,9 @@
         border: 1px solid var(--gray-6);
         background-color: var(--gray-2);
         position: relative;
+        &:hover{
+            border: 1px solid var(--gray-7);
+        }
         &.isOpen{
             z-index: 99;
         }
