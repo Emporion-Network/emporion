@@ -1,9 +1,9 @@
 <script lang="ts">
     import { CATEGORIES } from "../../../shared-types/categories";
     import { historyPush, href } from "../stores/location";
+    import { api } from "../stores/user";
     import MultiSelect from "./MultiSelect.svelte";
     import Search from "./Search.svelte";
-    import { searchSuggestions } from "./utils";
     export let selected:string[] = [];
     export let searchText:string="";
     let prevSearch = "";
@@ -15,7 +15,7 @@
             if(searchText === "") return;
             if(prevSearch === searchText) return;
             prevSearch = searchText;
-            searchSuggestions(searchText).then(e=> {
+            api.suggestionsGet(searchText).then(e=> {
                 if(e.length > 0){
                     suggestions = e;
                 }
@@ -71,6 +71,10 @@
             border-radius: 3px 0 0 3px;
             border-right: 2px solid var(--gray-6);
             height: 100%;
+            &:hover{
+                border: none;
+                border-right: 2px solid var(--gray-7);
+            }
         }
     }
 </style>

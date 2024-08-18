@@ -1,6 +1,6 @@
 <script lang="ts">
     import { tick } from "svelte";
-    import { wait } from "./utils";
+    import { wait } from "../utils";
     let n: string;
     let e: HTMLElement;
 

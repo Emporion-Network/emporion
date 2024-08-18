@@ -118,6 +118,7 @@
         display: flex;
         flex-direction: column;
         gap: 1rem;
+        z-index: 99;
 
         @include media.for-size(tablet) {
             width: 100%;
@@ -145,10 +146,10 @@
                 flex-direction: column;
                 display: block;
                 overflow: hidden;
-
             }
             a{
                width: 100%;
+               max-width: max-content;
                white-space: nowrap;
                overflow: hidden;
                display: flex;

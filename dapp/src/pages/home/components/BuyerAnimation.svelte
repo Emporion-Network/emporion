@@ -16,10 +16,10 @@
         scrollTo,
         together,
         wait,
-    } from "../../../lib/utils";
+    } from "../../../utils";
     import BuyerAnimationCell from "./BuyerAnimationCell.svelte";
     import AnimatableTitle from "../../../lib/AnimatableTitle.svelte";
-    import { fancyBorder } from "../../../lib/directives";
+    import { fancyBorder } from "../../../directives";
     import Vault from "../../../assets/Vault.svelte";
 
     let grid: HTMLElement;

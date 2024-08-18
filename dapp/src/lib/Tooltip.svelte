@@ -103,7 +103,7 @@
       margin: 0.5rem 0;
       border-radius: 3px;
       font-size: 0.9rem;
-      z-index: 100;
+      z-index: 99;
       max-width: 300px;
       font-weight: 500;
       &.left::after{

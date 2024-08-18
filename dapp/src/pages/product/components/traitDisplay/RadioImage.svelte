@@ -57,6 +57,7 @@
         color: var(--gray-12);
         border: none;
         cursor: pointer;
+
         img{
             width: 30px;
             height: 30px;
@@ -65,7 +66,7 @@
         &.selected{
             img{
                 outline: 2px solid var(--indigo-10);
-                outline-offset: 6px;
+                outline-offset: 3px;
             }
         }
         &.disable{

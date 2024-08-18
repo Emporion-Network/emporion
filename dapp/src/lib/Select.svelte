@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { clickOutside } from "./directives";
+    import { clickOutside } from "../directives";
 
     type T = $$Generic
     export let selected:T;

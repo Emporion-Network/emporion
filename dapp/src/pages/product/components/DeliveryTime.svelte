@@ -1,6 +1,6 @@
 <script lang="ts">
     import Slider from "../../../lib/Slider.svelte";
-    import { DAY, msToStr } from "../../../lib/utils";
+    import { DAY, msToStr } from "../../../utils";
     export let value = 7*DAY;
    
 </script>

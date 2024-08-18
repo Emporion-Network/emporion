@@ -1,21 +1,15 @@
 import { toBech32, fromBech32 } from "@cosmjs/encoding"
-import { addIbcTx, type CoinData } from "../stores/coins";
+import { addIbcTx, type CoinData } from "./stores/coins";
 import { SigningStargateClient } from "@cosmjs/stargate";
 import { MsgTransfer } from "cosmjs-types/ibc/applications/transfer/v1/tx"
 import { Decimal } from "@cosmjs/math";
 import { GasPrice } from "@cosmjs/stargate";
 import { CosmWasmClient, type ExecuteResult } from "@cosmjs/cosmwasm-stargate";
-import { notification } from "./Notifications.svelte";
-import type { ProductMetaData } from "../../../shared-types";
+import type { ProductMetaData } from "../../shared-types";
 import stringify from 'json-stable-stringify';
 import { sha256 } from '@cosmjs/crypto';
-import type { AssetInfoBaseForAddr, Product } from "../../../client-ts/Emporion.types";
-import type { Duration, Expiration } from "../../../client-ts/Emporion.client";
-
-
-const {
-    VITE_ENDPOINT_BACK_END_API: ENDPOINT_BACK_END_API,
-} = import.meta.env;
+import type { AssetInfoBaseForAddr, Product } from "../../client-ts/Emporion.types";
+import type { Duration, Expiration } from "../../client-ts/Emporion.client";
 
 export const caplz = (str: string) => {
     return `${str[0].toUpperCase()}${str.slice(1)}`;
@@ -220,22 +214,6 @@ export const getMetaHash = (meta: ProductMetaData) => {
     return hash(h)
 }
 
-export const uploadImage = (token: string): Promise<string[]> => {
-    return new Promise(resolve => {
-        let ipt = document.createElement('input');
-        ipt.type = "file"
-        ipt.accept = "image/*"
-        ipt.multiple = true;
-        ipt.onchange = () => {
-            const f = Array.from(ipt.files || []);
-            if (f.length === 0) {
-                return resolve([])
-            }
-            resolve(uploadFile(f, token))
-        }
-        ipt.click()
-    })
-}
 
 
 
@@ -367,170 +345,12 @@ export const signMessage = async (nonce: string) => {
 }
 
 
-export const uploadFile = async (f: File[], token: string) => {
-    try {
-        const data = new FormData()
-        f.forEach(f => {
-            data.append('file[]', f);
-        })
-        const resp = await fetch(`${ENDPOINT_BACK_END_API}/auth/upload-image`, {
-            method: "POST",
-            headers: {
-                'Authorization': `bearer ${token}`,
-            },
-            body: data,
-        });
-        const res: { urls: string[] } = await resp.json()
-        return res.urls.map(u => `${ENDPOINT_BACK_END_API}/image/${u}`)
-    } catch (e: any) {
-        notification({
-            type: "error",
-            text: e.message || "An Error occured"
-        })
-    }
-    return [];
-}
-
-export const getImages = async (user: string) => {
-    try {
-        const resp = await fetch(`${ENDPOINT_BACK_END_API}/images/${user}`);
-        const { images }: { images: string[] } = await resp.json()
-        return images.map(e => `${ENDPOINT_BACK_END_API}/image/${e}`);
-    } catch (e: any) {
-        notification({
-            type: "error",
-            text: e.message || "An Error occured"
-        })
-    }
-    return []
-}
-
-
-export const getProductsMeta = async (address: string, collection: string) => {
-    try {
-        const resp = await fetch(`${ENDPOINT_BACK_END_API}/collection/${address}/${collection}`);
-        const productsMeta: ProductMetaData[] = await resp.json();
-        if (`error` in productsMeta) {
-            return [];
-        }
-        return productsMeta;
-    } catch (e: any) {
-    }
-    return []
-}
-
-
-export const getProduct = async (id: string) => {
-    try {
-        const resp = await fetch(`${ENDPOINT_BACK_END_API}/product/${id}`);
-        const productsMeta: ProductMetaData = await resp.json();
-        if (`error` in productsMeta) {
-            return undefined;
-        }
-        return productsMeta;
-    } catch (e: any) {
-        notification({
-            type: "error",
-            text: e.message || "An Error occured"
-        })
-    }
-}
-
-
-
-
-export const getSellerCollections = async (address: string,) => {
-    try {
-        const resp = await fetch(`${ENDPOINT_BACK_END_API}/collections/${address}`);
-        const collections: string[] = await resp.json();
-        if (`error` in collections) {
-            return [];
-        }
-        return collections;
-    } catch (e: any) {
-        notification({
-            type: "error",
-            text: e.message || "An Error occured"
-        })
-    }
-    return []
-}
 
 export const extractAttr = (attr: string, resp: ExecuteResult) => {
     const attrs = resp.events.filter(e => e.type == 'wasm').map(e => e.attributes).flat()
     return attrs.find(a => a.key === attr)?.value
 }
 
-export const uploadMeta = async (meta: ProductMetaData, token: string) => {
-    const resp = await fetch(`${ENDPOINT_BACK_END_API}/auth/create-product`, {
-        method: "POST",
-        headers: {
-            'Authorization': `bearer ${token}`,
-        },
-        body: JSON.stringify(meta),
-    });
-
-    if (resp.status == 200) {
-        notification({
-            text: "Product created successfuly",
-            type: "success"
-        })
-    } else {
-        notification({
-            text: "An error occured",
-            type: "error"
-        })
-    }
-
-    return resp.status == 200;
-}
-
-
-
-export const searchSuggestions = async (query: string) => {
-    try {
-        const url = new URL(`${ENDPOINT_BACK_END_API}/search-suggestions`);
-        url.searchParams.set('q', query);
-        const resp = await fetch(url.href);
-        const products: string[] = await resp.json();
-        if (`error` in products) {
-            return [];
-        }
-        return products;
-    } catch (e: any) { }
-    return []
-}
-
-export const search = async (query: string, categorie?: string, page?: string) => {
-    try {
-        const url = page ?
-            new URL(`${ENDPOINT_BACK_END_API}/search/${page}`) : new URL(`${ENDPOINT_BACK_END_API}/search`);
-        url.searchParams.set('q', query);
-        if (categorie) url.searchParams.set('categorie', categorie);
-
-        const resp = await fetch(url.href);
-        const products: ProductMetaData[] = await resp.json();
-        if (`error` in products) {
-            return [];
-        }
-        return products;
-    } catch (e: any) { }
-    return []
-}
-
-export const listProducts = async (page?: string) => {
-    try {
-        const url = page ?
-            new URL(`${ENDPOINT_BACK_END_API}/products/${page}`) : new URL(`${ENDPOINT_BACK_END_API}/products`);
-        const resp = await fetch(url.href);
-        const products: ProductMetaData[] = await resp.json();
-        if (`error` in products) {
-            return [];
-        }
-        return products;
-    } catch (e: any) { }
-    return []
-}
 
 export const swap = <T>(arr: T[], idxA: number, idxB: number) => {
     [arr[idxA], arr[idxB]] = [arr[idxB], arr[idxA]];

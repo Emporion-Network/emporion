@@ -2,24 +2,21 @@
     let myCollections: string[] = [];
     user.subscribe(async (u) => {
         if (u?.address) {
-            myCollections = await getSellerCollections(u.address || "");
+            myCollections = await api.sellerCollectionNamesGet(u.address!);
         }
     });
 </script>
 
 <script lang="ts">
     import { Decimal } from "@cosmjs/math";
-    import { jwt, user } from "../../stores/user";
+    import { jwt, user, api } from "../../stores/user";
     import {
         extractAttr,
         getMetaHash,
-        getProductsMeta,
-        getSellerCollections,
         id,
-        uploadMeta,
         DAY,
         trimStrings,
-    } from "../../lib/utils";
+    } from "../../utils";
     import type { ProductMetaData } from "../../../../shared-types";
     import type {
         AssetInfoBaseForAddr,
@@ -106,9 +103,9 @@
             let id = extractAttr("product_id", r);
             if (!id) throw Error("Unknown error");
             meta.id = id;
-            if (await uploadMeta(meta, jwt.get() || "")) {
+            if (await api.metaUpload(meta)) {
                 clear();
-                myCollections = await getSellerCollections($user!.address || "");
+                myCollections = await api.sellerCollectionNamesGet($user!.address);
             }
         } catch (e) {
             let text = "Unknown error"
@@ -162,7 +159,7 @@
         })();
 
     const presetParams = async (collection: string) => {
-        metas = await getProductsMeta($user?.address || "", collection);
+        metas = await api.sellerCollectionsMetasGet($user!.address, collection);
         if (metas.length === 0) return;
         attributes = metas[0].attributes
             .map((a) => ({ ...structuredClone(a), key: id() }))
@@ -265,7 +262,7 @@
                     </Tooltip>
                 </div>
                 {#if $user?.address}
-                    {#await getSellerCollections($user?.address || "") then suggestions}
+                    {#await api.sellerCollectionNamesGet($user?.address) then suggestions}
                         <Search
                             suggestions={suggestions || []}
                             bind:value={collectionId}

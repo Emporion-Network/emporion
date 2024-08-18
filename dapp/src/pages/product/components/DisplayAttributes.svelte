@@ -10,7 +10,7 @@
     import RadioButton from "./traitDisplay/RadioButton.svelte";
     import RadioImage from "./traitDisplay/RadioImage.svelte";
     import Switch from "./traitDisplay/Switch.svelte";
-    import { eq, intersect, Map2, LMap } from "../../../lib/utils";
+    import { eq, intersect, Map2, LMap } from "../../../utils";
     import Select from "./traitDisplay/Select.svelte";
 
     const traitToComponent: Record<Displayable, ComponentType> = {

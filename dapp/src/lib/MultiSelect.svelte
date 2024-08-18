@@ -6,7 +6,7 @@
 </script>
 
 <script lang="ts">
-    import { clickOutside } from "./directives";
+    import { clickOutside } from "../directives";
 
     export let selected: string[] = [];
     export let options: Option[] = [];

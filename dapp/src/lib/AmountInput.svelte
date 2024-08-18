@@ -2,7 +2,7 @@
     import type { FormEventHandler } from "svelte/elements";
     import { prices, type CoinData } from "../stores/coins";
     import { Decimal } from "@cosmjs/math";
-    import { multiply_ratio } from "./utils";
+    import { multiply_ratio } from "../utils";
     export let label: string;
     export let coinDenom: string;
     export let useNativeAmount: boolean;

@@ -12,18 +12,18 @@
 <script lang="ts">
     import { CosmWasmClient } from "@cosmjs/cosmwasm-stargate";
     import Menu from "../../lib/Menu.svelte";
-    import { listProducts, search } from "../../lib/utils";
     import { EmporionQueryClient } from "../../../../client-ts/Emporion.client";
     import ProductCard from "./components/ProductCard.svelte";
     import SearchBar from "../../lib/SearchBar.svelte";
     import { href } from "../../stores/location";
+    import { api } from "../../stores/user";
 
     $: searchText = $href.searchParams.get("q");
     $: category = $href.searchParams.get("category") || "";
     $: page = $href.searchParams.get("page") || "";
 
     $: products = (
-        searchText ? search(searchText, category, page) : listProducts(page)
+        searchText ? api.productsSearch(searchText, category, page) : api.productsList(page)
     ).then((metas) => {
         return Promise.all(
             metas.map(async (m) => {

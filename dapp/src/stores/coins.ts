@@ -1,7 +1,7 @@
 import { writable } from "svelte/store";
 import { StargateClient, setupIbcExtension, QueryClient, type IbcExtension } from "@cosmjs/stargate";
 import { Decimal } from "@cosmjs/math";
-import { rotateObj, toPrefix } from "../lib/utils";
+import { rotateObj, toPrefix } from "../utils";
 import { user } from "./user";
 import { notification } from "../lib/Notifications.svelte";
 import { CosmWasmClient } from "@cosmjs/cosmwasm-stargate";

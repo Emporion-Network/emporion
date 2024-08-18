@@ -10,7 +10,7 @@
     import Foldable from "../../../lib/Foldable.svelte";
     import Switch from "./traitInputs/Switch.svelte";
     import Color from "./traitInputs/Color.svelte";
-    import { id, swap } from "../../../lib/utils";
+    import { id, swap } from "../../../utils";
     import Input from "../../../lib/Input.svelte";
     import TraitTypePicker from "./TraitTypePicker.svelte";
     import Region from "./traitInputs/Region.svelte";

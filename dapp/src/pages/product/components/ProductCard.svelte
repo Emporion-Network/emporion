@@ -3,7 +3,7 @@
     import type { ProductMetaData } from "../../../../../shared-types";
     import OverflowAddress from "../../../lib/OverflowAddress.svelte";
     import Stars from "../../../lib/Stars.svelte";
-    import { getPrices, rotateObj } from "../../../lib/utils";
+    import { getPrices, rotateObj } from "../../../utils";
     import { prices } from "../../../stores/coins";
     import { goTo, href } from "../../../stores/location";
     import { user } from "../../../stores/user";

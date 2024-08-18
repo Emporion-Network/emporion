@@ -6,13 +6,15 @@ import { GasPrice } from "@cosmjs/stargate";
 
 const {
     VITE_NATIVE_COIN: NATIVE_COIN,
-    VITE_ENDPOINT_BACK_END_API:ENDPOINT_BACK_END_API,
+    VITE_ENDPOINT_BACK_END_API: ENDPOINT_BACK_END_API,
     VITE_ENDPOINT_RPC: ENDPOINT_RPC,
     VITE_STORE_ADDRESS: STORE_ADDRESS,
 } = import.meta.env;
 
 import { EmporionClient } from "../../../client-ts/Emporion.client"
-import { getNames, signMessage } from "../lib/utils";
+import { Api } from "../api";
+
+import { getNames, signMessage } from "../utils";
 import { notification } from "../lib/Notifications.svelte";
 import { cart } from "./cart";
 
@@ -44,31 +46,48 @@ const autoLogIn = {
 
 const jwt = {
     set(v: string) {
-        localStorage.setItem("item", v?`${v}`:'');
+        localStorage.setItem("item", v ? `${v}` : '');
     },
     get() {
         return localStorage.getItem("item") || undefined;
     },
-    decoded(){
+    decoded() {
         let token = this.get();
-        if(!token) return
+        if (!token) return
         const base64Url = token.split('.')[1];
         const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+        const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function (c) {
             return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
         }).join(''));
         return JSON.parse(jsonPayload) as {
-            address:string,
-            exp:number
+            address: string,
+            exp: number
         };
     },
-    isExp(){
-        return (this.decoded()?.exp||0) < Date.now()/1000
+    isExp() {
+        return (this.decoded()?.exp || 0) < Date.now() / 1000
     },
-    clear(){
+    clear() {
         localStorage.removeItem('item');
     }
 };
+
+Api.notify = (err, log) => {
+    if(err){
+        notification({
+            type: 'error',
+            text: err
+        })
+    }
+    if(log){
+        notification({
+            type: 'success',
+            text: log
+        })
+    }
+}
+
+const api = new Api(ENDPOINT_BACK_END_API, '');
 
 
 
@@ -93,43 +112,29 @@ const setUser = async () => {
             cosmWasmClient,
             selectedCoin: NATIVE_COIN,
             address,
-            names:await getNames(address),
+            names: await getNames(address),
         })
         autoLogIn.set(true);
-        if(!jwt.isExp() && jwt.decoded()?.address == address){
+        
+        if (!jwt.isExp() && jwt.decoded()?.address == address) {
+            api.setToken(jwt.get()!);
             return;
         }
         cart.set([]);
 
-        try {
-            const {nonce}:{nonce:string} = await (await fetch(`${ENDPOINT_BACK_END_API}/nonce`, {
-                method:"POST",
-                body: JSON.stringify({ address:address }),
-            })).json()
-            let signature = await signMessage(nonce);
-    
-            const {token} = await (await fetch(`${ENDPOINT_BACK_END_API}/check-nonce`, {
-                method:"POST",
-                body: JSON.stringify({
-                    ...signature,
-                    nonce,
-                    address,
-                }),
-            })).json()
+        const { nonce } = await api.post<{ address: string }, { nonce: string }>(`${ENDPOINT_BACK_END_API}/nonce`, { address })
+        let signature = await signMessage(nonce);
 
-            jwt.set(token)
+        const { token } = await api.post<any, { token: string }>(`${ENDPOINT_BACK_END_API}/check-nonce`, {
+            ...signature,
+            nonce,
+            address,
+        })
+        jwt.set(token)
+        api.setToken(token);
 
-
-        } catch (e) {
-            notification({
-                type:"error",
-                //@ts-ignore
-                text: e.message
-            })
-        }
 
     } catch (e) {
-        console.log(e);
         autoLogIn.set(false)
         jwt.clear();
         console.log(e);
@@ -146,6 +151,7 @@ const logOut = async () => {
     const chainId = await qc.getChainId();
     user.set(null);
     jwt.clear();
+    api.setToken('');
     window.keplr.disable(chainId);
     autoLogIn.set(false);
 }
@@ -157,6 +163,15 @@ if (window.keplr && autoLogIn.get()) {
 
 
 const logIn = () => {
+    if (!window.keplr) {
+        notification({
+            type: "error",
+            text: "Please install Keplr",
+            urlLabel: "Get Keplr",
+            url: "https://www.keplr.app/"
+        })
+        return;
+    }
     setUser();
 }
 
@@ -165,4 +180,6 @@ window.addEventListener("keplr_keystorechange", () => {
 })
 
 
-export { user, logOut, logIn, jwt };
+
+
+export { user, logOut, logIn, jwt, api };

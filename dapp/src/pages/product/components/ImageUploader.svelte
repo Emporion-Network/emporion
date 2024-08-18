@@ -1,21 +1,38 @@
 <script lang="ts">
-    import { clickOutside, trapFocus } from "../../../lib/directives";
-    import { getImages, uploadFile, uploadImage } from "../../../lib/utils";
-    import { jwt, user } from "../../../stores/user";
+    import { trapFocus } from "../../../directives";
+    import {  user, api } from "../../../stores/user";
     let isVisible = false;
     let dragover = false;
     let state: "gallery" | "upload" = "gallery";
     let selected: string = "";
     let content: HTMLElement;
+
+    export const uploadImage = (): Promise<string[]> => {
+    return new Promise(resolve => {
+        let ipt = document.createElement('input');
+        ipt.type = "file"
+        ipt.accept = "image/*"
+        ipt.multiple = true;
+        ipt.onchange = () => {
+            const f = Array.from(ipt.files || []);
+            if (f.length === 0) {
+                return resolve([])
+            }
+            resolve(api.filesUpload(f))
+        }
+        ipt.click()
+    })
+}
+
     const handleKeydown = async (e: KeyboardEvent) => {
         if (["Enter", " "].includes(e.key)) {
-            await uploadImage(jwt.get() || "");
+            await uploadImage();
             state = "gallery";
         }
     };
 
     const handleClick = async () => {
-        await uploadImage(jwt.get() || "");
+        await uploadImage();
         state = "gallery";
     };
 
@@ -26,7 +43,7 @@
         const f = Array.from(e.dataTransfer?.files || []).filter((e) =>
             e.type.startsWith("image"),
         );
-        await uploadFile(f, jwt.get() || "");
+        await api.filesUpload(f);
         state = "gallery";
     };
     const setDragOver = (v: boolean) => () => {
@@ -73,7 +90,7 @@
             </button>
             {#if state == "gallery" && $user?.address}
                 <div class="gallery">
-                    {#await getImages($user?.address) then images}
+                    {#await api.imagesGet($user?.address) then images}
                         <button on:click={() => (state = "upload")}>
                             <i class="ri-image-add-line"></i>
                         </button>

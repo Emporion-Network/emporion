@@ -3,9 +3,9 @@
     import { Decimal } from "@cosmjs/math";
     import { user } from "../stores/user";
     import AmountInput from "./AmountInput.svelte";
-    import { trapFocus } from "./directives";
+    import { trapFocus } from "../directives";
     import InputAddress from "./InputAddress.svelte";
-    import { caplz, ibcTransfer, toPrefix } from "./utils";
+    import { caplz, ibcTransfer, toPrefix } from "../utils";
     import { notification } from "./Notifications.svelte";
     export let isVisible = false;
     export let nativeCoinDenom: string;

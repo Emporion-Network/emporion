@@ -1,6 +1,6 @@
 <script lang="ts">
     import { tick } from "svelte";
-    import { scrollTo } from "./utils";
+    import { scrollTo } from "../utils";
     let n: number;
     let e: HTMLElement;
 

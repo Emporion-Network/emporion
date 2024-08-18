@@ -1,7 +1,7 @@
 import { writable } from "svelte/store";
 import type { Product } from "../../../client-ts/Emporion.types";
 import type { ProductMetaData } from "../../../shared-types";
-import { id } from "../lib/utils";
+import { id } from "../utils";
 
 type CartItem = {product:Product, meta:ProductMetaData, coinDenom:string};
 

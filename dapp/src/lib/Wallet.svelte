@@ -2,9 +2,9 @@
     import { prices, type CoinData } from "../stores/coins";
     import { logIn, user } from "../stores/user";
     import { Decimal } from "@cosmjs/math";
-    import { clickOutside } from "./directives";
+    import { clickOutside } from "../directives";
     import IbcModal from "./IbcModal.svelte";
-    import { toPrefix } from "./utils";
+    import { toPrefix } from "../utils";
     import { cart, openCart } from "../stores/cart";
     let isOpen = false;
     let showModal = false;
@@ -51,8 +51,14 @@
     {@const selectedCoin = $prices[$user.selectedCoin]}
     {@const addr = toPrefix($user.address, selectedCoin.addressPrefix)}
     <div class="wallet input">
-        <button class="header" on:click={open}>
-            <img src={selectedCoin.icon} alt={selectedCoin.coinDenom} />
+        <div 
+        class="header input" 
+        tabindex="0" role="button" 
+        on:keydown={(e)=>['Enter', ' '].includes(e.key) ? open() : undefined}
+        on:click={open}>
+            <button class="to-profile">
+                <i class="ri-user-fill"></i>
+            </button>
             <div class="address">
                 <span>{addr.slice(0, 11)}...{addr.slice(-4)}</span>
                 <button on:click={copy(addr)}
@@ -73,7 +79,7 @@
                     ></i>
                 </span>
             </div>
-        </button>
+        </div>
         {#if isOpen}
             <div class="fold" use:clickOutside={close}>
                 <div class="assets">
@@ -166,6 +172,20 @@
         @include media.for-size(phone) {
             min-width: unset;
             width: 100%;
+        }
+        .to-profile{
+            background-color: transparent;
+            aspect-ratio: 1;
+            height: 100%;
+            color: var(--gray-12);
+            border: 1px solid transparent;
+            cursor: pointer;
+            border-radius: 3px;
+            &:hover{
+                background-color: var(--indigo-a3);
+                border: 1px solid var(--indigo-6);
+                color: var(--indigo-12);
+            }
         }
         img {
             width: 30px;

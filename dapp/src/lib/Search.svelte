@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { clickOutside } from "./directives";
+    import { clickOutside } from "../directives";
     type Suggestion = string|{label:string, value:string};
     export let value = "";
 

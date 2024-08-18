@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import { fancyBorder } from "../../lib/directives";
+    import { fancyBorder } from "../../directives";
     import Logo from "../../lib/Logo.svelte";
     import Atom from "../../assets/Atom.svelte";
     import Nolus from "../../assets/Nolus.svelte";

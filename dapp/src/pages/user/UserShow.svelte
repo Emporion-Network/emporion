@@ -2,7 +2,7 @@
     import type { Expiration } from "../../../../client-ts/Emporion.client";
     import Menu from "../../lib/Menu.svelte";
     import SearchBar from "../../lib/SearchBar.svelte";
-    import { rotateObj } from "../../lib/utils";
+    import { rotateObj } from "../../utils";
     import { prices } from "../../stores/coins";
     import { user } from "../../stores/user";
 

@@ -11,14 +11,16 @@
         clear,
     } from "../stores/cart";
     import { prices } from "../stores/coins";
-    import { user } from "../stores/user";
-    import { trapFocus } from "./directives";
+    import { api, jwt, logIn, user } from "../stores/user";
+    import { trapFocus } from "../directives";
     import OverflowAddress from "./OverflowAddress.svelte";
     import Qty from "./Qty.svelte";
     import RiskRatio from "./RiskRatio.svelte";
-    import { extractAttr, getPrices, rotateObj } from "./utils";
+    import { extractAttr, getPrices, rotateObj } from "../utils";
     import { notification } from "./Notifications.svelte";
+    import PostalAddresses from "./PostalAddresses.svelte";
     let content: HTMLElement;
+    let postalAddress = "";
     type seller = string;
     type coin = string;
     type productId = number;
@@ -41,7 +43,7 @@
         if (!acc.has(p.product.seller)) {
             const m = new Map();
             m.set(p.product.id, new Map());
-            let riskRatio = bySeller.get(p.product.seller)?.riskRatio || 50;
+            let riskRatio = bySeller.get(p.product.seller)?.riskRatio ?? 50;
 
             acc.set(p.product.seller, { products: m, riskRatio, total:Object.create(null) });
         }
@@ -77,6 +79,8 @@
     };
 
     const isDisabeled = (addr?:string)=>{
+        if(!$user) return true;
+        if(postalAddress.length == 0) return true;
         if(addr){
             return !Object.keys(bySeller.get(addr)!.total).reduce((acc, c)=>{
                 return acc && bySeller.get(addr)!.total[c].isLessThanOrEqual($prices[c].onChainAmount)
@@ -100,6 +104,10 @@
 
     const createOrder = (seller?: string) => async () => {
         try {
+            const addresses = await api.postalAddressesGet();
+            if(!addresses.includes(postalAddress)){
+                await api.postalAddressCreate(postalAddress)
+            }
             if (seller) {
                 const native: Record<string, Decimal> = {};
                 const cw20: Record<string, Decimal> = {};
@@ -153,7 +161,7 @@
                     let r = await $user?.emporionClient.create_order(
                         {
                             buyer_risk_share: [
-                                bySeller.get(seller)?.riskRatio || 50,
+                                bySeller.get(seller)?.riskRatio ?? 50,
                                 100,
                             ],
                             cart: nativeCart,
@@ -247,6 +255,9 @@
                         "auto",
                     );
                 }
+                $cart.filter((i) => i.product.seller === seller).forEach(i => {
+                    removeItem(i.key)
+                })
             } else {
                 // sellers with orders of native only amounts
                 const nativeOnly = [...bySeller.keys()].filter((seller) => {
@@ -302,8 +313,8 @@
                     instructions,
                     "auto",
                 );
+                clear();
             }
-            clear();
         } catch (e) {
             let text = "Unknown error";
             if (e instanceof Error) {
@@ -330,7 +341,11 @@
             </button>
             <h1>Cart</h1>
             {#if $cart.length > 0}
+                {#if $user}
+                    <PostalAddresses bind:postalAddress></PostalAddresses>
+                {/if}
                 <div class="buy-container">
+                    {#if $user}
                     {#if bySeller.size > 1}
                         <button
                             class="button-1 buy-button"
@@ -344,6 +359,9 @@
                             disabled={isDisabeled([...bySeller.keys()][0])}
                             >Buy</button
                         >
+                    {/if}
+                    {:else}
+                         <button on:click={logIn} class="button-1 buy-button">Login to checkout</button>
                     {/if}
                 </div>
                 {#each bySeller as [seller, { riskRatio, products }]}
@@ -445,10 +463,10 @@
             animation: slide 200ms ease-in-out forwards;
             @keyframes slide {
                 from {
-                    transform: translateX(100%);
+                    right: -100%;
                 }
                 to {
-                    transform: translateX(0%);
+                    right: 0;
                 }
             }
 
@@ -514,6 +532,7 @@
                 &:last-of-type {
                     padding-bottom: 6rem;
                 }
+
             }
             .items {
                 display: flex;

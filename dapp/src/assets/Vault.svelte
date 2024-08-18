@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { wait } from "../lib/utils";
+    import { wait } from "../utils";
 
     export const toggleLock = async () => {
         if (!c1.style.getPropertyValue("transform")) {

@@ -1,7 +1,7 @@
 <script lang="ts">
     import type { Product } from "../../../../../client-ts/Emporion.types";
     import type { ProductMetaData } from "../../../../../shared-types";
-    import { getDeliveryDuration, getDeliveryFormatedDate, getNames, getPrices, rotateObj } from "../../../lib/utils";
+    import { getDeliveryDuration, getDeliveryFormatedDate, getNames, getPrices, rotateObj } from "../../../utils";
     import { prices } from "../../../stores/coins";
     import markdownit from "markdown-it";
     import PricePicker from "./PricePicker.svelte";

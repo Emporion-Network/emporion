@@ -4,7 +4,7 @@
     import Foldable from "../../../lib/Foldable.svelte";
     import MultiSelect from "../../../lib/MultiSelect.svelte";
     import Tooltip from "../../../lib/Tooltip.svelte";
-    import { eq } from "../../../lib/utils";
+    import { eq } from "../../../utils";
     import { prices } from "../../../stores/coins";
     import { Decimal } from "@cosmjs/math";
 

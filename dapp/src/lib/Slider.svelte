@@ -64,6 +64,7 @@
             width: 100%;
             height: 100%;
             cursor: inherit;
+            cursor: pointer;
         }
     }
 </style>
