@@ -409,7 +409,7 @@ export class EmporionQueryClient<T extends {queryContractSmart:(address:string, 
         });
     }
 
-    async blacklisted(msg:Extract<QueryMsg, {blacklisted:any}>["blacklisted"]):Promise<TupleOfArrayOfAddrAndNullableAddr>{
+    async blacklisted(msg:Extract<QueryMsg, {blacklisted:any}>["blacklisted"]):Promise<TupleOfArrayOfAddrAndNullable_Addr>{
         return this.client.queryContractSmart(this.contractAddress, {
             blacklisted:msg
         });
@@ -520,7 +520,7 @@ export class EmporionClient<T extends {execute:(sender:string,contractAddress:st
         });
     }
 
-    async blacklisted(msg:Extract<QueryMsg, {blacklisted:any}>["blacklisted"]):Promise<TupleOfArrayOfAddrAndNullableAddr>{
+    async blacklisted(msg:Extract<QueryMsg, {blacklisted:any}>["blacklisted"]):Promise<TupleOfArrayOfAddrAndNullable_Addr>{
         return this.client.queryContractSmart(this.contractAddress, {
             blacklisted:msg
         });

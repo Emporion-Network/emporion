@@ -1,12 +1,16 @@
+import "bun";
 import { Secp256k1, Secp256k1Signature, sha256 } from '@cosmjs/crypto';
 import { fromBase64, fromBech32, toBech32 } from '@cosmjs/encoding';
 import {
     serializeSignDoc,
 } from '@cosmjs/amino';
 import { StatusCode } from 'hono/utils/http-status';
-import { cos_sim, pipeline } from "@xenova/transformers";
+import { ProductMetaData } from "../shared-types";
+import stringify from 'json-stable-stringify'
+import { ExecuteResult } from "@cosmjs/cosmwasm-stargate";
 
-export const verifySignature = async (message:string, signature) => {
+
+export const verifySignature = async (message: string, signature) => {
     const signDoc = {
         chain_id: '',
         account_number: '0',
@@ -35,8 +39,14 @@ export const verifySignature = async (message:string, signature) => {
 };
 
 
-export const hash = (str:string)=>{
+export const hash = (str: string) => {
     return Buffer.from(sha256(Buffer.from(str))).toString('hex');
+}
+
+export const productMetaHash = (p:ProductMetaData)=>{
+    let cpy:Partial<ProductMetaData> = structuredClone(p);
+    delete cpy.id;
+    return hash(stringify(cpy)).toLowerCase();
 }
 
 export const toPrefix = (addr: string, prefix: string) => {
@@ -45,29 +55,29 @@ export const toPrefix = (addr: string, prefix: string) => {
 }
 
 export class ServerError extends Error {
-    code:StatusCode
-    constructor(message, code){
+    code: StatusCode
+    constructor(message, code) {
         super(message)
         this.code = code;
     }
 }
 
 export const errors = {
-     UNKNOWN_ERROR:"Unknown error",
-     UNAUTHORIZED:"Unauthorized"
+    UNKNOWN_ERROR: "Unknown error",
+    UNAUTHORIZED: "Unauthorized"
 } as const;
 
-export function assert(assertion:boolean, message:string, code:number=400):asserts assertion{
-    if(!assertion){
+export function assert(assertion: boolean, message: string, code: number = 400): asserts assertion {
+    if (!assertion) {
         throw new ServerError(message, code)
     }
 }
 
-export const getUniqueCollectionId = (address:string, collection_id:string)=>{
+export const getUniqueCollectionId = (address: string, collection_id: string) => {
     return `${address}-${hash(collection_id).substring(0, 10)}`
 }
 
-export const validAddress = (address:string)=>{
+export const validateAddress = (address: string) => {
     try {
         toPrefix(address, "cosmos")
     } catch {
@@ -75,13 +85,13 @@ export const validAddress = (address:string)=>{
     }
 }
 
-const extractor = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
-export const embed = async (t:string)=>{
-    const a1 = (await extractor(t, {pooling:"mean", normalize:true})).data;
-    return a1 as number[]
-  }
 
-  export const textSim = async (a1:number[], a2:number[])=>{
-    const output = cos_sim(a1, a2)
-    return output;
-  }
+export function capitalize(word: string): string {
+    return `${word[0].toLocaleUpperCase()}${word.slice(1)}`
+}
+
+
+export const extractAttr = (attr: string, resp: ExecuteResult) => {
+    const attrs = resp.events.filter(e => e.type == 'wasm').map(e => e.attributes).flat()
+    return attrs.find(a => a.key === attr)?.value
+}

@@ -62,17 +62,17 @@
             width: calc(1.6rem - 2px);
             height: calc(1.6rem - 2px);
             border-radius: 1.6rem;
-            background-color: var(--gray-10);
+            background-color: var(--white-a12);
             position: absolute;
             top: 1px;
             left: 1px;
             transition: all 100ms ease-in-out;
         }
         &.on{
-            background-color: var(--indigo-a3);
+            background-color: var(--indigo-10);
             &::after{
-                background-color: var(--indigo-10);
-                left: 50%;
+                background-color: var(--white-a12);
+                left: calc(50% + 1px);
             }
         }
     }

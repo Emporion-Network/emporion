@@ -48,3 +48,15 @@ export type ProductMetaData = {
     attributes:Attribute[]
 }
 
+export type OrderMetaData = {
+    id:string,
+    postalAddress:string,
+    trackingNumber:string,
+    countryCity:string,
+    messages:{
+        text:string,
+        sender:'seller'|"buyer",
+        media:string[],
+    }[]
+}
+

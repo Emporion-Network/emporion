@@ -34,9 +34,11 @@
     - [x] add tooltips all over
     - [x] add query blacklist
     - [x] create order
+    - [x] select attribute
+    - [x] filter blacklisted
+    - [x] refactor api
+    - [x] add delivery address
     - [ ] location attribute
-    - [ ] select attribute
-    - [ ] filter blacklisted
     - [ ] add filters
     - [ ] add investment page
     - [ ] add stats page

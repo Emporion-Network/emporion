@@ -404,14 +404,18 @@ export const getDeliveryDuration = (duration: Duration) => {
 }
 
 
+export const dateToString = (date:Date)=>{
+    return date.toLocaleDateString("en-US", {
+        month:'short',
+        day:'numeric'
+    })
+}
+
 export const getDeliveryFormatedDate = (duration: Duration) =>{
     if ('time' in duration) {
         const date = new Date()
         date.setDate(date.getDate() + Math.floor(duration.time/DAY))
-        return date.toLocaleDateString("en-US", {
-            month:'short',
-            day:'numeric'
-        })
+        return dateToString(date)
     } 
 }
 
@@ -431,3 +435,81 @@ export const trimStrings = <T>(o:T):T=>{
     }
     return o;
 }
+
+export const ENV = {
+    ...import.meta.env,
+    ENDPOINT_RPC:import.meta.env.VITE_ENDPOINT_RPC,
+    ENDPOINT_BACK_END_API:import.meta.env.VITE_ENDPOINT_BACK_END_API,
+    ENPOINT_API:import.meta.env.VITE_ENPOINT_API,
+    STORE_ADDRESS:import.meta.env.VITE_STORE_ADDRESS,
+    NATIVE_COIN:import.meta.env.VITE_NATIVE_COIN,
+} as unknown as {
+    DEV: boolean;
+    PROD: boolean;
+    ENDPOINT_RPC:string;
+    ENDPOINT_BACK_END_API:string;
+    ENPOINT_API:string;
+    STORE_ADDRESS:string;
+    NATIVE_COIN:string;
+}
+
+
+
+type Entry = { key: string; value: unknown };
+type EmptyEntry<TValue> = { key: ''; value: TValue };
+type ExcludedTypes = Date | Set<unknown> | Map<unknown, unknown>;
+type ArrayEncoder = `[${bigint}]`;
+
+type EscapeArrayKey<TKey extends string> = TKey extends `${infer TKeyBefore}.${ArrayEncoder}${infer TKeyAfter}`
+  ? EscapeArrayKey<`${TKeyBefore}${ArrayEncoder}${TKeyAfter}`>
+  : TKey;
+
+// Transforms entries to one flattened type
+type CollapseEntries<TEntry extends Entry> = {
+  [E in TEntry as EscapeArrayKey<E['key']>]: E['value'];
+};
+
+// Transforms array type to object
+type CreateArrayEntry<TValue, TValueInitial> = OmitItself<
+  TValue extends unknown[] ? { [k: ArrayEncoder]: TValue[number] } : TValue,
+  TValueInitial
+>;
+
+// Omit the type that references itself
+type OmitItself<TValue, TValueInitial> = TValue extends TValueInitial
+  ? EmptyEntry<TValue>
+  : OmitExcludedTypes<TValue, TValueInitial>;
+
+// Omit the type that is listed in ExcludedTypes union
+type OmitExcludedTypes<TValue, TValueInitial> = TValue extends ExcludedTypes
+  ? EmptyEntry<TValue>
+  : CreateObjectEntries<TValue, TValueInitial>;
+
+type CreateObjectEntries<TValue, TValueInitial> = TValue extends object
+  ? {
+      // Checks that Key is of type string
+      [TKey in keyof TValue]-?: TKey extends string
+        ? // Nested key can be an object, run recursively to the bottom
+          CreateArrayEntry<TValue[TKey], TValueInitial> extends infer TNestedValue
+          ? TNestedValue extends Entry
+            ? TNestedValue['key'] extends ''
+              ? {
+                  key: TKey;
+                  value: TNestedValue['value'];
+                }
+              :
+                  | {
+                      key: `${TKey}.${TNestedValue['key']}`;
+                      value: TNestedValue['value'];
+                    }
+                  | {
+                      key: TKey;
+                      value: TValue[TKey];
+                    }
+            : never
+          : never
+        : never;
+    }[keyof TValue] // Builds entry for each key
+  : EmptyEntry<TValue>;
+
+export type FlattenObject<TValue> = CollapseEntries<CreateObjectEntries<TValue, TValue>>;

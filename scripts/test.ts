@@ -47,6 +47,6 @@ r = await signer.queryContractSmart(r, {
     info:{}
 });
 
-const x = await client.params({})
+const x = await client.product_all({})
 
-console.log(x.weighted_accepted_assets);
+console.log(x);

@@ -124,6 +124,7 @@ const setUser = async () => {
 
         const { nonce } = await api.post<{ address: string }, { nonce: string }>(`${ENDPOINT_BACK_END_API}/nonce`, { address })
         let signature = await signMessage(nonce);
+        console.log(signature);
 
         const { token } = await api.post<any, { token: string }>(`${ENDPOINT_BACK_END_API}/check-nonce`, {
             ...signature,

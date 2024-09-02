@@ -15,6 +15,13 @@ import {
     DeleteObjectsCommand,
     ListObjectsV2Command
 } from "@aws-sdk/client-s3";
+import { createTestProducts } from "./createTestPrducts";
+
+
+const wait = async(ms)=>new Promise(resolve => {
+    setTimeout(resolve, ms);
+})
+
 
 
 const encodeMessage = (message: any) => {
@@ -37,8 +44,6 @@ let signer = await SigningCosmWasmClient.connectWithSigner(ENDPOINT, adminClient
 
 
 const deploy = async () => {
-
-
     const DAY = 24 * 60 * 60;
     let emporion_core_wasm = new Uint8Array(await Bun.file('artifacts/emporion_core.wasm').arrayBuffer());
     let emporion_voting_module_wasm = new Uint8Array(await Bun.file('artifacts/emporion_voting_module.wasm').arrayBuffer());
@@ -111,9 +116,10 @@ const deploy = async () => {
                 return recursiveDelete(location);
             } catch(e){
             }
-          };
-
-        await deleteFolder('development')
+        };
+        try{
+            await deleteFolder('development')
+        } catch{}
 
         let cw20_base = new Uint8Array(await Bun.file('artifacts/cw20_base.wasm').arrayBuffer());
         let { codeId: CW_20_CODE_ID } = await signer.upload(adminAddress, cw20_base, "auto");
@@ -283,8 +289,8 @@ const deploy = async () => {
     env = loadEnvFile(await Bun.file(`backend/.env.${Bun.env.NODE_ENV}`).text());
     env['STORE_ADDRESS'] = STORE_ADDRESS;
     env['DAO_ADDRESS'] = DAO_ADDRESS;
+    env['CW20_ADDRESS'] = cw20;
     await Bun.write(`backend/.env.${Bun.env.NODE_ENV}`, envToString(env))
-
 
 
     return {
@@ -300,7 +306,7 @@ const testDeployement = async ({ DAO_ADDRESS, STORE_ADDRESS }: { DAO_ADDRESS: st
 }
 
 
-await $`bun scripts/build.ts`;
+// await $`bun scripts/build.ts`;
 await testDeployement(await deploy())
 
 

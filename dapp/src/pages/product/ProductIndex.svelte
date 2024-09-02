@@ -41,6 +41,8 @@
         })
         return metas.filter(e => !addrs.includes(e.product.seller));
     });
+
+    console.log(STORE_ADDRESS)
 </script>
 
 <Menu>

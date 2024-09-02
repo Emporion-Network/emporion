@@ -11,7 +11,7 @@
         clear,
     } from "../stores/cart";
     import { prices } from "../stores/coins";
-    import { api, jwt, logIn, user } from "../stores/user";
+    import { api, logIn, user } from "../stores/user";
     import { trapFocus } from "../directives";
     import OverflowAddress from "./OverflowAddress.svelte";
     import Qty from "./Qty.svelte";
@@ -78,8 +78,7 @@
         $isVisible = false;
     };
 
-    const isDisabeled = (addr?:string)=>{
-        if(!$user) return true;
+    const isDisabeled = (postalAddress:string, addr?:string)=>{
         if(postalAddress.length == 0) return true;
         if(addr){
             return !Object.keys(bySeller.get(addr)!.total).reduce((acc, c)=>{
@@ -258,6 +257,7 @@
                 $cart.filter((i) => i.product.seller === seller).forEach(i => {
                     removeItem(i.key)
                 })
+                await api.orderMetaDataCreate(postalAddress, String(orderId));
             } else {
                 // sellers with orders of native only amounts
                 const nativeOnly = [...bySeller.keys()].filter((seller) => {
@@ -315,6 +315,7 @@
                 );
                 clear();
             }
+            isVisible.set(false)
         } catch (e) {
             let text = "Unknown error";
             if (e instanceof Error) {
@@ -349,14 +350,14 @@
                     {#if bySeller.size > 1}
                         <button
                             class="button-1 buy-button"
-                            disabled={isDisabeled()}
+                            disabled={isDisabeled(postalAddress)}
                             on:click={createOrder()}>Buy all</button
                         >
                     {:else}
                         <button
                             class="button-1 buy-button"
                             on:click={createOrder([...bySeller.keys()][0])}
-                            disabled={isDisabeled([...bySeller.keys()][0])}
+                            disabled={isDisabeled(postalAddress, [...bySeller.keys()][0])}
                             >Buy</button
                         >
                     {/if}
@@ -407,7 +408,7 @@
                             <button
                                 class="button-2"
                                 on:click={createOrder(seller)}
-                                disabled={isDisabeled(seller)}
+                                disabled={isDisabeled(postalAddress, seller)}
                                 >Pay this seller only</button
                             >
                         {/if}

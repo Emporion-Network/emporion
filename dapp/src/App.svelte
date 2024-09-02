@@ -10,6 +10,8 @@
     import Cart from "./lib/Cart.svelte";
     import UserShow from "./pages/user/UserShow.svelte";
     import { user } from "./stores/user";
+    import { ENV } from "./utils";
+    import Storybook from "./pages/storybook/Storybook.svelte";
 
     watchPrices();
     onMount(() => {
@@ -32,6 +34,11 @@
     </Route>
     <Route match="/account">
         <UserShow />
+    </Route>
+{/if}
+{#if ENV.DEV}
+    <Route match="/storybook">
+        <Storybook/>
     </Route>
 {/if}
 <Notifications />

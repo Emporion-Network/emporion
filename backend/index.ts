@@ -4,7 +4,7 @@ import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { jwt, sign, type JwtVariables } from 'hono/jwt'
 import { stream } from 'hono/streaming'
-import type { ProductMetaData, Attribute } from "../shared-types/index"
+import type { ProductMetaData, Attribute,OrderMetaData } from "../shared-types/index"
 import { CATEGORIES } from "../shared-types/categories"
 import { REGIONS } from "../shared-types/countries"
 import markdownit from 'markdown-it'
@@ -14,20 +14,42 @@ import { CosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 import { EmporionQueryClient } from "../client-ts/Emporion.client";
 import stringify from 'json-stable-stringify'
 import { randomUUID } from "crypto";
-import { assert, hash, ServerError, verifySignature, errors, getUniqueCollectionId, validAddress as validateAddress, embed } from "./utils";
+import { assert, hash, ServerError, verifySignature, errors, getUniqueCollectionId, validateAddress, capitalize } from "./utils";
 import { fromBech32 } from "@cosmjs/encoding";
 import { FileStorage, Embedings, Search } from "./fileStorage";
+import { pipeline } from "@huggingface/transformers"
+
+
+const extractor = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2', {dtype:"fp32"});
+const addressCountryAndCityExtractor = await pipeline('token-classification', 'Frakko729/bert-base-uncased-city-country-ner', {dtype:"fp32"})
+const embed = async (t: string) => {
+    const a1 = (await extractor(t, { pooling: "mean", normalize: true })).data;
+    return a1 as number[]
+}
+
+const extractFrmAddress = async(text:string)=>{
+    text = text.replaceAll(/[^\p{L}]/ug, ' ').replaceAll(/ +/g, ' ')
+    const resp = await addressCountryAndCityExtractor(text)
+    return resp.reduce((acc, c:any)=>{
+        acc[c.entity.toLocaleLowerCase()] = capitalize(c.word)
+        return acc;
+    }, {country:"", city:""})
+}
+
 
 
 const app = new Hono<{ Variables: JwtVariables }>();
 const queryClient = await CosmWasmClient.connect(Bun.env.ENDPOINT || "");
 const client = new EmporionQueryClient(queryClient, Bun.env.STORE_ADDRESS || "");
 
+const USER_TO_ADDRESSES = new FileStorage<Record<string, string[]>>(`${Bun.env.NODE_ENV}/USER_TO_ADDRESSES`, false);
 const PRODUCTS = new FileStorage<ProductMetaData>(`${Bun.env.NODE_ENV}/PRODUCTS`, true);
 const COLLECTION_TO_PRODUCTS = new FileStorage<string[]>(`${Bun.env.NODE_ENV}/COLLECTION_TO_PRODUCTS`, true);
 const FILES = new FileStorage<File>(`${Bun.env.NODE_ENV}/Files`, true, true);
 const HASH_TO_PRODUCT_ID = new FileStorage<Record<string, string>>(`${Bun.env.NODE_ENV}/HASH_TO_PRODUCT_ID`, true);
 const SELLER_COLLECTIONS = new FileStorage<string[]>(`${Bun.env.NODE_ENV}/SELLER_COLLECTIONS`, true);
+const ORDERID_TO_ORDER_META = new FileStorage<OrderMetaData>(`${Bun.env.NODE_ENV}/ORDERID_TO_ORDER_META`, false);
+
 
 
 app.use('*', cors({
@@ -65,27 +87,40 @@ const AttributeSchema = z.object({
         }))
         .or(z.object({
             display_type: z.enum(["radio-button", "select"]),
-            value: z.string(),
+            value: z.string().max(100),
         })).or(z.object({
             display_type: z.literal("image"),
-            value: z.string().url(),
+            value: z.string().max(300).url(),
         })).or(z.object({
             display_type: z.literal("color"),
             value: z.object({
                 color: z.string().regex(/^#[0-9a-f]{8}$/),
-                label: z.string(),
+                label: z.string().max(100),
             })
         }))
     )) satisfies z.ZodSchema<Attribute>;
 const ProductMetaSchema = z.object({
     id: z.string().regex(/^(0|[1-9][0-9]*)$/),
-    name: z.string(),
-    description: z.string(),
+    name: z.string().max(400),
+    description: z.string().max(3000),
     image: z.string().url(),
     categories: z.array(z.enum(categories)),
-    collection_id: z.string(),
+    collection_id: z.string().max(400),
     attributes: z.array(AttributeSchema),
 }) satisfies z.ZodSchema<ProductMetaData>;
+
+const OrderMetaDataSchema = z.object({
+    id:z.string().regex(/^(0|[1-9][0-9]*)$/),
+    postalAddress:z.string().max(300),
+    trackingNumber:z.string().max(20),
+    countryCity:z.string().max(50),
+    messages:z.array(z.object({
+        text:z.string().max(500),
+        media:z.array(z.string().url()),
+        sender:z.enum(['seller', 'buyer']),
+        date:z.number(),
+    }))
+}) satisfies z.ZodSchema<OrderMetaData>;
 
 const NonceReq = z.object({
     address: z.string(),
@@ -215,11 +250,37 @@ app.get('/collections/:address', async (c) => {
     return c.json(collections || [])
 })
 
-app.get("/auth/test", async (c) => {
-    const payload = c.get('jwtPayload')
-    return c.json({
-        payload
+
+app.post('/auth/create-postal-address', async (c)=>{
+    let { address }: { address: string } = c.get('jwtPayload');
+    const {postalAddress} = await c.req.json();
+    z.string().max(300).min(5).parse(postalAddress);
+    const k = address.slice(0, 10);
+    await USER_TO_ADDRESSES.update(k, (addrs={})=>{
+        addrs[address] = addrs[address] ?? [];
+        addrs[address].push(postalAddress);
+        return addrs;
     })
+    return c.json({}, 200);
+})
+
+app.post('/auth/remove-address', async (c)=>{
+    let { address }: { address: string } = c.get('jwtPayload');
+    const {index} = await c.req.json();
+    const k = address.slice(0, 10);
+    await USER_TO_ADDRESSES.update(k, (addrs={})=>{
+        addrs[address] = addrs[address] ?? [];
+        addrs[address] = addrs[address].filter((_, i)=> i !== index);
+        return addrs;
+    })
+    return c.json({}, 200);
+})
+
+app.get('/auth/addresses', async (c)=>{
+    let { address }: { address: string } = c.get('jwtPayload');
+    const k = address.slice(0, 10);
+    const bucket = await USER_TO_ADDRESSES.get(k) || {};
+    return c.json(bucket[address] || [])
 })
 
 app.get("/products/:page?", async (c) => {
@@ -319,8 +380,79 @@ app.get("/search-suggestions", async (c) => {
     return c.json(results.map(e => e.text))
 })
 
+app.get('/extract-city-country', async (c)=>{
+    const search = c.req.query('q')||"";
+    const resp = await extractFrmAddress(search)
+    return c.json(resp)
+})
+
+app.post("/auth/create-order", async(c)=>{
+    let { address }: { address: string } = c.get('jwtPayload')
+    const body = await c.req.json();
+    let orderMeta: OrderMetaData = OrderMetaDataSchema.parse({
+        id:body.id,
+        postalAddress:body.postalAddress,
+        trackingNumber:"",
+        countryCity:await extractFrmAddress(body.postalAddress),
+        messages:[]
+    });
+    const o = await client.order({order_id:Number(body.id)})
+    assert(o.buyer == address, errors.UNAUTHORIZED)
+    await ORDERID_TO_ORDER_META.set(body.id, orderMeta);
+    return c.json({})
+})
+
+
+app.post('/auth/order-set-tracking-number', async(c)=>{
+    let { address }: { address: string } = c.get('jwtPayload')
+    const body = await c.req.json();
+    let id = OrderMetaDataSchema.shape.id.parse(body.id)
+    let trackingNumber = OrderMetaDataSchema.shape.trackingNumber.parse(body.trackingNumber);
+    const o = await client.order({order_id:Number(id)});
+    assert(o.seller === address, errors.UNAUTHORIZED);
+    await ORDERID_TO_ORDER_META.update(body.id, (o)=>{
+        assert(o !== undefined, "Order not found");
+        o.trackingNumber = trackingNumber;
+        return o;
+    });
+
+    return c.json({})
+})
+
+
+app.post('/auth/order-add-message', async(c)=>{
+    let { address }: { address: string } = c.get('jwtPayload')
+    const body = await c.req.json();
+    let id = OrderMetaDataSchema.shape.id.parse(body.id)
+    const o = await client.order({order_id:Number(id)});
+    const sender = o.buyer === address ? "buyer" : "seller";
+    assert([o.buyer, o.seller].includes(address), errors.UNAUTHORIZED);
+    let message = OrderMetaDataSchema.shape
+    .messages.element.parse({
+        ...body.message,
+        date:Date.now(),
+        sender,
+    });
+    assert(o.seller === address, errors.UNAUTHORIZED);
+    await ORDERID_TO_ORDER_META.update(body.id, (o)=>{
+        assert(o !== undefined, "Order not found");
+        o.messages.push(message)
+        return o;
+    });
+
+    return c.json({})
+});
+
+app.get('/auth/order/:id', async(c)=>{
+    const id = c.req.param('id');
+    let { address }: { address: string } = c.get('jwtPayload')
+    const o = await client.order({order_id:Number(id)});
+    assert([o.buyer, o.seller].includes(address), errors.UNAUTHORIZED);
+    return c.json(await ORDERID_TO_ORDER_META.get(id))
+})
 
 app.onError((e, c) => {
+    console.log(e);
     if (e instanceof ServerError) {
         return c.json({
             error: e.message
