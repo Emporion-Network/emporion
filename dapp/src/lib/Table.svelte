@@ -1,13 +1,13 @@
 <script lang="ts">
-    import {onMount} from "svelte";
+    import { onMount } from "svelte";
     export let rows: T[];
     export let index: keyof T;
-    export let filter :(a: T) => boolean = (a:T)=>true;
+    export let filter: (a: T) => boolean = (a: T) => true;
     let sorts = new Map<(a: T, b: T) => number, number>();
     type T = $$Generic;
 
     let og = [...rows];
-    let headEl:HTMLElement;
+    let headEl: HTMLElement;
     let nbRows = 0;
 
     $: rows = [...og]
@@ -29,11 +29,9 @@
         sorts = sorts;
     };
 
-    onMount(()=>{
-        nbRows = headEl.children.length
-    })
-
-
+    onMount(() => {
+        nbRows = headEl.children.length;
+    });
 </script>
 
 <div class="table" style="--nb:{nbRows}">
@@ -54,10 +52,19 @@
         display: flex;
         flex-direction: column;
         color: var(--gray-12);
+        border-left: 1px solid var(--gray-6);
+        border-right: 1px solid var(--gray-6);
+        border-radius: 3px;
         .head {
             display: flex;
+            border-bottom: 1px solid var(--gray-6);
+            background-color: var(--gray-2);
+            border-radius: 3px 3px 0 0;
+            border-top: 1px solid var(--gray-6);
+            min-height: 3rem;
+
             :global(> *) {
-                min-width: calc(100%/var(--nb));
+                min-width: calc(100% / var(--nb));
                 flex: 1 1 0px;
                 display: flex;
                 justify-content: center;
@@ -69,8 +76,13 @@
             flex-direction: column;
             .row {
                 display: flex;
+                border-bottom: 1px solid var(--gray-6);
+                min-height: 3rem;
+                &:last-of-type {
+                    border-radius: 3px;
+                }
                 :global(> *) {
-                    min-width: calc(100%/var(--nb));
+                    min-width: calc(100% / var(--nb));
                     flex: 1 1 0px;
                     display: flex;
                     justify-content: center;

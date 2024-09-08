@@ -1,26 +1,16 @@
-<script lang="ts" context="module">
-    const {
-        VITE_ENDPOINT_RPC: ENDPOINT_RPC,
-        VITE_STORE_ADDRESS: STORE_ADDRESS,
-    } = import.meta.env;
-    const client = new EmporionQueryClient(
-        await CosmWasmClient.connect(ENDPOINT_RPC),
-        STORE_ADDRESS,
-    );
-</script>
-
 <script lang="ts">
-    import { CosmWasmClient } from "@cosmjs/cosmwasm-stargate";
     import Menu from "../../lib/Menu.svelte";
-    import { EmporionQueryClient } from "../../../../client-ts/Emporion.client";
     import ProductCard from "./components/ProductCard.svelte";
     import SearchBar from "../../lib/SearchBar.svelte";
     import { href } from "../../stores/location";
     import { api } from "../../stores/user";
+    import { clients } from "../../stores/readStores";
 
     $: searchText = $href.searchParams.get("q");
     $: category = $href.searchParams.get("category") || "";
     $: page = $href.searchParams.get("page") || "";
+
+    
 
     $: products = (
         searchText ? api.productsSearch(searchText, category, page) : api.productsList(page)
@@ -29,20 +19,19 @@
             metas.map(async (m) => {
                 return {
                     meta: m,
-                    product: await client.product_by_id({
+                    product: await $clients.emporionQueryClient.product_by_id({
                         product_id: Number(m.id),
                     }),
                 };
             }),
         );
     }).then(async (metas) => {
-        const addrs = await client.blacklisted_check({
+        const addrs = await $clients.emporionQueryClient.blacklisted_check({
             addrs:metas.map(e => e.product.seller),
         })
         return metas.filter(e => !addrs.includes(e.product.seller));
     });
 
-    console.log(STORE_ADDRESS)
 </script>
 
 <Menu>

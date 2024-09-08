@@ -2,8 +2,9 @@
     export let value:string="";
     export let placeholder="";
     export let rows=2;
+    export let readOnly = false;
 </script>
-<textarea bind:value rows="{rows}" placeholder="{placeholder}"></textarea>
+<textarea bind:value rows="{rows}" readonly={readOnly} placeholder="{placeholder}"></textarea>
 
 <style lang="scss">
     textarea{
@@ -16,6 +17,10 @@
         border-radius: 3px;
         padding: 0.5rem;
         font-weight: bold;
+        &:read-only{
+            cursor: default;
+            outline: none;
+        }
         &:hover{
             border-color: var(--gray-7);
         }

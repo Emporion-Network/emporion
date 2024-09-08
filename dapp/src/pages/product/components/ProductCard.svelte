@@ -3,7 +3,7 @@
     import type { ProductMetaData } from "../../../../../shared-types";
     import OverflowAddress from "../../../lib/OverflowAddress.svelte";
     import Stars from "../../../lib/Stars.svelte";
-    import { getPrices, rotateObj } from "../../../utils";
+    import { getNames, getPrices, rotateObj } from "../../../utils";
     import { prices } from "../../../stores/coins";
     import { goTo, href } from "../../../stores/location";
     import { user } from "../../../stores/user";
@@ -14,6 +14,7 @@
     const link = new URL($href.href);
     link.pathname = `/product`;
     link.searchParams.set("p", meta.id);
+    let sellerNames = getNames(product.seller);
 
     let r = rotateObj($prices, "onChainDenom");
     $: showPriceIn = $user?.selectedCoin || NATIVE_COIN;
@@ -49,9 +50,21 @@
     </div>
     <div class="info">
         <div class="wpr">
-            <button class="button-link">
-                <OverflowAddress address={product.seller}></OverflowAddress>
-            </button>
+            {#await sellerNames}
+                <button class="button-link">
+                    <OverflowAddress address={product.seller}></OverflowAddress>
+                </button>
+            {:then [sellerName]}
+                {#if sellerName}
+                    <button class="button-link">{name}</button>
+                {:else}
+                    <button class="button-link">
+                        <OverflowAddress address={product.seller}
+                        ></OverflowAddress>
+                    </button>
+                {/if}
+            {/await}
+
             <Stars bind:rating={product.rating} small></Stars>
         </div>
         <h2>

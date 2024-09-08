@@ -81,8 +81,8 @@ pub fn execute(
         ExecuteMsg::RejectOrder { order_id } => Order::msg_reject(&mut deps, info, order_id),
         ExecuteMsg::FulfillOrder { order_id } => Order::msg_fulfill(&mut deps, env, info, order_id),
         ExecuteMsg::DisputeOrder { order_id } => Order::msg_dispute(&mut deps, info, order_id),
-        ExecuteMsg::ReviewUser(msg) => Review::msg_review_user(&mut deps, info, msg),
-        ExecuteMsg::ReviewProduct(msg) => Review::msg_review_product(&mut deps, info, msg),
+        ExecuteMsg::ReviewUser(msg) => Review::msg_review_user(&mut deps, env, info, msg),
+        ExecuteMsg::ReviewProduct(msg) => Review::msg_review_product(&mut deps, env, info, msg),
         ExecuteMsg::ListProduct { product_id } => Product::msg_list(&mut deps, info, product_id),
         ExecuteMsg::UnListProduct { product_id } => {
             Product::msg_unlist(&mut deps, info, product_id)

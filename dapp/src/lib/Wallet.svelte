@@ -6,15 +6,24 @@
     import IbcModal from "./IbcModal.svelte";
     import { toPrefix } from "../utils";
     import { cart, openCart } from "../stores/cart";
+    import { goTo, href } from "../stores/location";
     let isOpen = false;
     let showModal = false;
     let direction: "deposit" | "withdraw" = "deposit";
     const { VITE_NATIVE_COIN: NATIVE_COIN } = import.meta.env;
 
+    const link = new URL($href.href);
+    link.pathname = `/account`;
+    link.search = '';
+
     const copy = (str: string) => (e: MouseEvent) => {
         e.preventDefault();
         e.stopImmediatePropagation();
         navigator.clipboard.writeText(str);
+        icon = "ri-check-line"
+        setTimeout(()=>{
+            icon = "ri-file-copy-line";
+        }, 500)
     };
     const open = () => {
         isOpen = true;
@@ -39,6 +48,8 @@
         direction = "withdraw";
     };
 
+    let icon = "ri-file-copy-line";
+
     const sellectAsset = (coin: CoinData) => () => {
         if ($user) {
             $user.selectedCoin = coin.coinDenom;
@@ -56,13 +67,13 @@
         tabindex="0" role="button" 
         on:keydown={(e)=>['Enter', ' '].includes(e.key) ? open() : undefined}
         on:click={open}>
-            <button class="to-profile">
+            <button class="to-profile" on:click={goTo(link.href)}>
                 <i class="ri-user-fill"></i>
             </button>
             <div class="address">
                 <span>{addr.slice(0, 11)}...{addr.slice(-4)}</span>
                 <button on:click={copy(addr)}
-                    ><i class="ri-file-copy-line"></i></button
+                    ><i class="{icon}"></i></button
                 >
             </div>
             <div class="amount">
@@ -181,6 +192,15 @@
             border: 1px solid transparent;
             cursor: pointer;
             border-radius: 3px;
+            position: relative;
+            &::after{
+                position: absolute;
+                content: "";
+                background-color: var(--red-10);
+                width: 6px;
+                height: 6px;
+                border-radius: 6px;
+            }
             &:hover{
                 background-color: var(--indigo-a3);
                 border: 1px solid var(--indigo-6);

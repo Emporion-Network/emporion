@@ -9,7 +9,7 @@
 
 <script lang="ts">
     import { Decimal } from "@cosmjs/math";
-    import { jwt, user, api } from "../../stores/user";
+    import { user, api } from "../../stores/user";
     import {
         extractAttr,
         getMetaHash,
@@ -26,7 +26,7 @@
         VITE_ENDPOINT_BACK_END_API: ENDPOINT_BACK_END_API 
     } = import.meta.env;
     import ImageUploader from "./components/ImageUploader.svelte";
-    import Description from "./components/Description.svelte";
+    import Description from "../../lib/Description.svelte";
     import Categories from "./components/Categories.svelte";
     import PricePicker from "./components/PriceMaker.svelte";
     import Attriutes from "./components/AttributesMaker.svelte";

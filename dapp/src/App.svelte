@@ -12,6 +12,7 @@
     import { user } from "./stores/user";
     import { ENV } from "./utils";
     import Storybook from "./pages/storybook/Storybook.svelte";
+    import Chat from "./pages/user/Chat.svelte";
 
     watchPrices();
     onMount(() => {
@@ -34,6 +35,9 @@
     </Route>
     <Route match="/account">
         <UserShow />
+    </Route>
+    <Route match="/messages">
+        <Chat/>
     </Route>
 {/if}
 {#if ENV.DEV}

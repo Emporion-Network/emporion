@@ -11,6 +11,12 @@
 body {
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+}
+#app{
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 img,
@@ -73,6 +79,7 @@ textarea::placeholder {
         background-color: var(--indigo-10);
     }
 }
+
 
 .button-1-2 {
     background-color: var(--gray-2);

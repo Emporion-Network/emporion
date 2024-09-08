@@ -69,6 +69,7 @@
             :global(.multiselect .value){
                 background-color: var(--indigo-9);
                 border-radius: 0 5px 5px 0;
+                color: var(--white-a12);
                 &:hover{
                     background-color: var(--indigo-10);
                 }

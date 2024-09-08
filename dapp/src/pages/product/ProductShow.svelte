@@ -1,24 +1,12 @@
-<script lang="ts" context="module">
-    const {
-        VITE_ENDPOINT_RPC: ENDPOINT_RPC,
-        VITE_STORE_ADDRESS: STORE_ADDRESS,
-    } = import.meta.env;
-    const client = new EmporionQueryClient(
-        await CosmWasmClient.connect(ENDPOINT_RPC),
-        STORE_ADDRESS,
-    );
-</script>
-
 <script lang="ts">
     import ProductShow from "./components/ProductPickerShow.svelte";
     import { href, historyReplace } from "../../stores/location";
-    import { EmporionQueryClient } from "../../../../client-ts/Emporion.client";
-    import { CosmWasmClient } from "@cosmjs/cosmwasm-stargate";
     import Menu from "../../lib/Menu.svelte";
     import SearchBar from "../../lib/SearchBar.svelte";
     import type { Product } from "../../../../client-ts/Emporion.types";
     import type { ProductMetaData } from "../../../../shared-types";
     import { api } from "../../stores/user";
+    import { clients } from "../../stores/readStores";
     let productId:string;
     let metas:ProductMetaData[] = [];
     let products:Product[] = [];
@@ -34,11 +22,11 @@
         const newPid = newHref.searchParams.get("p");
         if(!newPid || productId == newPid) return;
         const mp = await api.productGet(newPid);
-        const p = await client.product_by_id({product_id:Number(newPid)})
+        const p = await $clients.emporionQueryClient.product_by_id({product_id:Number(newPid)})
         const newMetas = await api.sellerCollectionsMetasGet(p.seller, mp.collection_id);
         const newProducts = (await Promise.all(newMetas.map(({id})=>{
             if(Number(id) === p.id) return p;
-            return client.product_by_id({product_id:Number(id)})
+            return $clients.emporionQueryClient.product_by_id({product_id:Number(id)})
         }))).filter(e => e !== undefined)
         .filter(e => e.is_listed)
         const listed = newProducts.map(e => `${e.id}`);

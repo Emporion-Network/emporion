@@ -167,9 +167,6 @@
             div {
                 flex: 1;
             }
-            i {
-                color: var(--gray-12);
-            }
 
             &.placeholder {
                 color: var(--gray-10);

@@ -52,11 +52,23 @@ export type OrderMetaData = {
     id:string,
     postalAddress:string,
     trackingNumber:string,
-    countryCity:string,
+    countryCity:{
+        country:string,
+        city:string,
+    },
     messages:{
         text:string,
-        sender:'seller'|"buyer",
+        isBuyer:boolean,
         media:string[],
+        date:number
     }[]
 }
 
+
+
+export type SoketMessage = {jwt:string} | {
+    jwt:string;
+    orderId:string;
+    media: string[];
+    text: string;
+};

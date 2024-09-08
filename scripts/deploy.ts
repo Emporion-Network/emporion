@@ -306,7 +306,7 @@ const testDeployement = async ({ DAO_ADDRESS, STORE_ADDRESS }: { DAO_ADDRESS: st
 }
 
 
-// await $`bun scripts/build.ts`;
+await $`bun scripts/build.ts`;
 await testDeployement(await deploy())
 
 

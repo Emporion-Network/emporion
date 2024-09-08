@@ -17,6 +17,7 @@ import { Api } from "../api";
 import { getNames, signMessage } from "../utils";
 import { notification } from "../lib/Notifications.svelte";
 import { cart } from "./cart";
+import type { SoketMessageRecieve } from "../../../shared-types";
 
 declare global {
     // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -31,7 +32,8 @@ const user = writable<{
     cosmWasmClient: CosmWasmClient,
     selectedCoin: string,
     address: string,
-    names: string[]
+    names: string[],
+    ws: WebSocket,
 } | null>(null);
 
 const autoLogIn = {
@@ -73,13 +75,13 @@ const jwt = {
 };
 
 Api.notify = (err, log) => {
-    if(err){
+    if (err) {
         notification({
             type: 'error',
             text: err
         })
     }
-    if(log){
+    if (log) {
         notification({
             type: 'success',
             text: log
@@ -106,6 +108,21 @@ const setUser = async () => {
         const address = (await offlineSigner.getAccounts())[0].address;
         const emporionClient = new EmporionClient(cosmWasmClient, address, STORE_ADDRESS);
 
+        const wsHref = new URL(ENDPOINT_BACK_END_API);
+        const ws = new WebSocket(`ws://${wsHref.host}/ws`);
+        ws.onopen = () => {
+            ws.send(JSON.stringify({
+                jwt: jwt.get()
+            }))
+        }
+
+        ws.onmessage = (event) => {
+            const message: SoketMessageRecieve = JSON.parse(event.data);
+            document.dispatchEvent(new CustomEvent('soket-message', {
+                detail: message
+            }))
+        }
+
         user.set({
             offlineSigner,
             emporionClient,
@@ -113,9 +130,12 @@ const setUser = async () => {
             selectedCoin: NATIVE_COIN,
             address,
             names: await getNames(address),
+            ws,
         })
         autoLogIn.set(true);
-        
+
+
+
         if (!jwt.isExp() && jwt.decoded()?.address == address) {
             api.setToken(jwt.get()!);
             return;

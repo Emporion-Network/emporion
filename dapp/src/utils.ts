@@ -223,23 +223,18 @@ export const id = () => {
     return dateString + randomness;
 };
 
+const sgzClient = CosmWasmClient.connect("https://stargaze-rpc.publicnode.com:443");
 
 export const getNames = async (address: string) => {
-    return Promise.all([{
-        rpc: "https://stargaze-rpc.publicnode.com:443",
-        contract: "stars1fx74nkqkw2748av8j7ew7r3xt9cgjqduwn8m0ur5lhe49uhlsasszc5fhr",
-        prefix: 'stars'
-    }].map(async ({ rpc, contract, prefix }) => {
-        const client = await CosmWasmClient.connect(rpc);
-        try {
-            let res = await client.queryContractSmart(contract, {
-                name: { address: toPrefix(address, prefix) },
-            }) as string;
-            return res;
-        } catch (e) {
-        }
-        return ""
-    })).then(e => e.filter(a => a !== ""));
+    const client = await sgzClient;
+    try {
+        let res = await client.queryContractSmart("stars1fx74nkqkw2748av8j7ew7r3xt9cgjqduwn8m0ur5lhe49uhlsasszc5fhr", {
+            name: { address: toPrefix(address, "stars") },
+        }) as string;
+        return [res];
+    } catch (e) {
+    }
+    return []
 }
 
 export const intersect = <T>(a: T[], b: T[]) => {
@@ -372,10 +367,11 @@ export const getPrices = (product: Product, record: Record<string, CoinData>) =>
     });
 };
 
-export const getDeliveryDate = (expiration: Expiration) => {
+export const getExpirationDate = (expiration: Expiration) => {
     if ('at_time' in expiration) {
         return new Date(Number(expiration.at_time.slice(0, 13)))
     }
+    return new Date()
 }
 
 export const DAY = 86400;
@@ -404,33 +400,33 @@ export const getDeliveryDuration = (duration: Duration) => {
 }
 
 
-export const dateToString = (date:Date)=>{
+export const dateToString = (date: Date) => {
     return date.toLocaleDateString("en-US", {
-        month:'short',
-        day:'numeric'
+        month: 'short',
+        day: 'numeric',
     })
 }
 
-export const getDeliveryFormatedDate = (duration: Duration) =>{
+export const getDeliveryFormatedDate = (duration: Duration) => {
     if ('time' in duration) {
         const date = new Date()
-        date.setDate(date.getDate() + Math.floor(duration.time/DAY))
+        date.setDate(date.getDate() + Math.floor(duration.time / DAY))
         return dateToString(date)
-    } 
+    }
 }
 
-export const trimStrings = <T>(o:T):T=>{
-    if(Array.isArray(o)){
+export const trimStrings = <T>(o: T): T => {
+    if (Array.isArray(o)) {
         return o.map(i => trimStrings(i)) as T;
     }
-    if(typeof o == 'object' && o && Object.prototype.toString.call(o) === '[object Object]'){
+    if (typeof o == 'object' && o && Object.prototype.toString.call(o) === '[object Object]') {
         Object.keys(o).forEach((k) => {
             let key = k as keyof typeof o;
             o[key] = trimStrings(o[key])
         })
         return o;
     }
-    if(typeof o === 'string'){
+    if (typeof o === 'string') {
         return o.trim() as T;
     }
     return o;
@@ -438,19 +434,19 @@ export const trimStrings = <T>(o:T):T=>{
 
 export const ENV = {
     ...import.meta.env,
-    ENDPOINT_RPC:import.meta.env.VITE_ENDPOINT_RPC,
-    ENDPOINT_BACK_END_API:import.meta.env.VITE_ENDPOINT_BACK_END_API,
-    ENPOINT_API:import.meta.env.VITE_ENPOINT_API,
-    STORE_ADDRESS:import.meta.env.VITE_STORE_ADDRESS,
-    NATIVE_COIN:import.meta.env.VITE_NATIVE_COIN,
+    ENDPOINT_RPC: import.meta.env.VITE_ENDPOINT_RPC,
+    ENDPOINT_BACK_END_API: import.meta.env.VITE_ENDPOINT_BACK_END_API,
+    ENPOINT_API: import.meta.env.VITE_ENPOINT_API,
+    STORE_ADDRESS: import.meta.env.VITE_STORE_ADDRESS,
+    NATIVE_COIN: import.meta.env.VITE_NATIVE_COIN,
 } as unknown as {
     DEV: boolean;
     PROD: boolean;
-    ENDPOINT_RPC:string;
-    ENDPOINT_BACK_END_API:string;
-    ENPOINT_API:string;
-    STORE_ADDRESS:string;
-    NATIVE_COIN:string;
+    ENDPOINT_RPC: string;
+    ENDPOINT_BACK_END_API: string;
+    ENPOINT_API: string;
+    STORE_ADDRESS: string;
+    NATIVE_COIN: string;
 }
 
 
@@ -461,55 +457,107 @@ type ExcludedTypes = Date | Set<unknown> | Map<unknown, unknown>;
 type ArrayEncoder = `[${bigint}]`;
 
 type EscapeArrayKey<TKey extends string> = TKey extends `${infer TKeyBefore}.${ArrayEncoder}${infer TKeyAfter}`
-  ? EscapeArrayKey<`${TKeyBefore}${ArrayEncoder}${TKeyAfter}`>
-  : TKey;
+    ? EscapeArrayKey<`${TKeyBefore}${ArrayEncoder}${TKeyAfter}`>
+    : TKey;
 
 // Transforms entries to one flattened type
 type CollapseEntries<TEntry extends Entry> = {
-  [E in TEntry as EscapeArrayKey<E['key']>]: E['value'];
+    [E in TEntry as EscapeArrayKey<E['key']>]: E['value'];
 };
 
 // Transforms array type to object
 type CreateArrayEntry<TValue, TValueInitial> = OmitItself<
-  TValue extends unknown[] ? { [k: ArrayEncoder]: TValue[number] } : TValue,
-  TValueInitial
+    TValue extends unknown[] ? { [k: ArrayEncoder]: TValue[number] } : TValue,
+    TValueInitial
 >;
 
 // Omit the type that references itself
 type OmitItself<TValue, TValueInitial> = TValue extends TValueInitial
-  ? EmptyEntry<TValue>
-  : OmitExcludedTypes<TValue, TValueInitial>;
+    ? EmptyEntry<TValue>
+    : OmitExcludedTypes<TValue, TValueInitial>;
 
 // Omit the type that is listed in ExcludedTypes union
 type OmitExcludedTypes<TValue, TValueInitial> = TValue extends ExcludedTypes
-  ? EmptyEntry<TValue>
-  : CreateObjectEntries<TValue, TValueInitial>;
+    ? EmptyEntry<TValue>
+    : CreateObjectEntries<TValue, TValueInitial>;
 
 type CreateObjectEntries<TValue, TValueInitial> = TValue extends object
-  ? {
-      // Checks that Key is of type string
-      [TKey in keyof TValue]-?: TKey extends string
+    ? {
+        // Checks that Key is of type string
+        [TKey in keyof TValue]-?: TKey extends string
         ? // Nested key can be an object, run recursively to the bottom
-          CreateArrayEntry<TValue[TKey], TValueInitial> extends infer TNestedValue
-          ? TNestedValue extends Entry
-            ? TNestedValue['key'] extends ''
-              ? {
-                  key: TKey;
-                  value: TNestedValue['value'];
-                }
-              :
-                  | {
-                      key: `${TKey}.${TNestedValue['key']}`;
-                      value: TNestedValue['value'];
-                    }
-                  | {
-                      key: TKey;
-                      value: TValue[TKey];
-                    }
-            : never
-          : never
+        CreateArrayEntry<TValue[TKey], TValueInitial> extends infer TNestedValue
+        ? TNestedValue extends Entry
+        ? TNestedValue['key'] extends ''
+        ? {
+            key: TKey;
+            value: TNestedValue['value'];
+        }
+        :
+        | {
+            key: `${TKey}.${TNestedValue['key']}`;
+            value: TNestedValue['value'];
+        }
+        | {
+            key: TKey;
+            value: TValue[TKey];
+        }
+        : never
+        : never
         : never;
     }[keyof TValue] // Builds entry for each key
-  : EmptyEntry<TValue>;
+    : EmptyEntry<TValue>;
 
 export type FlattenObject<TValue> = CollapseEntries<CreateObjectEntries<TValue, TValue>>;
+
+
+export const capitalize = (str: string) => `${str[0].toUpperCase()}${str.slice(1)}`
+
+//@ts-ignore
+window.suggestCahin = async ()=>{
+    await window.keplr?.experimentalSuggestChain({
+        chainId: "test-1",
+        chainName: "neutron",
+        rpc: "http://localhost:26657",
+        rest: "http://localhost:1317",
+        bip44: {
+            coinType: 118,
+        },
+        bech32Config: {
+            bech32PrefixAccAddr: "neutron",
+            bech32PrefixAccPub: "neutron" + "pub",
+            bech32PrefixValAddr: "neutron" + "valoper",
+            bech32PrefixValPub: "neutron" + "valoperpub",
+            bech32PrefixConsAddr: "neutron" + "valcons",
+            bech32PrefixConsPub: "neutron" + "valconspub",
+        },
+        currencies: [ 
+            { 
+                coinDenom: "NTRN", 
+                coinMinimalDenom: "untrn", 
+                coinDecimals: 6, 
+                coinGeckoId: "neutron-3", 
+            }, 
+        ],
+        feeCurrencies: [
+            {
+                coinDenom: "NTRN",
+                coinMinimalDenom: "untrn",
+                coinDecimals: 6,
+                coinGeckoId: "neutron-3", 
+                gasPriceStep: {
+                    low: 0.01,
+                    average: 0.025,
+                    high: 0.04,
+                },
+            },
+        ],
+        stakeCurrency: {
+            coinDenom: "NTRN",
+            coinMinimalDenom: "untrn",
+            coinDecimals: 6,
+            coinGeckoId: "neutron-3",
+        },
+    });
+    
+}

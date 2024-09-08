@@ -51,6 +51,10 @@ export class Api {
         this.token = token;
     }
 
+    getToken(){
+        return this.token;
+    }
+
     private assert(value: boolean, message: string): asserts value {
         if (!value) {
             throw new ApiError(message)

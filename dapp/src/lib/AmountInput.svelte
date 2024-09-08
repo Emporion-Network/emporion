@@ -8,9 +8,11 @@
     export let useNativeAmount: boolean;
     export let value = Decimal.zero(0);
     export let checkAmout = true;
+    export let setAvailable:undefined|Decimal = undefined;
+
     $:value = value ?? Decimal.zero(0);
     $:coin = $prices[coinDenom];
-    $:available = useNativeAmount ? coin.nativeAmount : coin.onChainAmount;
+    $:available = setAvailable || (useNativeAmount ? coin.nativeAmount : coin.onChainAmount);
     let amount = value.toString();
     let tgt:HTMLInputElement;
 
@@ -50,6 +52,7 @@
 
     const set = (n:number, d:number)=>()=>{
         value = multiply_ratio(available, [n, d])
+        amount = value.toString();
         tgt.value = value.toString()
     }
 </script>

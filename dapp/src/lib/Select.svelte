@@ -9,6 +9,7 @@
             return;
         }
         selected = newValue;
+        isOpen = false;
     }
 
     const close = ()=>{
@@ -60,5 +61,6 @@
         min-width: 200px;
         background-color: var(--gray-4);
         z-index: 3;
+        overflow-y: auto;
     }
 </style>

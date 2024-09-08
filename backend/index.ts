@@ -2,9 +2,9 @@ import "bun";
 import { z } from "zod";
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
-import { jwt, sign, type JwtVariables } from 'hono/jwt'
+import { jwt, sign, verify, type JwtVariables } from 'hono/jwt'
 import { stream } from 'hono/streaming'
-import type { ProductMetaData, Attribute,OrderMetaData } from "../shared-types/index"
+import type { ProductMetaData, Attribute, OrderMetaData, SoketMessage } from "../shared-types/index"
 import { CATEGORIES } from "../shared-types/categories"
 import { REGIONS } from "../shared-types/countries"
 import markdownit from 'markdown-it'
@@ -17,23 +17,27 @@ import { randomUUID } from "crypto";
 import { assert, hash, ServerError, verifySignature, errors, getUniqueCollectionId, validateAddress, capitalize } from "./utils";
 import { fromBech32 } from "@cosmjs/encoding";
 import { FileStorage, Embedings, Search } from "./fileStorage";
-import { pipeline } from "@huggingface/transformers"
+import { pipeline } from "@huggingface/transformers";
+import { createBunWebSocket } from 'hono/bun';
+import { WSContext } from "hono/ws";
+
+const { upgradeWebSocket, websocket } = createBunWebSocket()
 
 
-const extractor = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2', {dtype:"fp32"});
-const addressCountryAndCityExtractor = await pipeline('token-classification', 'Frakko729/bert-base-uncased-city-country-ner', {dtype:"fp32"})
+const extractor = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2', { dtype: "fp32" });
+const addressCountryAndCityExtractor = await pipeline('token-classification', 'Frakko729/bert-base-uncased-city-country-ner', { dtype: "fp32" })
 const embed = async (t: string) => {
     const a1 = (await extractor(t, { pooling: "mean", normalize: true })).data;
     return a1 as number[]
 }
 
-const extractFrmAddress = async(text:string)=>{
+const extractFrmAddress = async (text: string) => {
     text = text.replaceAll(/[^\p{L}]/ug, ' ').replaceAll(/ +/g, ' ')
     const resp = await addressCountryAndCityExtractor(text)
-    return resp.reduce((acc, c:any)=>{
+    return resp.reduce((acc, c: any) => {
         acc[c.entity.toLocaleLowerCase()] = capitalize(c.word)
         return acc;
-    }, {country:"", city:""})
+    }, { country: "", city: "" })
 }
 
 
@@ -110,17 +114,32 @@ const ProductMetaSchema = z.object({
 }) satisfies z.ZodSchema<ProductMetaData>;
 
 const OrderMetaDataSchema = z.object({
-    id:z.string().regex(/^(0|[1-9][0-9]*)$/),
-    postalAddress:z.string().max(300),
-    trackingNumber:z.string().max(20),
-    countryCity:z.string().max(50),
-    messages:z.array(z.object({
-        text:z.string().max(500),
-        media:z.array(z.string().url()),
-        sender:z.enum(['seller', 'buyer']),
-        date:z.number(),
+    id: z.string().regex(/^(0|[1-9][0-9]*)$/),
+    postalAddress: z.string().max(300),
+    trackingNumber: z.string().max(20),
+    countryCity: z.object({
+        country: z.string().max(50),
+        city: z.string().max(50)
+    }),
+    messages: z.array(z.object({
+        text: z.string().max(500),
+        media: z.array(z.string().url()),
+        isBuyer: z.boolean(),
+        date: z.number(),
     }))
 }) satisfies z.ZodSchema<OrderMetaData>;
+
+const SoketMessage = z.object({
+        orderId:z.string().regex(/^(0|[1-9][0-9]*)$/),
+        jwt:z.string(),
+        media: z.array(z.string().url()),
+        text:z.string().max(300)
+    }).or(
+        z.object({
+            jwt:z.string(),
+        })
+    ) satisfies Zod.Schema<SoketMessage>
+
 
 const NonceReq = z.object({
     address: z.string(),
@@ -251,12 +270,12 @@ app.get('/collections/:address', async (c) => {
 })
 
 
-app.post('/auth/create-postal-address', async (c)=>{
+app.post('/auth/create-postal-address', async (c) => {
     let { address }: { address: string } = c.get('jwtPayload');
-    const {postalAddress} = await c.req.json();
+    const { postalAddress } = await c.req.json();
     z.string().max(300).min(5).parse(postalAddress);
     const k = address.slice(0, 10);
-    await USER_TO_ADDRESSES.update(k, (addrs={})=>{
+    await USER_TO_ADDRESSES.update(k, (addrs = {}) => {
         addrs[address] = addrs[address] ?? [];
         addrs[address].push(postalAddress);
         return addrs;
@@ -264,19 +283,19 @@ app.post('/auth/create-postal-address', async (c)=>{
     return c.json({}, 200);
 })
 
-app.post('/auth/remove-address', async (c)=>{
+app.post('/auth/remove-address', async (c) => {
     let { address }: { address: string } = c.get('jwtPayload');
-    const {index} = await c.req.json();
+    const { index } = await c.req.json();
     const k = address.slice(0, 10);
-    await USER_TO_ADDRESSES.update(k, (addrs={})=>{
+    await USER_TO_ADDRESSES.update(k, (addrs = {}) => {
         addrs[address] = addrs[address] ?? [];
-        addrs[address] = addrs[address].filter((_, i)=> i !== index);
+        addrs[address] = addrs[address].filter((_, i) => i !== index);
         return addrs;
     })
     return c.json({}, 200);
 })
 
-app.get('/auth/addresses', async (c)=>{
+app.get('/auth/addresses', async (c) => {
     let { address }: { address: string } = c.get('jwtPayload');
     const k = address.slice(0, 10);
     const bucket = await USER_TO_ADDRESSES.get(k) || {};
@@ -293,7 +312,7 @@ app.post('/auth/upload-image', async (c) => {
     const body = await c.req.parseBody();
     let { address }: { address: string } = c.get('jwtPayload');
     let files = body['file[]'] as unknown as File[];
-    if(!Array.isArray(files)){
+    if (!Array.isArray(files)) {
         files = [files]
     }
     const urls = await Promise.all(files.map(async file => {
@@ -358,7 +377,7 @@ app.get("/search/:page?", async (c) => {
     const vect = embed(search)
     const ids: any[] = (await Embedings.search(vect)
         .distanceType('cosine')
-        .where(`id >= ${page||'0'}`)
+        .where(`id >= ${page || '0'}`)
         .limit(100)
         .toArray()).filter(e => e._distance < 0.8)
     const results = (await PRODUCTS.getList(ids.map(e => e.id.toString())))
@@ -380,37 +399,37 @@ app.get("/search-suggestions", async (c) => {
     return c.json(results.map(e => e.text))
 })
 
-app.get('/extract-city-country', async (c)=>{
-    const search = c.req.query('q')||"";
+app.get('/extract-city-country', async (c) => {
+    const search = c.req.query('q') || "";
     const resp = await extractFrmAddress(search)
     return c.json(resp)
 })
 
-app.post("/auth/create-order", async(c)=>{
+app.post("/auth/create-order", async (c) => {
     let { address }: { address: string } = c.get('jwtPayload')
     const body = await c.req.json();
     let orderMeta: OrderMetaData = OrderMetaDataSchema.parse({
-        id:body.id,
-        postalAddress:body.postalAddress,
-        trackingNumber:"",
-        countryCity:await extractFrmAddress(body.postalAddress),
-        messages:[]
+        id: body.id,
+        postalAddress: body.postalAddress,
+        trackingNumber: "",
+        countryCity: await extractFrmAddress(body.postalAddress),
+        messages: []
     });
-    const o = await client.order({order_id:Number(body.id)})
+    const o = await client.order({ order_id: Number(body.id) })
     assert(o.buyer == address, errors.UNAUTHORIZED)
     await ORDERID_TO_ORDER_META.set(body.id, orderMeta);
     return c.json({})
 })
 
 
-app.post('/auth/order-set-tracking-number', async(c)=>{
+app.post('/auth/order-set-tracking-number', async (c) => {
     let { address }: { address: string } = c.get('jwtPayload')
     const body = await c.req.json();
     let id = OrderMetaDataSchema.shape.id.parse(body.id)
     let trackingNumber = OrderMetaDataSchema.shape.trackingNumber.parse(body.trackingNumber);
-    const o = await client.order({order_id:Number(id)});
+    const o = await client.order({ order_id: Number(id) });
     assert(o.seller === address, errors.UNAUTHORIZED);
-    await ORDERID_TO_ORDER_META.update(body.id, (o)=>{
+    await ORDERID_TO_ORDER_META.update(body.id, (o) => {
         assert(o !== undefined, "Order not found");
         o.trackingNumber = trackingNumber;
         return o;
@@ -420,21 +439,21 @@ app.post('/auth/order-set-tracking-number', async(c)=>{
 })
 
 
-app.post('/auth/order-add-message', async(c)=>{
+app.post('/auth/order-add-message', async (c) => {
     let { address }: { address: string } = c.get('jwtPayload')
     const body = await c.req.json();
     let id = OrderMetaDataSchema.shape.id.parse(body.id)
-    const o = await client.order({order_id:Number(id)});
+    const o = await client.order({ order_id: Number(id) });
     const sender = o.buyer === address ? "buyer" : "seller";
     assert([o.buyer, o.seller].includes(address), errors.UNAUTHORIZED);
     let message = OrderMetaDataSchema.shape
-    .messages.element.parse({
-        ...body.message,
-        date:Date.now(),
-        sender,
-    });
+        .messages.element.parse({
+            ...body.message,
+            date: Date.now(),
+            sender,
+        });
     assert(o.seller === address, errors.UNAUTHORIZED);
-    await ORDERID_TO_ORDER_META.update(body.id, (o)=>{
+    await ORDERID_TO_ORDER_META.update(body.id, (o) => {
         assert(o !== undefined, "Order not found");
         o.messages.push(message)
         return o;
@@ -443,10 +462,10 @@ app.post('/auth/order-add-message', async(c)=>{
     return c.json({})
 });
 
-app.get('/auth/order/:id', async(c)=>{
+app.get('/auth/order/:id', async (c) => {
     const id = c.req.param('id');
     let { address }: { address: string } = c.get('jwtPayload')
-    const o = await client.order({order_id:Number(id)});
+    const o = await client.order({ order_id: Number(id) });
     assert([o.buyer, o.seller].includes(address), errors.UNAUTHORIZED);
     return c.json(await ORDERID_TO_ORDER_META.get(id))
 })
@@ -468,7 +487,71 @@ app.onError((e, c) => {
     }, 400)
 })
 
+
+const wsToUser = new Map<WSContext, {
+    address:string,
+    orders:Map<string, {isBuyer:boolean, other:string}>
+}>
+
+const addressToWs = new Map<string, WSContext>;
+
+app.get(
+    '/ws',
+    upgradeWebSocket((c) => {
+        return {
+            async onMessage(event, ws) {
+                try {
+                    const msg:SoketMessage = SoketMessage.parse(JSON.parse(event.data.toString()));
+                    const {address} = await verify(msg.jwt, Bun.env.JWT_SECRET||"") as {address:string};
+                    if(!wsToUser.get(ws)){
+                        wsToUser.set(ws, {
+                            address,
+                            orders:new Map(),
+                        });
+                        addressToWs.set(address, ws);
+                    }
+                    if(!('orderId' in msg)) return;
+                    if(!wsToUser.get(ws)!.orders.get(msg.orderId)){
+                        const o = await client.order({order_id:Number(msg.orderId)});
+                        assert(o.buyer === address || o.seller === address, errors.UNAUTHORIZED);
+                        let isBuyer = o.buyer === address;
+                        const other = o.buyer === address ? o.seller : o.buyer;
+                        wsToUser.get(ws)!.orders.set(msg.orderId, {
+                            isBuyer,
+                            other
+                        })
+                    }
+                    const user = wsToUser.get(ws)!.orders.get(msg.orderId)!
+
+                    const message:OrderMetaData['messages'][number] = {
+                            text:msg.text,
+                            media:msg.media,
+                            isBuyer:user.isBuyer,
+                            date:Date.now()
+                    }
+                    const traget = addressToWs.get(user.other);
+                    traget?.send(JSON.stringify({
+                        orderId:msg.orderId,
+                        message,
+                    }))
+                    
+
+                } catch (e) {
+                    console.log(e)
+                    ws.close()
+                }
+            },
+            onClose: (_, ws) => {
+                const address = wsToUser.get(ws)?.address;
+                addressToWs.delete(String(address))
+                wsToUser.delete(ws)
+            },
+        }
+    })
+)
+
 export default {
     port: 3000,
     fetch: app.fetch,
+    websocket
 } 
