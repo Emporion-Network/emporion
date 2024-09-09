@@ -23,6 +23,7 @@ pub(crate) const CONTRACT_NAME: &str = "crates.io:emporion-core";
 pub(crate) const CONTRACT_VERSION: &str = env!("CARGO_PKG_VERSION");
 pub const MAX_ITEMS_PER_PAGE: usize = if_test!(2, 100);
 pub const MAX_MESSAGE_LEN: usize = 3000; // bytes
+pub const MAX_ALIAS_LEN:usize = 30;
 
 ///////////////////////////////////////////////////////////////////
 //////////////////////////      Stores     ////////////////////////
@@ -33,6 +34,7 @@ pub const INDEX: Item<u64> = Item::new("idx");
 pub const BANK: Item<Bank> = Item::new("bnk");
 pub const BLACKLIST: Map<Addr, Empty> = Map::new("blst");
 pub const USERS: Map<Addr, User> = Map::new("usr");
+pub const ALIAS:Map<String, Empty> = Map::new("alias");
 pub const ORDERS: Map<u64, Order> = Map::new("ord");
 pub const PRODUCTS: Map<u64, Product> = Map::new("prd");
 pub const REVIEWS: Map<u64, Review> = Map::new("rvw");
@@ -100,6 +102,8 @@ pub struct ContractParams {
 #[cw_serde]
 pub struct User {
     pub addr: Addr,
+    pub alias:Option<String>,
+    pub logo:Option<String>,
     pub nb_orders: u64,
     pub nb_rejected_orders: u64,
     pub nb_disputed_orders: u64,
@@ -108,7 +112,7 @@ pub struct User {
     pub invested: AssetList,
     pub unbonding: Vec<(Asset, Expiration)>,
     // rating / Total ratings
-    pub rating: (u64, u64),
+    pub rating: [u64;6],
 }
 
 ///////////////////////
@@ -155,7 +159,7 @@ pub struct Product {
     pub id: u64,
     pub seller: Addr,
     pub price: AssetList,
-    pub rating: (u64, u64),
+    pub rating: [u64; 6],
     pub meta: String,
     pub is_listed: bool,
     pub delivery_time: Duration,
@@ -909,7 +913,9 @@ impl User {
                     generated_fees: AssetList::new(),
                     invested: AssetList::new(),
                     unbonding: vec![],
-                    rating: (0, 0),
+                    rating: [0, 0, 0, 0, 0, 0],
+                    alias:None,
+                    logo:None,
                 };
                 u.save(deps)?;
                 Ok::<_, ContractError>(u)
@@ -925,6 +931,33 @@ impl User {
     pub fn save(&self, deps: &mut DepsMut) -> Result<(), ContractError> {
         USERS.save(deps.storage, self.addr.clone(), &self)?;
         Ok(())
+    }
+
+
+    pub fn msg_update_info(deps: &mut DepsMut, info: MessageInfo,alias:Option<String>, logo:Option<String>) -> Result<Response, ContractError>  {
+        let mut usr = User::load_or_new(deps, info.sender.clone())?;
+        match alias {
+            Some(alias) => {
+                if ALIAS.has(deps.storage, alias.clone()) {
+                    return  Err(ContractError::Unauthorized {});
+                }
+                if alias.len() > MAX_ALIAS_LEN {
+                    return  Err(ContractError::InvalidAliasSize {});
+                }
+                if usr.alias.is_some() {
+                    ALIAS.remove(deps.storage, usr.alias.unwrap());
+                }
+                ALIAS.save(deps.storage, alias.clone(), &Empty {})?;
+                usr.alias = Some(alias);
+            },
+            None => {}
+        };
+       
+        usr.logo = logo;
+        usr.save(deps)?;
+        Ok(Response::new()
+        .add_attribute("action", "info_updated")
+        .add_attribute("sender", info.sender.to_string()))
     }
 }
 
@@ -999,7 +1032,7 @@ impl Product {
             price,
             seller,
             is_listed: msg.is_listed,
-            rating: (0, 0),
+            rating: [0, 0, 0, 0, 0, 0],
             delivery_time: msg.delivery_time,
             meta_hash: msg.meta_hash,
         };
@@ -1808,6 +1841,9 @@ impl Review {
         if ordr.status != OrderStatus::Fulfilled && ordr.status != OrderStatus::Disputed {
             return Err(ContractError::Unauthorized {});
         }
+        if msg.rating > 5 {
+            return Err(ContractError::InvalidReview {});
+        }
         let mut to_be_rated = User::load(deps.as_ref(), ordr.other(&info.sender))?;
         let user_to_review = USER_TO_REVIEW.key((to_be_rated.addr.clone(), ordr.id));
         let mut action = "user_review_created";
@@ -1816,8 +1852,8 @@ impl Review {
             let mut review = Review::load(deps.as_ref(), review_id)?;
             // remove previous rating
             // add new rating
-            to_be_rated.rating.0 -= u64::from(review.rating);
-            to_be_rated.rating.0 += u64::from(msg.rating);
+            to_be_rated.rating[review.rating as usize] -= 1;
+            to_be_rated.rating[msg.rating as usize] += 1;
             review.message = msg.message;
             review.rating = msg.rating;
             review.updated_at = Some(env.block.time);
@@ -1834,8 +1870,7 @@ impl Review {
                 env.block.time,
                 None
             )?;
-            to_be_rated.rating.0 += u64::from(msg.rating);
-            to_be_rated.rating.1 += 1;
+            to_be_rated.rating[msg.rating as usize] += 1;
             user_to_review.save(deps.storage, &review.id)?;
             review.id
         };
@@ -1866,6 +1901,9 @@ impl Review {
         if ordr.cart.iter().all(|(id, _)| id != &msg.product_id) {
             return Err(ContractError::Unauthorized {});
         }
+        if msg.rating > 5 {
+            return Err(ContractError::InvalidReview {});
+        }
         let mut to_be_rated = Product::load(deps.as_ref(), msg.product_id)?;
         let product_to_review = PRODUCT_TO_REVIEW.key((to_be_rated.id, ordr.id));
         let mut action = "create_product_review";
@@ -1874,8 +1912,8 @@ impl Review {
             let mut review = Review::load(deps.as_ref(), review_id)?;
             // remove previous rating
             // add new rating
-            to_be_rated.rating.0 -= u64::from(review.rating);
-            to_be_rated.rating.0 += u64::from(msg.rating);
+            to_be_rated.rating[review.rating as usize] -= 1;
+            to_be_rated.rating[msg.rating as usize] += 1;
             review.message = msg.message;
             review.rating = msg.rating;
             review.updated_at = Some(env.block.time);
@@ -1892,8 +1930,7 @@ impl Review {
                 env.block.time,
                 None,
             )?;
-            to_be_rated.rating.0 += u64::from(msg.rating);
-            to_be_rated.rating.1 += 1;
+            to_be_rated.rating[msg.rating as usize] += 1;
             product_to_review.save(deps.storage, &review.id)?;
             review.id
         };

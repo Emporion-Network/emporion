@@ -2606,8 +2606,8 @@ mod tests {
         let b = query_user_stats(&app, &store_addr, &buyer)?;
         let s = query_user_stats(&app, &store_addr, &seller)?;
 
-        assert_eq!(b.rating, (4, 1));
-        assert_eq!(s.rating, (5, 1));
+        assert_eq!(b.rating, [0, 0, 0, 0, 1, 0]);
+        assert_eq!(s.rating, [0, 0, 0, 0, 0, 1]);
 
         let reviews = query_reviews_from(&mut app, &store_addr, &buyer, None)?;
         assert_eq!(reviews.0.len(), 1);
@@ -2649,7 +2649,7 @@ mod tests {
         assert_eq!(reviews_of_buyer.0[0].from, seller.clone());
 
         let b = query_user_stats(&app, &store_addr, &buyer)?;
-        assert_eq!(b.rating, (3, 1));
+        assert_eq!(b.rating, [0, 0, 0, 1, 0, 0]);
 
         assert!(exec_review_product(&mut app, &store_addr, &seller, msg.clone()).is_err());
         msg.rating = 12;

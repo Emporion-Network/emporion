@@ -11,6 +11,7 @@
             flex:1;
             overflow: hidden;
             display: flex;
+            max-width: max-content;
             span:first-of-type{
                 text-overflow: ellipsis;
                 flex:1;

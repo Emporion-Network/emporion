@@ -36,20 +36,13 @@
     },
     "rating": {
       "type": "array",
-      "items": [
-        {
-          "type": "integer",
-          "format": "uint64",
-          "minimum": 0.0
-        },
-        {
-          "type": "integer",
-          "format": "uint64",
-          "minimum": 0.0
-        }
-      ],
-      "maxItems": 2,
-      "minItems": 2
+      "items": {
+        "type": "integer",
+        "format": "uint64",
+        "minimum": 0.0
+      },
+      "maxItems": 6,
+      "minItems": 6
     },
     "seller": {
       "$ref": "#/definitions/Addr"

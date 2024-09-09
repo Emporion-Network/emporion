@@ -438,12 +438,12 @@ const products = [
             {
                 display_type: 'image',
                 trait_type: "tshirtb2.webp",
-                value: "tshirt2.webp",
+                value: "tshirtb2.webp",
             },
             {
                 display_type: 'image',
                 trait_type: "tshirtb3.webp",
-                value: "tshirt3.webp",
+                value: "tshirtb3.webp",
             },
             {
                 display_type: "color",
@@ -471,12 +471,12 @@ const products = [
             {
                 display_type: 'image',
                 trait_type: "tshirtb2.webp",
-                value: "tshirt2.webp",
+                value: "tshirtb2.webp",
             },
             {
                 display_type: 'image',
                 trait_type: "tshirtb3.webp",
-                value: "tshirt3.webp",
+                value: "tshirtb3.webp",
             },
             {
                 display_type: "color",
@@ -504,12 +504,12 @@ const products = [
             {
                 display_type: 'image',
                 trait_type: "tshirtb2.webp",
-                value: "tshirt2.webp",
+                value: "tshirtb2.webp",
             },
             {
                 display_type: 'image',
                 trait_type: "tshirtb3.webp",
-                value: "tshirt3.webp",
+                value: "tshirtb3.webp",
             },
             {
                 display_type: "color",
@@ -537,12 +537,12 @@ const products = [
             {
                 display_type: 'image',
                 trait_type: "tshirtb2.webp",
-                value: "tshirt2.webp",
+                value: "tshirtb2.webp",
             },
             {
                 display_type: 'image',
                 trait_type: "tshirtb3.webp",
-                value: "tshirt3.webp",
+                value: "tshirtb3.webp",
             },
             {
                 display_type: "color",
@@ -570,12 +570,12 @@ const products = [
             {
                 display_type: 'image',
                 trait_type: "tshirtb2.webp",
-                value: "tshirt2.webp",
+                value: "tshirtb2.webp",
             },
             {
                 display_type: 'image',
                 trait_type: "tshirtb3.webp",
-                value: "tshirt3.webp",
+                value: "tshirtb3.webp",
             },
             {
                 display_type: "color",

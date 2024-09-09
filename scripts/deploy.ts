@@ -63,7 +63,6 @@ const deploy = async () => {
         const {
             STORAGE_SECRET,
             STORAGE_KEY,
-            BUKET,
             BUKET_ENDPOINT,
             BUKET_REGION,
             STORAGE_BUKET,
@@ -83,7 +82,7 @@ const deploy = async () => {
             async function recursiveDelete(token) {
               // get the files
               const listCommand = new ListObjectsV2Command({
-                Bucket: BUKET, 
+                Bucket: STORAGE_BUKET, 
                 Prefix: location,
                 ContinuationToken: token
               });
@@ -119,7 +118,9 @@ const deploy = async () => {
         };
         try{
             await deleteFolder('development')
-        } catch{}
+        } catch(e){
+            console.log(e)
+        }
 
         let cw20_base = new Uint8Array(await Bun.file('artifacts/cw20_base.wasm').arrayBuffer());
         let { codeId: CW_20_CODE_ID } = await signer.upload(adminAddress, cw20_base, "auto");

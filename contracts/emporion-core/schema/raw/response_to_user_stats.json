@@ -18,11 +18,23 @@
     "addr": {
       "$ref": "#/definitions/Addr"
     },
+    "alias": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
     "generated_fees": {
       "$ref": "#/definitions/AssetListBase_for_Addr"
     },
     "invested": {
       "$ref": "#/definitions/AssetListBase_for_Addr"
+    },
+    "logo": {
+      "type": [
+        "string",
+        "null"
+      ]
     },
     "nb_disputed_orders": {
       "type": "integer",
@@ -46,20 +58,13 @@
     },
     "rating": {
       "type": "array",
-      "items": [
-        {
-          "type": "integer",
-          "format": "uint64",
-          "minimum": 0.0
-        },
-        {
-          "type": "integer",
-          "format": "uint64",
-          "minimum": 0.0
-        }
-      ],
-      "maxItems": 2,
-      "minItems": 2
+      "items": {
+        "type": "integer",
+        "format": "uint64",
+        "minimum": 0.0
+      },
+      "maxItems": 6,
+      "minItems": 6
     },
     "unbonding": {
       "type": "array",

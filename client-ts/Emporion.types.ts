@@ -106,6 +106,11 @@ export type ExecuteMsg = {
     amount: AssetListBaseForString;
     to: string;
   };
+} | {
+  update_user_info: {
+    alias?: string | null;
+    logo?: string | null;
+  };
 };
 export type Binary = string;
 export interface CreateOrderExecuteMsg {
@@ -277,7 +282,7 @@ export interface Product {
   meta: string;
   meta_hash: string;
   price: AssetListBaseForAddr;
-  rating: [number, number];
+  rating: [number, number, number, number, number, number];
   seller: Addr;
 }
 export type TupleOfArrayOfReviewAndNullableUint64 = [Review[], number | null];
@@ -287,11 +292,13 @@ export type ReviewOf = {
   product: number;
 };
 export interface Review {
+  created_at: Timestamp;
   from: Addr;
   id: number;
   message: string;
   of: ReviewOf;
   rating: number;
+  updated_at?: Timestamp | null;
 }
 export interface TotalPowerAtHeightResponse {
   height: number;
@@ -299,13 +306,15 @@ export interface TotalPowerAtHeightResponse {
 }
 export interface User {
   addr: Addr;
+  alias?: string | null;
   generated_fees: AssetListBaseForAddr;
   invested: AssetListBaseForAddr;
+  logo?: string | null;
   nb_disputed_orders: number;
   nb_fulfilled_orders: number;
   nb_orders: number;
   nb_rejected_orders: number;
-  rating: [number, number];
+  rating: [number, number, number, number, number, number];
   unbonding: [AssetBaseForAddr, Expiration][];
 }
 export interface VotingPowerAtHeightResponse {

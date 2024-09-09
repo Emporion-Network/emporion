@@ -1,7 +1,12 @@
 <script lang="ts">
-    export let rating:[rating:number, totalRatings:number];
+    export let rating:[number, number, number, number, number, number];
     export let small = false;
-    let [avg, totalRatings] = rating;
+    export let showTotal = true;
+    let [avg, totalRatings] = rating.reduce((acc, c, i) => {
+        acc[0] += c*i;
+        acc[1] += c;
+        return acc;
+    }, [0, 0] as [number, number]);
 </script>
 <div class="rating">
     <div class="stars" style="--p:{small ? 100 : 100*avg/5}%">
@@ -13,7 +18,9 @@
         <i class="ri-star-fill"></i>
         {/if}
     </div>
+    {#if showTotal}
     <button class="button-link-2">{totalRatings} ratings</button>
+    {/if}
 </div>
 
 

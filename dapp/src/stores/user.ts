@@ -17,7 +17,7 @@ import { Api } from "../api";
 import { getNames, signMessage } from "../utils";
 import { notification } from "../lib/Notifications.svelte";
 import { cart } from "./cart";
-import type { SoketMessageRecieve } from "../../../shared-types";
+import type { SoketMessage, SoketMessageRecieve } from "../../../shared-types";
 
 declare global {
     // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -34,6 +34,7 @@ const user = writable<{
     address: string,
     names: string[],
     ws: WebSocket,
+    sendSoketMessage:(message:Omit<Extract<SoketMessage, {orderId:string}>, 'jwt'>)=>void,
 } | null>(null);
 
 const autoLogIn = {
@@ -110,6 +111,29 @@ const setUser = async () => {
 
         const wsHref = new URL(ENDPOINT_BACK_END_API);
         const ws = new WebSocket(`ws://${wsHref.host}/ws`);
+
+
+        
+        autoLogIn.set(true);
+
+        if (!jwt.isExp() && jwt.decoded()?.address == address) {
+            api.setToken(jwt.get()!);
+        } else {
+            cart.set([]);
+    
+            const { nonce } = await api.post<{ address: string }, { nonce: string }>(`${ENDPOINT_BACK_END_API}/nonce`, { address })
+            let signature = await signMessage(nonce);
+            console.log(signature);
+    
+            const { token } = await api.post<any, { token: string }>(`${ENDPOINT_BACK_END_API}/check-nonce`, {
+                ...signature,
+                nonce,
+                address,
+            })
+            jwt.set(token)
+            api.setToken(token);
+        }
+
         ws.onopen = () => {
             ws.send(JSON.stringify({
                 jwt: jwt.get()
@@ -123,6 +147,13 @@ const setUser = async () => {
             }))
         }
 
+        const sendSoketMessage = (message:Omit<SoketMessage, 'jwt'>)=>{
+            ws.send(JSON.stringify({
+                ...message,
+                jwt:jwt.get(),
+            }))
+        }
+
         user.set({
             offlineSigner,
             emporionClient,
@@ -131,28 +162,8 @@ const setUser = async () => {
             address,
             names: await getNames(address),
             ws,
+            sendSoketMessage,
         })
-        autoLogIn.set(true);
-
-
-
-        if (!jwt.isExp() && jwt.decoded()?.address == address) {
-            api.setToken(jwt.get()!);
-            return;
-        }
-        cart.set([]);
-
-        const { nonce } = await api.post<{ address: string }, { nonce: string }>(`${ENDPOINT_BACK_END_API}/nonce`, { address })
-        let signature = await signMessage(nonce);
-        console.log(signature);
-
-        const { token } = await api.post<any, { token: string }>(`${ENDPOINT_BACK_END_API}/check-nonce`, {
-            ...signature,
-            nonce,
-            address,
-        })
-        jwt.set(token)
-        api.setToken(token);
 
 
     } catch (e) {
@@ -199,6 +210,8 @@ const logIn = () => {
 window.addEventListener("keplr_keystorechange", () => {
     setUser()
 })
+
+
 
 
 

@@ -72,3 +72,8 @@ export type SoketMessage = {jwt:string} | {
     media: string[];
     text: string;
 };
+
+export type SoketMessageRecieve = {
+    message:OrderMetaData["messages"][number],
+    orderId:string,
+}

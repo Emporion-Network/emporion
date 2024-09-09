@@ -61,4 +61,7 @@ pub enum ContractError {
     #[error("Invalid meta hash")]
     InvalidMetaHash{},
 
+    #[error("Invalid alias size")]
+    InvalidAliasSize{},
+
 }

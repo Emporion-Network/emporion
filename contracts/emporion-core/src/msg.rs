@@ -203,6 +203,10 @@ pub enum ExecuteMsg {
     WithdrawToDev{
         amount:AssetListUnchecked,
         to:String,
+    },
+    UpdateUserInfo{
+        alias:Option<String>,
+        logo:Option<String>,
     }
 }
 

@@ -245,6 +245,7 @@
                         value={item.metaData?.trackingNumber ||
                             "No tracking number"}
                         on:change={setTrackingNb(item.order.id)}
+                        on:click={(e)=>{e.currentTarget.select()}}
                     />
                 </div>
                 <div>

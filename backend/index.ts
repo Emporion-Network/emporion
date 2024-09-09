@@ -534,7 +534,12 @@ app.get(
                         orderId:msg.orderId,
                         message,
                     }))
-                    
+
+                    ORDERID_TO_ORDER_META.update(msg.orderId, ((m) => {
+                        assert(m !== undefined, errors.UNKNOWN_ERROR)
+                        m?.messages.push(message)
+                        return m;
+                    }))
 
                 } catch (e) {
                     console.log(e)

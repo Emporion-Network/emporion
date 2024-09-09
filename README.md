@@ -68,7 +68,7 @@ Once the server is running you can start the frontend by running `npm run dev` i
     - [x] add filters
     - [x] add investment page
     - [ ] add reviews to product page and account page
-    - [ ] create chat
+    - [x] create chat
     - [ ] add loaders
     - [ ] make everything phone friendly
     - [ ] Finish home page
