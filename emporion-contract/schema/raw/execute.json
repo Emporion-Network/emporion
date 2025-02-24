@@ -1,0 +1,424 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ExecuteMsg",
+  "oneOf": [
+    {
+      "type": "object",
+      "required": [
+        "create_product"
+      ],
+      "properties": {
+        "create_product": {
+          "$ref": "#/definitions/CreateProductMsg"
+        }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": [
+        "create_bulk_products"
+      ],
+      "properties": {
+        "create_bulk_products": {
+          "$ref": "#/definitions/CreateBulkProductsMsg"
+        }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": [
+        "update_product"
+      ],
+      "properties": {
+        "update_product": {
+          "$ref": "#/definitions/UpdateProductMsg"
+        }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": [
+        "update_bulk_product"
+      ],
+      "properties": {
+        "update_bulk_product": {
+          "$ref": "#/definitions/UpdateBulkProductMsg"
+        }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": [
+        "create_order"
+      ],
+      "properties": {
+        "create_order": {
+          "$ref": "#/definitions/CreateOrderMsg"
+        }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": [
+        "accept_order"
+      ],
+      "properties": {
+        "accept_order": {
+          "$ref": "#/definitions/AcceptOrderMsg"
+        }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": [
+        "cancel_order"
+      ],
+      "properties": {
+        "cancel_order": {
+          "$ref": "#/definitions/CancelOrderMsg"
+        }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": [
+        "complete_order"
+      ],
+      "properties": {
+        "complete_order": {
+          "$ref": "#/definitions/CompleteOrderMsg"
+        }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": [
+        "dispute_order"
+      ],
+      "properties": {
+        "dispute_order": {
+          "$ref": "#/definitions/DisputeOrderMsg"
+        }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": [
+        "upsert_rating"
+      ],
+      "properties": {
+        "upsert_rating": {
+          "$ref": "#/definitions/RateUserMsg"
+        }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": [
+        "distribute"
+      ],
+      "properties": {
+        "distribute": {
+          "$ref": "#/definitions/DistributeMsg"
+        }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": [
+        "update_params"
+      ],
+      "properties": {
+        "update_params": {
+          "$ref": "#/definitions/UpdateParamsMsg"
+        }
+      },
+      "additionalProperties": false
+    }
+  ],
+  "definitions": {
+    "AcceptOrderMsg": {
+      "type": "object",
+      "required": [
+        "order_id"
+      ],
+      "properties": {
+        "order_id": {
+          "$ref": "#/definitions/Uint64"
+        }
+      },
+      "additionalProperties": false
+    },
+    "BankDistribution": {
+      "type": "object",
+      "required": [
+        "rewards",
+        "rnd"
+      ],
+      "properties": {
+        "rewards": {
+          "$ref": "#/definitions/Decimal"
+        },
+        "rnd": {
+          "$ref": "#/definitions/Decimal"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CancelOrderMsg": {
+      "type": "object",
+      "required": [
+        "order_id"
+      ],
+      "properties": {
+        "order_id": {
+          "$ref": "#/definitions/Uint64"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CompleteOrderMsg": {
+      "type": "object",
+      "required": [
+        "order_id"
+      ],
+      "properties": {
+        "order_id": {
+          "$ref": "#/definitions/Uint64"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CreateBulkProductsMsg": {
+      "type": "object",
+      "required": [
+        "products"
+      ],
+      "properties": {
+        "products": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CreateProductMsg"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "CreateOrderMsg": {
+      "type": "object",
+      "required": [
+        "orders"
+      ],
+      "properties": {
+        "orders": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/OrderForSeller"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "CreateProductMsg": {
+      "type": "object",
+      "required": [
+        "listed",
+        "meta_data_url",
+        "price"
+      ],
+      "properties": {
+        "listed": {
+          "type": "boolean"
+        },
+        "meta_data_url": {
+          "type": "string"
+        },
+        "price": {
+          "$ref": "#/definitions/Uint128"
+        }
+      },
+      "additionalProperties": false
+    },
+    "Decimal": {
+      "description": "A fixed-point decimal value with 18 fractional digits, i.e. Decimal(1_000_000_000_000_000_000) == 1.0\n\nThe greatest possible value that can be represented is 340282366920938463463.374607431768211455 (which is (2^128 - 1) / 10^18)",
+      "type": "string"
+    },
+    "DisputeOrderMsg": {
+      "type": "object",
+      "required": [
+        "order_id"
+      ],
+      "properties": {
+        "order_id": {
+          "$ref": "#/definitions/Uint64"
+        }
+      },
+      "additionalProperties": false
+    },
+    "DistributeMsg": {
+      "type": "object",
+      "additionalProperties": false
+    },
+    "OrderForSeller": {
+      "type": "object",
+      "required": [
+        "loss_distribution_ratio",
+        "product_ids"
+      ],
+      "properties": {
+        "loss_distribution_ratio": {
+          "$ref": "#/definitions/Decimal"
+        },
+        "product_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Uint64"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "RateUserMsg": {
+      "type": "object",
+      "required": [
+        "comment",
+        "mark",
+        "order_id",
+        "user"
+      ],
+      "properties": {
+        "comment": {
+          "type": "string"
+        },
+        "mark": {
+          "type": "integer",
+          "format": "uint8",
+          "minimum": 0.0
+        },
+        "order_id": {
+          "$ref": "#/definitions/Uint64"
+        },
+        "user": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "Uint128": {
+      "description": "A thin wrapper around u128 that is using strings for JSON encoding/decoding, such that the full u128 range can be used for clients that convert JSON numbers to floats, like JavaScript and jq.\n\n# Examples\n\nUse `from` to create instances of this and `u128` to get the value out:\n\n``` # use cosmwasm_std::Uint128; let a = Uint128::from(123u128); assert_eq!(a.u128(), 123);\n\nlet b = Uint128::from(42u64); assert_eq!(b.u128(), 42);\n\nlet c = Uint128::from(70u32); assert_eq!(c.u128(), 70); ```",
+      "type": "string"
+    },
+    "Uint64": {
+      "description": "A thin wrapper around u64 that is using strings for JSON encoding/decoding, such that the full u64 range can be used for clients that convert JSON numbers to floats, like JavaScript and jq.\n\n# Examples\n\nUse `from` to create instances of this and `u64` to get the value out:\n\n``` # use cosmwasm_std::Uint64; let a = Uint64::from(42u64); assert_eq!(a.u64(), 42);\n\nlet b = Uint64::from(70u32); assert_eq!(b.u64(), 70); ```",
+      "type": "string"
+    },
+    "UpdateBulkProductMsg": {
+      "type": "object",
+      "required": [
+        "products"
+      ],
+      "properties": {
+        "products": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/UpdateProductMsg"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "UpdateParamsMsg": {
+      "type": "object",
+      "properties": {
+        "admin": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "distribution": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/BankDistribution"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "platform_fee": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Decimal"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "publish_fee": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Uint128"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "rewards_distribution_address": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "UpdateProductMsg": {
+      "type": "object",
+      "required": [
+        "product_id"
+      ],
+      "properties": {
+        "listed": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "meta_data_url": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "price": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Uint128"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "product_id": {
+          "$ref": "#/definitions/Uint64"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

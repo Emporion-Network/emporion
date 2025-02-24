@@ -1,0 +1,20 @@
+{
+  "scripts": {
+    "build-contract": "docker run --rm -v \"$(pwd)/emporion-contract\":/code --mount type=volume,source=\"$(basename \"$(pwd)\")_cache\",target=/target  --mount type=volume,source=registry_cache,target=/usr/local/cargo/registry cosmwasm/optimizer:0.16.0",
+    "deploy-contract": "bun run scripts/deploy",
+    "schema": "bun run scripts/schema",
+    "publish": "bun run --cwd=frontend build && git add . && git commit -m 'chore: update dist' && git push"
+  },
+  "dependencies": {
+    "@cosmjs/cosmwasm-stargate": "^0.33.0",
+    "@cosmjs/stargate": "^0.33.0",
+    "@cosmwasm/ts-codegen": "^1.12.1",
+    "decimal.js": "^10.5.0",
+    "osmojs": "^16.15.0"
+  },
+  "devDependencies": {
+    "@keplr-wallet/types": "^0.12.182",
+    "@types/bun": "^1.2.2",
+    "@types/node": "^22.13.1"
+  }
+}

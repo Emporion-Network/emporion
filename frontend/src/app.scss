@@ -1,0 +1,297 @@
+@mixin import_color($color) {
+  @import url("@radix-ui/colors/#{$color}.css");
+  @import url("@radix-ui/colors/#{$color}-dark.css");
+  @import url("@radix-ui/colors/#{$color}-alpha.css");
+  @import url("@radix-ui/colors/#{$color}-dark-alpha.css");
+}
+
+@mixin map_color($color, $new_name) {
+  @include import_color($color);
+
+  :root {
+    @for $i from 1 through 12 {
+      --#{$new_name}-#{$i}:var(--#{$color}-#{$i});
+      --#{$new_name}-a#{$i}:var(--#{$color}-a#{$i});
+    }
+  }
+}
+
+@import url("@radix-ui/colors/white-alpha.css");
+@import url("@radix-ui/colors/black-alpha.css");
+
+@include import_color("orange");
+@include import_color("green");
+@include import_color("red");
+@include import_color("yellow");
+
+@include map_color("slate", "neutral");
+@include map_color("blue", "main");
+@import url('https://fonts.googleapis.com/css2?family=Azeret+Mono:ital,wght@0,100..900;1,100..900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+
+:root {
+  --font-1: "Inter";
+  --font-mono: "Azeret Mono";
+  --font-2: "Montserrat";
+  --height-2: 2.5rem;
+  --brand: 228, 27, 35;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+body {
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  background-color: var(--neutral-1);
+  color: var(--neutral-12);
+  font-family: 'Inter', sans-serif;
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+button {
+  user-select: none;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  overflow-wrap: break-word;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  text-wrap: balance;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+#app {
+  isolation: isolate;
+}
+
+h1 {
+  font-family: var(--font-1);
+}
+
+.hide-scrollbar {
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.skeleton {
+  background-image: linear-gradient(90deg,
+      var(--neutral-a4) 20%,
+      var(--neutral-a2) 50%,
+      var(--neutral-a4) 80%);
+  background-size: 300% 100%;
+  background-position-x: -20%;
+  animation: 1s loading ease-in-out infinite;
+
+  @keyframes loading {
+    to {
+      background-position-x: 120%;
+    }
+  }
+}
+
+.skeleton-button {
+  background-color: var(--main-a3);
+  border: 1px solid var(--main-7);
+  color: var(--main-11);
+  font-weight: bold;
+  font-family: var(--font-1);
+  font-size: 1.3rem;
+  border-radius: 3px;
+
+  i {
+    display: inline-block;
+    animation: rotate 1s linear infinite;
+  }
+
+  @keyframes rotate {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+}
+
+.primary-button {
+  outline: none;
+  background-color: var(--neutral-12);
+  border: 1px solid var(--neutral-12);
+  color: var(--neutral-1);
+  border-radius: 3px;
+  outline: none;
+  padding-right: 0.5rem;
+  height: calc(var(--height-2) + 0.5rem);
+  font-weight: 600;
+
+  &:hover {
+    cursor: pointer;
+    color: var(--neutral-12);
+    background-color: var(--neutral-a2);
+  }
+
+  &:focus-visible {
+    border: 1px solid var(--main-8);
+  }
+
+  &:disabled {
+    opacity: 0.2;
+    pointer-events: none;
+    user-select: none;
+  }
+}
+
+.secondary-button {
+  outline: none;
+  background-color: transparent;
+  border: 1px solid var(--neutral-6);
+  color: var(--neutral-11);
+  border-radius: 3px;
+  outline: none;
+  padding-right: 0.5rem;
+  height: calc(var(--height-2) + 0.5rem);
+  font-weight: 600;
+
+  &:hover {
+    cursor: pointer;
+    color: var(--neutral-12);
+    border: 1px solid var(--neutral-8);
+  }
+
+  &:focus-visible {
+    border: 1px solid var(--main-8);
+  }
+
+  &:disabled {
+    opacity: 0.2;
+    pointer-events: none;
+    user-select: none;
+  }
+}
+
+.tertiary-button {
+  outline: none;
+  background-color: var(--neutral-3);
+  border: 1px solid var(--neutral-3);
+  color: var(--neutral-11);
+  border-radius: 3px;
+  outline: none;
+  padding-right: 0.5rem;
+  height: calc(var(--height-2) + 0.5rem);
+  font-weight: 600;
+
+  &:hover {
+    cursor: pointer;
+    color: var(--neutral-12);
+    border: 1px solid var(--neutral-8);
+  }
+
+  &:focus-visible {
+    border: 1px solid var(--main-8);
+  }
+
+  &:disabled {
+    opacity: 0.2;
+    pointer-events: none;
+    user-select: none;
+  }
+}
+
+.primary-accent-button {
+  outline: none;
+  background-color: var(--main-3);
+  border: 1px solid var(--main-7);
+  color: var(--neutral-12);
+  border-radius: 3px;
+  outline: none;
+  padding-right: 0.5rem;
+  height: calc(var(--height-2) + 0.5rem);
+  font-weight: 600;
+
+  &:hover {
+    cursor: pointer;
+    background-color: var(--main-4);
+    border: 1px solid var(--main-8);
+  }
+
+  &:focus-visible {
+    border: 1px solid var(--main-8);
+  }
+
+  &:disabled {
+    opacity: 0.2;
+    pointer-events: none;
+    user-select: none;
+  }
+}
+
+.secondary-accent-button {
+  outline: none;
+  background-color: transparent;
+  border: 1px solid var(--main-7);
+  color: var(--neutral-12);
+  border-radius: 3px;
+  outline: none;
+  padding-right: 0.5rem;
+  height: calc(var(--height-2) + 0.5rem);
+
+  &:hover {
+    cursor: pointer;
+    background-color: var(--main-2);
+    border: 1px solid var(--main-8);
+  }
+
+  &:focus-visible {
+    border: 1px solid var(--main-8);
+  }
+
+  &:disabled {
+    opacity: 0.2;
+    pointer-events: none;
+  }
+}

@@ -1,0 +1,4 @@
+{
+  "rust-analyzer.checkOnSave": true,
+  "todo-tree.tree.showBadges": true,
+}

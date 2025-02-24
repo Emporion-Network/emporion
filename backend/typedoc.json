@@ -1,0 +1,12 @@
+{
+    "entryPoints": [
+        "./src/**/*.ts"
+    ],
+    "exclude": [
+        "./src/main.ts"
+    ],
+    "out": "./docs",
+    "excludePrivate": true,
+    "excludeInternal": true,
+    "entryPointStrategy": "resolve"
+}
