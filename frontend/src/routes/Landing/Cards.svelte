@@ -42,7 +42,7 @@
 
 <style lang="scss">
   @property --p {
-    syntax: "<percentage>"; /* <- defined as type number for the transition to work */
+    syntax: "<percentage>";
     initial-value: 0%;
     inherits: false;
   }
