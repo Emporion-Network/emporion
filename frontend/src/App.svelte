@@ -45,7 +45,6 @@
   <NavBar></NavBar>
   <MyStore />
 </Route>
-<!-- Globals -->
 
 <FilePicker />
 <Footer />

@@ -3,7 +3,7 @@
     "build-contract": "docker run --rm -v \"$(pwd)/emporion-contract\":/code --mount type=volume,source=\"$(basename \"$(pwd)\")_cache\",target=/target  --mount type=volume,source=registry_cache,target=/usr/local/cargo/registry cosmwasm/optimizer:0.16.0",
     "deploy-contract": "bun run scripts/deploy",
     "schema": "bun run scripts/schema",
-    "publish": "bun run --cwd=frontend build && git add . && git commit -m 'chore: update dist' && git push"
+    "publish": "bun run scripts/prod/publish"
   },
   "dependencies": {
     "@cosmjs/cosmwasm-stargate": "^0.33.0",
