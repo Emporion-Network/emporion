@@ -82,6 +82,9 @@ app
     await next();
   })
   .use(logger())
+  .get('/', async (c) => {
+    return c.json({ ok: true });
+  })
   .route('/api', fileUploder)
   .route('/api', auth)
   .route('/api', translate)
