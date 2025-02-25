@@ -27,7 +27,7 @@ export class Api {
     this.root = root;
     this.useHaderToken = useHeaderToken;
     const url = new URL(root);
-    this.ws = new WebSocket(`wss://${url.host}:${url.port}/ws`);
+    this.ws = new WebSocket(`wss://${url.host}:${url.port}/${url.pathname}/ws`);
   }
 
   private async get<T>(path: string) {
