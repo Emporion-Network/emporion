@@ -84,7 +84,7 @@ app
   })
   .use(logger())
   .get('/', async (c) => {
-    return c.json({ ok: true, version: version });
+    return c.json({ version: version });
   })
   .route('/', fileUploder)
   .route('/', auth)
