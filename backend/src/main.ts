@@ -89,8 +89,8 @@ app
   .route('/api', auth)
   .route('/api', translate)
   .route('/api', autocomplete)
-  .route('/api', wsHandler)
   .route('/api', metadata)
+  .route('/', wsHandler)
   .onError((e, c) => {
     return c.json({
       error: true,
