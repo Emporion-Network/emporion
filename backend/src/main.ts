@@ -12,6 +12,7 @@ import autocomplete from '@/services/autocomplete';
 import { wsHandler, websocket } from '@/services/ws/ws';
 import { logger } from 'hono/logger';
 import { Indexer } from './state/blockchain';
+import { version } from 'package.json';
 
 const app = new Hono<{ Variables: { state: State } }>();
 
@@ -83,13 +84,13 @@ app
   })
   .use(logger())
   .get('/', async (c) => {
-    return c.json({ ok: true });
+    return c.json({ ok: true, version: version });
   })
-  .route('/api', fileUploder)
-  .route('/api', auth)
-  .route('/api', translate)
-  .route('/api', autocomplete)
-  .route('/api', metadata)
+  .route('/', fileUploder)
+  .route('/', auth)
+  .route('/', translate)
+  .route('/', autocomplete)
+  .route('/', metadata)
   .route('/', wsHandler)
   .onError((e, c) => {
     return c.json({
