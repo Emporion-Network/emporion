@@ -1,5 +1,5 @@
 import { pipeline } from '@huggingface/transformers';
-const extractor = await pipeline('feature-extraction', 'mixedbread-ai/mxbai-embed-large-v1', {
+const extractor = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2', {
   dtype: 'fp32',
 });
 

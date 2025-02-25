@@ -38,7 +38,7 @@ export class Db {
     if (!e) {
       this.client.createCollection(this.ProductMetadataName, {
         vectors: {
-          size: 1024,
+          size: 768,
           distance: 'Cosine',
           on_disk: true,
         },
