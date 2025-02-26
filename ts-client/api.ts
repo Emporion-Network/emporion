@@ -27,7 +27,7 @@ export class Api {
     this.root = root;
     this.useHaderToken = useHeaderToken;
     const url = new URL(root);
-    this.ws = new WebSocket(`wss://${url.host}:${url.port}/${url.pathname}/ws`);
+    this.ws = new WebSocket(`wss://${url.host}${url.pathname}ws`);
   }
 
   private async get<T>(path: string) {
@@ -136,7 +136,14 @@ export class Api {
   }
 
   async getCollections(req: GetMetadata["req"]) {
-    return this['get' satisfies GetMetadata['method']]<GetMetadata['res']>(`/collections/${req}` satisfies GetMetadata['path']);
+    return this['get' satisfies GetMetadata['method']]<GetMetadata['res']>(`/collections/${req}` satisfies GetMetadata['path']).then(e => {
+      if (e.error) return e;
+      e.result.sort((a, b) => a.products[0].id > b.products[0].id ? -1 : 1)
+      e.result.map(e => {
+        e.products.sort((a, b) => a.id > b.id ? -1 : 1)
+      })
+      return e;
+    });
   }
 }
 

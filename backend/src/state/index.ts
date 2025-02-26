@@ -16,6 +16,7 @@ export class State {
   readonly db: Db;
   readonly fs: Fs;
   readonly tracking: Tracking;
+  readonly domainName: string;
 
   constructor(params: {
     jwtSecret: string
@@ -35,8 +36,10 @@ export class State {
     upsClientSecret: string
     fedexClientId: string
     fedexClientSecret: string
+    domainName: string
   }) {
     this.nonces = new Map();
+    this.domainName = params.domainName;
     this.nonceLifetime = params.nonceLifetime;
     this.jwtSecret = params.jwtSecret;
     this.jwtLifetime = params.jwtLifetime;

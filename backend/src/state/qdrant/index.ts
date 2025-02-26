@@ -1,7 +1,6 @@
 import { type ProductMetadata, stringify, type T } from '@common';
 import { QdrantClient } from '@qdrant/js-client-rest';
 import { embedDocument, embedQuery } from './embeddings';
-import { randomUUIDv7 } from 'bun';
 
 const mergeTranslated = (a: T<string>): string => {
   return Object.keys(a).reduce((acc, k) => {
@@ -12,10 +11,6 @@ const mergeTranslated = (a: T<string>): string => {
 export class Db {
   private client: QdrantClient;
   private ProductMetadataName = 'products';
-  private waitingMap = new Map<string, {
-    data: ProductMetadata
-    createdAt: number
-  }>();
 
   embedDocument: typeof embedDocument;
   embedQuery: typeof embedQuery;
@@ -110,15 +105,6 @@ export class Db {
     }
   }
 
-  #clearExpired() {
-    const now = Date.now();
-    this.waitingMap.forEach((v, k) => {
-      if (now - v.createdAt > 1000 * 60 * 10) {
-        this.waitingMap.delete(k);
-      }
-    });
-  }
-
   async getCollections(addr: string) {
     const res = await this.client.queryGroups(this.ProductMetadataName, {
       group_by: 'collection',
@@ -139,37 +125,23 @@ export class Db {
       group_size: 500,
       limit: 100,
     });
-    console.log(res);
     return res.groups.map(h => ({ collection: h.id, products: h.hits.map(h => ({ id: h.id.toString(), ...h.payload })) }));
   }
 
-  async insertProduct({
-    id,
-    addr,
-    chainId: chain_id,
-    price,
-  }: {
-    id: string
-    addr: string
-    chainId: string
-    price: string
-  }) {
-    const product = this.waitingMap.get(id)?.data;
-    if (!product) return;
-    if (product.seller !== addr) return;
-    const vector = await this.embedDocument(stringify(product));
+  async upsertProduct(metaData: ProductMetadata) {
+    const vector = await this.embedDocument(stringify(metaData));
     try {
       await this.client.upsert(this.ProductMetadataName, {
         points: [
           {
             vector,
             // @ts-expect-error bigint is accepted but not in the types
-            id: BigInt(chain_id),
+            id: BigInt(metaData.id),
             payload: {
-              ...product,
-              price: BigInt(price),
-              _description: mergeTranslated(product.description),
-              _title: mergeTranslated(product.description),
+              ...metaData,
+              price: BigInt(metaData.price),
+              _description: mergeTranslated(metaData.description),
+              _title: mergeTranslated(metaData.title),
             } as unknown as Record<string, unknown>,
           },
         ],
@@ -178,16 +150,14 @@ export class Db {
       const message = (e as { data: unknown }).data;
       console.error(message);
     }
-    this.waitingMap.delete(id);
-    this.#clearExpired();
   }
 
-  getId(metadata: ProductMetadata) {
-    const id = randomUUIDv7();
-    this.waitingMap.set(id, {
-      createdAt: Date.now(),
-      data: metadata,
+  async getProduct(id: string) {
+    const res = await this.client.retrieve(this.ProductMetadataName, {
+      // @ts-expect-error bigint is accepted but not in the types
+      ids: [BigInt(id)],
+      with_payload: true,
     });
-    return id;
+    return res[0]?.payload as unknown as ProductMetadata | undefined;
   }
 }

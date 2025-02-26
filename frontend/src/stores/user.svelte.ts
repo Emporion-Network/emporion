@@ -204,7 +204,6 @@ class User extends Api {
       undistributed_rewards: { id: 1 },
     });
     let distribution = await ec.getDistribution();
-    console.log(distribution);
     return {
       ...await ec.getParams(),
       total_staked: totalStaked,

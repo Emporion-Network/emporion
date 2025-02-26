@@ -1,14 +1,10 @@
 <script lang="ts">
-  import { user } from "@/stores/user.svelte";
   import Collections from "./Collections.svelte";
+  import Orders from "./Orders.svelte";
 </script>
 
 <div class="my-store">
-  <div class="profile"></div>
-  <div class="orders">
-    <h2>Orders</h2>
-    <div class="table"></div>
-  </div>
+  <Orders></Orders>
   <Collections></Collections>
 </div>
 
@@ -19,5 +15,6 @@
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    gap: 1rem;
   }
 </style>

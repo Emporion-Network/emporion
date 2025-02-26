@@ -2,6 +2,7 @@ import type { State } from '@/state';
 import { Hono } from 'hono';
 import { assert, assertIsValidMetadata, bechToBech, isValidBech, type ProductMetadata } from '@common';
 import { jwt } from '@/middlewares/jwt';
+import { randomUUIDv7 } from 'bun';
 
 const app = new Hono<{ Variables: { state: State } }>()
   .use('/upload-metadata', jwt)
@@ -12,13 +13,17 @@ const app = new Hono<{ Variables: { state: State } }>()
     assert(metadata.length > 0, 'invalid metadata');
     metadata.forEach((m: ProductMetadata) => {
       assertIsValidMetadata(m);
+      m.seller = c.var.user.addr;
     });
-    const addr = c.var.user.addr;
-    const ids = metadata.map((m: ProductMetadata) => {
-      return state.db.getId({
-        ...m,
-        seller: addr,
+
+    const ids = metadata.map(async (m: ProductMetadata) => {
+      const id = randomUUIDv7();
+      const url = `${state.domainName}/metadata/${id}`;
+      await state.fs.write(id, JSON.stringify(m), {
+        type: 'application/json',
+        acl: 'public-read',
       });
+      return url;
     });
     return c.json({
       error: false,
@@ -39,5 +44,18 @@ const app = new Hono<{ Variables: { state: State } }>()
       error: false,
       result: collections,
     });
+  })
+  .get('/metadata/:id', async (c) => {
+    try {
+      const state = c.var.state;
+      const id = c.req.param('id');
+      const metadata = await state.fs.file(`/metadata/${id}`);
+      return c.body(metadata.stream());
+    } catch {
+      return c.json({
+        error: true,
+        message: 'metadata not found',
+      });
+    }
   });
 export default app;

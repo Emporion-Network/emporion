@@ -20,12 +20,18 @@
 </script>
 
 <div class="collections">
-  <h2>Collections</h2>
+  <div class="title">
+    <h2>Collections</h2>
+    <button class="primary-button" onclick={() => goTo(`/collection`)}>
+      <i class="ri-add-line"></i>
+      <span>New Collection</span>
+    </button>
+  </div>
   {#if user.address}
     <div class="grid">
       {#await user.getCollections(user.address!) then collections}
         {#if !collections.error}
-          {#each [...collections.result, ...collections.result, ...collections.result, ...collections.result, ...collections.result, ...collections.result, ...collections.result, ...collections.result, ...collections.result, ...collections.result] as { collection, products }}
+          {#each collections.result as { collection, products }}
             {@const [min, max] = getMinMax(products)}
             {@const p = products.find((p) => p.gallery[t.lang])}
             <div
@@ -52,6 +58,11 @@
               </div>
             </div>
           {/each}
+          {#if !collections.result.length}
+            <p class="info">
+              {"You don't have any collections yet. Create one!"}
+            </p>
+          {/if}
         {/if}
       {/await}
     </div>
@@ -63,10 +74,22 @@
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    .title {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
     .grid {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
       gap: 1rem;
+    }
+    p {
+      padding: 2rem 1rem;
+      background-color: var(--neutral-2);
+      color: var(--neutral-11);
+      text-align: center;
+      margin-bottom: 1rem;
     }
     .collection {
       display: flex;

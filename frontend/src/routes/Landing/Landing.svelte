@@ -159,8 +159,8 @@
         <p>Build trust with seller ratings secured on the blockchain.</p>
       </div>
     </Cards>
-    <button class="action_btn" onclick={() => goTo("/store")}
-      >Explore the Marketplace</button
+    <button class="action_btn" onclick={() => goTo("/store")}>
+      Explore the Marketplace</button
     >
     <Separator />
   </div>

@@ -36,6 +36,8 @@ const {
   UPS_CLIENT_SECRET = '',
   PORT = '3000',
   EMPORION_CONTRACT_ADDRESS = '',
+  DOMAIN_NAME = 'emporion.network',
+  WS_RPCS = 'wss://rpc-juno.mib.tech/websocket,wss://juno-rpc.publicnode.com:443/websocket',
 } = Bun.env;
 
 /**
@@ -44,6 +46,7 @@ const {
  * this would make the migration to a distributed system easier
 */
 const state = new State({
+  domainName: DOMAIN_NAME,
   jwtSecret: JWT_SECRET,
   translationApiKey: TRANSLATION_API_KEY,
   translationApiEndpoint: TRANSLATION_API_ENDPOINT,
@@ -63,7 +66,7 @@ const state = new State({
   upsClientSecret: UPS_CLIENT_SECRET,
 });
 
-const blockchain = new Indexer(['wss://juno-rpc.publicnode.com:443/websocket'], state, {
+const blockchain = new Indexer(WS_RPCS.split(','), state, {
   emporionContractAddress: EMPORION_CONTRACT_ADDRESS,
 });
 

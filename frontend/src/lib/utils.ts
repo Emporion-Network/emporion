@@ -149,3 +149,23 @@ export const intersect = <T>(...arrs: T[][]) => {
   }
   return [...result];
 };
+
+export const looseEq = (a: any, b: any) => {
+  if (a === b) return true;
+  if (typeof a !== typeof b) return false;
+  if (Array.isArray(a)) {
+    if (a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) {
+      if (!looseEq(a[i], b[i])) return false;
+    }
+    return true;
+  } else if (typeof a === 'object') {
+    if (Object.keys(a).length !== Object.keys(b).length) return false;
+    for (let k in a) {
+      if (!looseEq(a[k], b[k])) return false;
+    }
+    return true;
+  } else {
+    return a === b;
+  }
+}

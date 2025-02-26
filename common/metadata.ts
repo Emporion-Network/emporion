@@ -233,6 +233,15 @@ export function assertIsValidMetadata(metadata: unknown): asserts metadata is Pr
   assertIsValidTranslatedString(metadata.title);
 };
 
+export function ceheckIsVaildMetadata(metadata: unknown): metadata is ProductMetadata {
+  try {
+    assertIsValidMetadata(metadata);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
 /**
  * @throws if value is not a valid translated string
  * @param value - Translated text

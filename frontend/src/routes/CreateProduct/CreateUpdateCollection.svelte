@@ -44,7 +44,6 @@
   onMount(() => {
     setTimeout(() => {
       selectedLang = t.lang;
-      untrack(() => loadCollection());
     }, 10);
   });
 </script>

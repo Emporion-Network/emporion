@@ -75,6 +75,9 @@ export class TxDecoder {
   #decodeMsgRecvPacket = (msg: Msg, height: number, hash: string): BlockchainEvent<'MsgRecvPacket'>[] => {
     into<MsgRecvPacket>(msg);
     const data = this.#decodeJson(msg.packet.data);
+    if (!!data || !!data.sender || !!data.receiver || !!data.amount || !!data.denom) {
+      return [];
+    }
     return [{
       hash,
       height,
@@ -155,10 +158,11 @@ export class TxDecoder {
   };
 
   getEvents(tx: Uint8Array, height: number, hash: string) {
-    return ((this.registry.decode({
+    const decoded = this.registry.decode({
       typeUrl: Tx.typeUrl,
       value: tx,
-    }) as Tx).body?.messages
+    }) as Tx;
+    return (decoded.body?.messages
       .filter((m) => {
         return this.msgToEvent.has(m.typeUrl);
       }).map((msg) => {

@@ -40,7 +40,10 @@
   import Checkbox from "@/lib/Checkbox.svelte";
   import { user } from "@/stores/user.svelte";
   import { assertIsValidMetadata } from "@common";
+  import { getLocation } from "@/stores/location.svelte";
+  import { looseEq } from "@/lib/utils";
 
+  const { goTo } = getLocation();
   let t = getTranslator();
   let registry = getTutoRegistry();
   let {
@@ -58,19 +61,24 @@
   let showProduct = $state(false);
   let categories: SvelteSet<string> = $state(new SvelteSet());
   let category = $derived(Array.from(categories.values()));
+  let prevProducts: Product[] = $state([]); // used to detect changes in products
+
+  let changed = $derived.by(() => {
+    return !looseEq(prevProducts, products);
+  });
 
   const addProduct = () => {
     products.push({
       title: translatedString(),
       description: translatedString(),
       collection: collectionName,
+      category: category,
       gallery: translatedArray(),
       attributes: attributes.map((e) =>
         metas[e.display_type].bindClone(e as never),
       ),
       price: "0",
       listed: false,
-      category: category,
     });
     toggleProductView(products.length - 1);
   };
@@ -97,9 +105,17 @@
     });
   };
 
+  $effect(() => {
+    products.forEach((p) => {
+      p.collection = collectionName;
+      p.category = category;
+    });
+  });
+
   $effect.pre(() => {
     products;
     untrack(() => {
+      prevProducts = $state.snapshot(products);
       attributes = $state.snapshot(products[0]?.attributes) || [];
       collectionName = products[0]?.collection || "";
       categories = new SvelteSet(products[0]?.category || []);
@@ -121,6 +137,11 @@
 
   const selectProduct = (productId: number) => {
     selectedProduct = productId;
+  };
+
+  const deleteProduct = (productId: number) => {
+    products.splice(productId, 1);
+    selectProduct(0);
   };
 
   const createProducts = async () => {
@@ -149,26 +170,37 @@
   });
 </script>
 
+{#snippet head(toStore: boolean = true)}
+  <div class="head" class:wpr={toStore}>
+    <button
+      onclick={() => (toStore ? goTo("/my-store") : (showProduct = false))}
+      aria-labelledby={"back"}
+    >
+      <i class="ri-arrow-left-long-line"></i>
+      <span>{toStore ? "Back to my store" : "Back to collection"}</span>
+    </button>
+    <MultiSelect
+      options={supportedLangs}
+      bind:value={selectedLang}
+      multiple={false}
+      placeholder={t.t("weird_fuzzy_warbler_edit")}
+      label={t.t("weird_fuzzy_warbler_edit")}
+      bind:this={registry["lang_selector"]}
+    >
+      {#snippet valueRenderer(v)}
+        {t.t(TranslatedLanguages[v])}
+      {/snippet}
+      {#snippet optionRenderer(v)}
+        {t.t(TranslatedLanguages[v])}
+      {/snippet}
+    </MultiSelect>
+  </div>
+{/snippet}
+
 <div class="form">
   {#if !showProduct}
     <div class="collection">
-      <div class="wpr">
-        <MultiSelect
-          options={supportedLangs}
-          bind:value={selectedLang}
-          multiple={false}
-          placeholder={t.t("weird_fuzzy_warbler_edit")}
-          label={t.t("weird_fuzzy_warbler_edit")}
-          bind:this={registry["lang_selector"]}
-        >
-          {#snippet valueRenderer(v)}
-            {t.t(TranslatedLanguages[v])}
-          {/snippet}
-          {#snippet optionRenderer(v)}
-            {t.t(TranslatedLanguages[v])}
-          {/snippet}
-        </MultiSelect>
-      </div>
+      {@render head()}
       <Collapsable opened>
         {#snippet head()}
           <h3>General</h3>
@@ -240,13 +272,23 @@
                     <i class="ri-file-copy-line"></i>
                     Clone Product
                   </button>
-                  <button
-                    class="red"
-                    onclick={() => close() && selectProduct(i)}
-                  >
-                    <i class="ri-eye-off-line"></i>
-                    Unlist product
-                  </button>
+                  {#if "id" in product}
+                    <button
+                      class="red"
+                      onclick={() => close() && selectProduct(i)}
+                    >
+                      <i class="ri-eye-off-line"></i>
+                      Unlist product
+                    </button>
+                  {:else}
+                    <button
+                      class="red"
+                      onclick={() => close() && deleteProduct(i)}
+                    >
+                      <i class="ri-eye-off-line"></i>
+                      Delete product
+                    </button>
+                  {/if}
                 {/snippet}
               </ContextMenu>
             </div>
@@ -265,28 +307,18 @@
         onclick={createProducts}
         class="primary-button"
         bind:this={registry["add_product"]}
-        disabled={!isValid}
+        disabled={!isValid || (!changed && products.some((p) => "id" in p))}
       >
-        {"Create Collection"}
+        {#if products.some((p) => "id" in p)}
+          {"Update Collection"}
+        {:else}
+          {"Create Collection"}
+        {/if}
       </button>
     </div>
   {:else}
     <div class="product" transition:fly={{ x: -100 }}>
-      <MultiSelect
-        options={supportedLangs}
-        bind:value={selectedLang}
-        multiple={false}
-        placeholder={t.t("weird_fuzzy_warbler_edit")}
-        label={t.t("weird_fuzzy_warbler_edit")}
-        bind:this={registry["lang_selector"]}
-      >
-        {#snippet valueRenderer(v)}
-          {t.t(TranslatedLanguages[v])}
-        {/snippet}
-        {#snippet optionRenderer(v)}
-          {t.t(TranslatedLanguages[v])}
-        {/snippet}
-      </MultiSelect>
+      {@render head(false)}
       <label>
         <Checkbox value={products[selectedProduct].listed}></Checkbox>
         {"Active"}
@@ -341,6 +373,26 @@
       flex-direction: column;
       padding: 1rem;
       gap: 1rem;
+    }
+
+    .head {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      button {
+        align-self: flex-start;
+        background-color: transparent;
+        border: none;
+        color: var(--neutral-11);
+        cursor: pointer;
+        span {
+          text-decoration: underline;
+          text-underline-offset: 0.4rem;
+        }
+        &:hover {
+          color: var(--neutral-12);
+        }
+      }
     }
 
     .collection {

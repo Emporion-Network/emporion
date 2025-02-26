@@ -27,6 +27,13 @@
     <a target="_blank" href="https://discord.com" aria-labelledby="discord">
       <i class="ri-discord-line"></i>
     </a>
+    <a
+      target="_blank"
+      href="https://github.com/emporion-Network/"
+      aria-labelledby="github"
+    >
+      <i class="ri-github-fill"></i>
+    </a>
   </div>
 </footer>
 
