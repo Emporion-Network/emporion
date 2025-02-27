@@ -4,18 +4,33 @@
   import Orders from "./Orders.svelte";
   import Address from "@/lib/Address.svelte";
   import Rating from "@/lib/Rating.svelte";
+  import Reviews from "./Reviews.svelte";
 </script>
 
 <div class="my-store">
   <div class="head">
     {#if user.address}
-      <div>
+      <div class="wpr">
         <h1>
           <span>Hello,</span>
           <Address address={user.address!}></Address>
           <span>👋</span>
         </h1>
         <Rating type="long" nb_ratings={0} avg_rating={0}></Rating>
+        <div class="numbers">
+          <div class="number">
+            <span>{"Revenue This Week"}</span>
+            <span>$0</span>
+          </div>
+          <div class="number">
+            <span>{"Orders Pending"}</span>
+            <span>0</span>
+          </div>
+          <div class="number">
+            <span>{"Processing Time"}</span>
+            <span>0days</span>
+          </div>
+        </div>
       </div>
       <div class="rating-detail">
         {#await user.getRating(user.address) then r}
@@ -44,8 +59,9 @@
       </div>
     {/if}
   </div>
-  <Orders></Orders>
-  <Collections></Collections>
+  <Orders />
+  <Collections />
+  <Reviews />
 </div>
 
 <style lang="scss">
@@ -59,10 +75,43 @@
     .head {
       display: flex;
       justify-content: space-between;
+      gap: 1rem;
+    }
+    .wpr {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      flex: 1;
+    }
+    .numbers {
+      display: flex;
+      gap: 1rem;
+      flex: 1;
+      width: 100%;
+      .number {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 1rem;
+        gap: 1rem;
+        background-color: var(--neutral-2);
+        flex: 1;
+        span {
+          &:first-child {
+            font-size: 0.9rem;
+            color: var(--neutral-11);
+            white-space: nowrap;
+          }
+          &:last-child {
+            font-size: 2rem;
+            font-weight: bold;
+          }
+        }
+      }
     }
     .rating-detail {
       padding: 1rem;
-      background-color: var(--neutral-3);
+      background-color: var(--neutral-2);
       width: max-content;
       flex-direction: column;
       display: flex;

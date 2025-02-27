@@ -7,6 +7,7 @@
   import { user } from "@/stores/user.svelte";
   import Address from "@/lib/Address.svelte";
   import Rating from "@/lib/Rating.svelte";
+  import ContextMenu from "@/lib/ContextMenu.svelte";
 
   let {
     selectedLang,
@@ -37,6 +38,36 @@
       <div class="link">
         <span>{"Seller:"}</span>
         <Address address={user.address!} />
+        <ContextMenu>
+          {#snippet opener({ get, set, ...props })}
+            {/*@ts-ignore*/ null}
+            <button
+              class="ghost-button"
+              aria-label="More"
+              bind:this={get, set}
+              {...props}
+              onclick={(e) => e.stopPropagation()}
+            >
+              <i class="ri-more-line"></i>
+            </button>
+          {/snippet}
+          {#snippet options(close)}
+            <div class="options">
+              <button class="ghost-button">
+                <i class="ri-share-forward-line"></i>
+                Share
+              </button>
+              <button class="ghost-button">
+                <i class="ri-file-copy-line"></i>
+                Copy address
+              </button>
+              <button class="ghost-button red">
+                <i class="ri-flag-fill"></i>
+                Report listing
+              </button>
+            </div>
+          {/snippet}
+        </ContextMenu>
       </div>
       <div class="line"></div>
       <h2>
@@ -69,6 +100,13 @@
     align-self: flex-start;
     gap: 1rem;
     padding: 1rem;
+    .options {
+      background-color: var(--neutral-1);
+      align-items: flex-start;
+      padding: 0.5rem;
+      display: flex;
+      flex-direction: column;
+    }
     .picker {
       width: 40%;
       display: flex;

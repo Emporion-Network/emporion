@@ -268,6 +268,14 @@ class User extends Api {
     return ec.getMark({ addr });
   }
 
+  async getOrdersForMe() {
+    const ec = await this.ec;
+    return ec.listOrdersForUser({
+      addr: this.address!,
+      pagination: {}
+    })
+  }
+
 }
 
 export const user = new User({

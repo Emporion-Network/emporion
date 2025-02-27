@@ -6,3 +6,4 @@
 [ ] Buy 
 [ ] Settle
 [ ] Review
+[ ] Flag product

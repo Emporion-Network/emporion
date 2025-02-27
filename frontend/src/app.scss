@@ -295,3 +295,28 @@ h1 {
     pointer-events: none;
   }
 }
+
+.ghost-button {
+  outline: none;
+  background-color: transparent;
+  border: none;
+  color: var(--neutral-11);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--neutral-12);
+  }
+
+  &.red {
+    color: var(--red-11);
+
+    &:hover {
+      color: var(--red-10);
+    }
+  }
+
+  &:disabled {
+    opacity: 0.2;
+    pointer-events: none;
+  }
+}

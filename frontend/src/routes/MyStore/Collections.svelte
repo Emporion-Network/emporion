@@ -103,7 +103,7 @@
   </div>
   {#if !collections.length}
     <p class="info">
-      {"You don't have any collections yet. Create one!"}
+      {"You don't have any collections yet."}
     </p>
   {/if}
 </div>
