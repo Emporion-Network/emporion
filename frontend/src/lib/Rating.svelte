@@ -6,13 +6,13 @@
     | {
         type: "short";
         avg_rating: number;
-        url: string;
+        url?: string;
       }
     | {
         type: "long";
         avg_rating: number;
         nb_ratings: number;
-        url: string;
+        url?: string;
       }
     | {
         type: "editable";
@@ -56,7 +56,7 @@
     {:else}
       <button
         aria-label={`${props.avg_rating}/5 ${t.t("less_sleek_nils_read")}`}
-        onclick={handleRedirect(props.url)}
+        onclick={() => props.url && handleRedirect(props.url)}
       >
         <div class="stars" style="--r:{(100 * props.avg_rating) / 5}%">
           {#each { length: 5 } as _, i}
@@ -64,12 +64,12 @@
             ></i>
           {/each}
         </div>
-        <span class="small">
-          {#if props.type == "long"}
+        {#if props.type == "long"}
+          <span class="small">
             {props.avg_rating}/5 ({props.nb_ratings}
             {t.t("fancy_known_peacock_pray")})
-          {/if}
-        </span>
+          </span>
+        {/if}
       </button>
     {/if}
   </div>
@@ -82,7 +82,7 @@
     align-items: center;
     width: max-content;
     gap: 0.5rem;
-    font-size: 1rem;
+    font-size: 1em;
     &.skeleton {
       background-clip: text;
       color: transparent;
@@ -94,11 +94,11 @@
       display: flex;
       justify-content: center;
       align-items: flex-end;
-      gap: 0.5rem;
+      gap: 0.5em;
     }
     .stars {
       display: flex;
-      gap: 0.3rem;
+      gap: 0.3em;
       color: transparent;
       background: linear-gradient(
         to right,
@@ -107,12 +107,12 @@
         transparent var(--r)
       );
       -webkit-text-stroke-color: var(--neutral-12);
-      -webkit-text-stroke-width: 2px;
+      -webkit-text-stroke-width: 1.5px;
       background-clip: text;
       -webkit-background-clip: text;
     }
     .small {
-      font-size: 0.8rem;
+      font-size: 0.8em;
       font-weight: 600;
       color: var(--neutral-11);
     }

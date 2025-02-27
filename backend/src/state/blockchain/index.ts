@@ -82,7 +82,7 @@ export class Indexer {
       }
     };
     ws.onclose = () => {
-      console.log(`reopening RPC:${idx}`);
+      console.log(`RPC:${idx} Reopening...`);
       this.#sokets[idx] = this.#initEndpoint(url, idx);
     };
     ws.onerror = (e) => {

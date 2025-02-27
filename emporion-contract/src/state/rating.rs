@@ -11,7 +11,7 @@ use crate::{
     error::ContractError,
     msg::{
         exec::RateUserMsg,
-        query::{ByIndex, Paginated, PaginatedByAddress, PaginatedByIndex},
+        query::{ByIndex, GetByAddress, Paginated, PaginatedByAddress, PaginatedByIndex},
     },
     MAX_ITEMS_PER_PAGE, MAX_STRING_SIZE,
 };
@@ -25,19 +25,32 @@ const ADDR_TO_RATINGS: Map<(Addr, u64), (bool, u64)> = Map::new("addr_to_ratings
 const ORDER_TO_RATINGS: Map<(u64, u64), ()> = Map::new("order_to_ratings");
 const ADDR_TO_MARK: Map<Addr, Mark> = Map::new("addr_to_mark");
 
+#[derive(Default)]
 #[cw_serde]
-struct Mark(u32, u32, u32, u32, u32, u32);
+pub struct Mark(u32, u32, u32, u32, u32, u32);
 
 impl Mark {
     pub fn new(fst: u8) -> Result<Self, ContractError> {
         if fst > 5 {
             return error!("Mark should be in range [0,5]");
         }
-        Ok(Self(0, 0, 0, 0, 0, 0) + fst)
+        Ok(Self::default() + fst)
     }
 
     pub fn save(&self, deps: &mut DepsMut, addr: Addr) -> Result<(), ContractError> {
         Ok(ADDR_TO_MARK.save(deps.storage, addr, &self)?)
+    }
+
+    pub fn query_get(deps: &Deps, msg: GetByAddress) -> Result<QueryResponse, ContractError> {
+        let addr = deps.api.addr_validate(&msg.addr)?;
+        let resp = ADDR_TO_MARK.load(deps.storage, addr).unwrap_or_default();
+        Ok(to_json_binary::<Vec<u32>>(&resp.into())?)
+    }
+}
+
+impl Into<Vec<u32>> for Mark {
+    fn into(self) -> Vec<u32> {
+        vec![self.0, self.1, self.2, self.3, self.4, self.5]
     }
 }
 
@@ -249,4 +262,11 @@ impl Rating {
             ]))
         }
     }
+}
+
+#[test]
+
+fn test() {
+    let m = to_json_binary::<Vec<u32>>(&Mark::default().into()).unwrap();
+    println!("{:?}", m);
 }

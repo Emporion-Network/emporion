@@ -5,7 +5,12 @@ use crate::{
         query::QueryMsg,
     },
     state::{
-        bnk::Bank, index::Index, order::Order, params::Params, product::Product, rating::Rating,
+        bnk::Bank,
+        index::Index,
+        order::Order,
+        params::Params,
+        product::Product,
+        rating::{Mark, Rating},
     },
     CONTRACT_NAME, CONTRACT_VERSION,
 };
@@ -76,6 +81,7 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> Result<Binary, ContractErr
         QueryMsg::ListRatingsFromUser(msg) => Rating::query_from(&deps, msg),
         QueryMsg::ListRatingsByOrder(msg) => Rating::query_by_order(&deps, msg),
         QueryMsg::ListAllRatings(msg) => Rating::query_list(&deps, msg),
+        QueryMsg::GetMark(msg) => Mark::query_get(&deps, msg),
     }
 }
 

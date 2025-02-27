@@ -1,7 +1,13 @@
 use cosmwasm_schema::{cw_serde, QueryResponses};
 use cosmwasm_std::{Empty, Uint64};
 
-use crate::state::{bnk::Bank, order::Order, params::Params, product::Product, rating::Rating};
+use crate::state::{
+    bnk::Bank,
+    order::Order,
+    params::Params,
+    product::Product,
+    rating::{Mark, Rating},
+};
 
 #[cw_serde]
 pub struct GetByAddress {
@@ -67,4 +73,6 @@ pub enum QueryMsg {
     ListRatingsFromUser(PaginatedByAddress),
     #[returns(Vec<Rating>)]
     ListRatingsByOrder(PaginatedByIndex),
+    #[returns(Mark)]
+    GetMark(GetByAddress),
 }

@@ -1,9 +1,10 @@
 <script lang="ts">
   import { user } from "@/stores/user.svelte";
   import { Decimal } from "@cosmjs/math";
-  import type { ProductMetadata } from "@common";
+  import type { ProductMetadata, ResponseSuccess } from "@common";
   import { getLocation } from "@/stores/location.svelte";
   import { getTranslator } from "@/stores/translate.svelte";
+  import Input from "@/lib/Input.svelte";
   const getMinMax = (products: ProductMetadata[]) => {
     let max = Decimal.fromAtomics(products[0].price, 6);
     let min = Decimal.fromAtomics(products[0].price, 6);
@@ -14,9 +15,45 @@
     }
     return [min, max] as const;
   };
-
+  let search = $state("");
   let t = getTranslator();
   let { goTo } = getLocation();
+  type Collections = Extract<
+    Awaited<ReturnType<typeof user.getCollections>>,
+    { error: false }
+  >["result"];
+  let collections: Collections = $state([]);
+  $effect(() => {
+    if (!user.address) return;
+    user.getCollections(user.address).then((e) => {
+      if (e.error) return;
+      collections = e.result;
+    });
+  });
+
+  let filtered = $derived.by(() => {
+    return collections.filter((c) => {
+      return [
+        c.collection.toLocaleLowerCase().includes(search.toLocaleLowerCase()),
+        c.products.some((p) => {
+          return (
+            p.title[t.lang]
+              .toLocaleLowerCase()
+              .includes(search.toLocaleLowerCase()) ||
+            p.description[t.lang]
+              .toLocaleLowerCase()
+              .includes(search.toLocaleLowerCase()) ||
+            p.category.some((c) => {
+              return t
+                .t(c as any)
+                .toLocaleLowerCase()
+                .includes(search.toLocaleLowerCase());
+            })
+          );
+        }),
+      ].reduce((acc, b) => acc || b, false);
+    });
+  });
 </script>
 
 <div class="collections">
@@ -27,45 +64,47 @@
       <span>New Collection</span>
     </button>
   </div>
-  {#if user.address}
-    <div class="grid">
-      {#await user.getCollections(user.address!) then collections}
-        {#if !collections.error}
-          {#each collections.result as { collection, products }}
-            {@const [min, max] = getMinMax(products)}
-            {@const p = products.find((p) => p.gallery[t.lang])}
-            <div
-              class="collection"
-              role="button"
-              tabindex="0"
-              onkeypress={() => {}}
-              onclick={() =>
-                goTo(`/collection?name=${encodeURIComponent(collection)}`)}
-            >
-              {#if p}
-                <img src={p.gallery[t.lang][0]} alt="" />
-              {/if}
-              <div class="info">
-                <h3>{collection} x{products.length}</h3>
-                <span>{t.t(products[0].category[0] as any)}</span>
-              </div>
-              <div>
-                {#if !min.equals(max)}
-                  <span>{min.toString()} - {max.toString()} USDC</span>
-                {:else}
-                  <span>{min.toString()} USDC</span>
-                {/if}
-              </div>
-            </div>
-          {/each}
-          {#if !collections.result.length}
-            <p class="info">
-              {"You don't have any collections yet. Create one!"}
-            </p>
-          {/if}
+  <div class="search">
+    <Input
+      type="search"
+      placeholder="Search collection..."
+      label="Search collection"
+      bind:value={search}
+    ></Input>
+  </div>
+  <div class="grid">
+    {#each filtered as { collection, products }}
+      {@const [min, max] = getMinMax(products)}
+      {@const p = products.find((p) => p.gallery[t.lang])}
+      <div
+        class="collection"
+        role="button"
+        tabindex="0"
+        onkeypress={() => {}}
+        onclick={() =>
+          goTo(`/collection?name=${encodeURIComponent(collection)}`)}
+      >
+        {#if p}
+          <img src={p.gallery[t.lang][0]} alt="" />
         {/if}
-      {/await}
-    </div>
+        <div class="info">
+          <h3>{collection} x{products.length}</h3>
+          <span>{t.t(products[0].category[0] as any)}</span>
+        </div>
+        <div>
+          {#if !min.equals(max)}
+            <span>{min.toString()} - {max.toString()} USDC</span>
+          {:else}
+            <span>{min.toString()} USDC</span>
+          {/if}
+        </div>
+      </div>
+    {/each}
+  </div>
+  {#if !collections.length}
+    <p class="info">
+      {"You don't have any collections yet. Create one!"}
+    </p>
   {/if}
 </div>
 
@@ -78,6 +117,10 @@
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
+    }
+    .search {
+      display: flex;
+      justify-content: flex-start;
     }
     .grid {
       display: grid;

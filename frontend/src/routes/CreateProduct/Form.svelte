@@ -285,7 +285,7 @@
                       class="red"
                       onclick={() => close() && deleteProduct(i)}
                     >
-                      <i class="ri-eye-off-line"></i>
+                      <i class="ri-delete-bin-line"></i>
                       Delete product
                     </button>
                   {/if}

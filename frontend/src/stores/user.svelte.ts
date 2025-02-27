@@ -263,6 +263,10 @@ class User extends Api {
     }
   }
 
+  async getRating(addr: string) {
+    const ec = await this.ec;
+    return ec.getMark({ addr });
+  }
 
 }
 

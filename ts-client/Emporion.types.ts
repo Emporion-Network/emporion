@@ -122,6 +122,8 @@ export type QueryMsg = {
   list_ratings_from_user: PaginatedByAddress;
 } | {
   list_ratings_by_order: PaginatedByIndex;
+} | {
+  get_mark: GetByAddress;
 };
 export interface Empty {}
 export interface ByIndex {
@@ -139,11 +141,15 @@ export interface PaginatedByIndex {
   id: Uint64;
   pagination: Paginated;
 }
+export interface GetByAddress {
+  addr: string;
+}
 export interface MigrateMsg {}
 export interface Bank {
   rewards: Uint128;
   rnd: Uint128;
 }
+export type Mark = [number, number, number, number, number, number];
 export type Addr = string;
 export type OrderStatus = "pending" | "accepted" | "cancelled" | "completed" | "disputed";
 export interface Order {

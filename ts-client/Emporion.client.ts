@@ -6,7 +6,7 @@
 
 import { CosmWasmClient, SigningCosmWasmClient, ExecuteResult } from "@cosmjs/cosmwasm-stargate";
 import { Coin, StdFee } from "@cosmjs/amino";
-import { Decimal, Uint64, Uint128, InstantiateMsg, BankDistribution, ExecuteMsg, CreateProductMsg, CreateBulkProductsMsg, UpdateProductMsg, UpdateBulkProductMsg, CreateOrderMsg, OrderForSeller, AcceptOrderMsg, CancelOrderMsg, CompleteOrderMsg, DisputeOrderMsg, RateUserMsg, DistributeMsg, UpdateParamsMsg, QueryMsg, Empty, ByIndex, Paginated, PaginatedByAddress, PaginatedByIndex, MigrateMsg, Bank, Addr, OrderStatus, Order, Params, Product, Rating, ArrayOfOrder, ArrayOfProduct, ArrayOfRating } from "./Emporion.types";
+import { Decimal, Uint64, Uint128, InstantiateMsg, BankDistribution, ExecuteMsg, CreateProductMsg, CreateBulkProductsMsg, UpdateProductMsg, UpdateBulkProductMsg, CreateOrderMsg, OrderForSeller, AcceptOrderMsg, CancelOrderMsg, CompleteOrderMsg, DisputeOrderMsg, RateUserMsg, DistributeMsg, UpdateParamsMsg, QueryMsg, Empty, ByIndex, Paginated, PaginatedByAddress, PaginatedByIndex, GetByAddress, MigrateMsg, Bank, Mark, Addr, OrderStatus, Order, Params, Product, Rating, ArrayOfOrder, ArrayOfProduct, ArrayOfRating } from "./Emporion.types";
 export interface EmporionReadOnlyInterface {
   contractAddress: string;
   getParams: () => Promise<Params>;
@@ -89,6 +89,11 @@ export interface EmporionReadOnlyInterface {
     id: Uint64;
     pagination: Paginated;
   }) => Promise<ArrayOfRating>;
+  getMark: ({
+    addr
+  }: {
+    addr: string;
+  }) => Promise<Mark>;
 }
 export class EmporionQueryClient implements EmporionReadOnlyInterface {
   client: CosmWasmClient;
@@ -110,6 +115,7 @@ export class EmporionQueryClient implements EmporionReadOnlyInterface {
     this.listRatingsForUser = this.listRatingsForUser.bind(this);
     this.listRatingsFromUser = this.listRatingsFromUser.bind(this);
     this.listRatingsByOrder = this.listRatingsByOrder.bind(this);
+    this.getMark = this.getMark.bind(this);
   }
   getParams = async (): Promise<Params> => {
     return this.client.queryContractSmart(this.contractAddress, {
@@ -277,6 +283,17 @@ export class EmporionQueryClient implements EmporionReadOnlyInterface {
       list_ratings_by_order: {
         id,
         pagination
+      }
+    });
+  };
+  getMark = async ({
+    addr
+  }: {
+    addr: string;
+  }): Promise<Mark> => {
+    return this.client.queryContractSmart(this.contractAddress, {
+      get_mark: {
+        addr
       }
     });
   };
