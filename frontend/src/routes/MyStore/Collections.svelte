@@ -58,10 +58,10 @@
 
 <div class="collections">
   <div class="title">
-    <h2>Collections</h2>
+    <h2>{t.t("male_patient_cheetah_urge")}</h2>
     <button class="primary-button" onclick={() => goTo(`/collection`)}>
       <i class="ri-add-line"></i>
-      <span>New Collection</span>
+      <span>New collection</span>
     </button>
   </div>
   <div class="search">
