@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, untrack } from "svelte";
-  import { storage } from "@/stores/localStorage";
+  import { storage } from "@/stores/localStorage.svelte";
   import { getTranslator } from "@/stores/translate.svelte";
   import Form from "./Form.svelte";
   import type { Product } from "./Form.svelte";

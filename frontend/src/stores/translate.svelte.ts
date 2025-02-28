@@ -1,7 +1,7 @@
 import { langs } from '../../messages.d.js';
 import { I18n } from 'i18n-js';
 import en from '../../../messages/en.json';
-import { storage } from './localStorage.js';
+import { storage } from './localStorage.svelte.js';
 
 const tst = $derived.by(() => {
   const _ = lang;

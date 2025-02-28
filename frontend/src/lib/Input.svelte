@@ -135,6 +135,7 @@
       div {
         top: 0%;
         transform: translateY(-50%) scale(0.8);
+        transform-origin: center left;
         color: var(--main-10);
       }
     }

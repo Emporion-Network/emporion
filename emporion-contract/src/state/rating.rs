@@ -23,7 +23,7 @@ const RATINGS: Map<u64, Rating> = Map::new("ratings");
 //////////////////////////   |     |     |      |
 const ADDR_TO_RATINGS: Map<(Addr, u64), (bool, u64)> = Map::new("addr_to_ratings");
 const ORDER_TO_RATINGS: Map<(u64, u64), ()> = Map::new("order_to_ratings");
-const ADDR_TO_MARK: Map<Addr, Mark> = Map::new("addr_to_mark");
+const ADDR_TO_MARK: Map<Addr, [u32; 6]> = Map::new("addr_to_mark");
 
 #[derive(Default)]
 #[cw_serde]
@@ -37,8 +37,12 @@ impl Mark {
         Ok(Self::default() + fst)
     }
 
-    pub fn save(&self, deps: &mut DepsMut, addr: Addr) -> Result<(), ContractError> {
-        Ok(ADDR_TO_MARK.save(deps.storage, addr, &self)?)
+    pub fn save(self, deps: &mut DepsMut, addr: Addr) -> Result<(), ContractError> {
+        Ok(ADDR_TO_MARK.save(deps.storage, addr, &self.into())?)
+    }
+
+    pub fn load(deps:&Deps, addr: Addr) -> Result<Self, ContractError>{
+        Ok(ADDR_TO_MARK.load(deps.storage, addr)?.into())
     }
 
     pub fn query_get(deps: &Deps, msg: GetByAddress) -> Result<QueryResponse, ContractError> {
@@ -48,9 +52,15 @@ impl Mark {
     }
 }
 
-impl Into<Vec<u32>> for Mark {
-    fn into(self) -> Vec<u32> {
-        vec![self.0, self.1, self.2, self.3, self.4, self.5]
+impl Into<[u32; 6]> for Mark {
+    fn into(self) -> [u32; 6] {
+        [self.0, self.1, self.2, self.3, self.4, self.5]
+    }
+}
+
+impl From<[u32; 6]> for Mark {
+    fn from(value: [u32; 6]) -> Self {
+        Mark(value[0], value[1], value[2], value[3], value[4], value[5])
     }
 }
 
@@ -228,7 +238,7 @@ impl Rating {
         if let Some((_, rating_id)) = rating_id {
             // update
             let mut rating = RATINGS.load(deps.storage, rating_id)?;
-            let mut mark = ADDR_TO_MARK.load(deps.storage, to_rate.clone())?;
+            let mut mark = Mark::load(&deps.as_ref(), to_rate.clone())?;
             mark = (mark - rating.mark) + msg.mark;
             mark.save(deps, to_rate)?;
 
@@ -253,7 +263,7 @@ impl Rating {
                 msg.comment,
                 (env.block.time.seconds() * 1000).into(),
             )?;
-            ADDR_TO_MARK.save(deps.storage, to_rate.clone(), &Mark::new(msg.mark)?)?;
+            Mark::new(msg.mark)?.save(deps, to_rate.clone())?;
             ADDR_TO_RATINGS.save(deps.storage, key, &(tag, rating.id.u64()))?;
             ORDER_TO_RATINGS.save(deps.storage, (o.id.u64(), rating.id.u64()), &())?;
             Ok(Response::new().add_attributes(vec![
@@ -267,6 +277,13 @@ impl Rating {
 #[test]
 
 fn test() {
-    let m = to_json_binary::<Vec<u32>>(&Mark::default().into()).unwrap();
+    let mut deps = cosmwasm_std::testing::mock_dependencies();
+    let addr = deps.api.addr_make("creator");
+    let m = to_json_binary::<[u32; 6]>(&Mark::default().into()).unwrap();
+    Mark::default().save(&mut deps.as_mut(), addr.clone()).unwrap();
+    let mut m =  Mark::load(&deps.as_ref(), addr.clone()).unwrap();
+    m = m + 5;
+    m.save(&mut deps.as_mut(), addr.clone()).unwrap();
+    let m =  Mark::load(&deps.as_ref(), addr.clone()).unwrap();
     println!("{:?}", m);
 }

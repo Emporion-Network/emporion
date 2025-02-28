@@ -144,13 +144,10 @@
   };
 
   const load = () => {
-    console.log("loaded");
     loaded = true;
   };
 
   const unload = () => {
-    console.log("unloaded");
-
     loaded = false;
   };
 

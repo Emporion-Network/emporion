@@ -1,5 +1,6 @@
 <script lang="ts">
-    import { getTranslator } from "@/stores/translate.svelte";
+  import { getTranslator } from "@/stores/translate.svelte";
+  import { getBgColor } from "@/lib/utils";
 
   let {
     images,
@@ -24,16 +25,20 @@
 </script>
 
 <div class="gellery" bind:this={element}>
-  {#each images as img}
+  {#each images as img, i}
     <img src={img} {alt} />
   {/each}
   {#if images.length}
     <div class="buttons">
-      <button aria-label="{t.t("neat_sound_meerkat_drum")}" class:hide={i == 0} onclick={slide(-1)}>
+      <button
+        aria-label={t.t("neat_sound_meerkat_drum")}
+        class:hide={i == 0}
+        onclick={slide(-1)}
+      >
         <i class="ri-arrow-left-wide-line"></i>
       </button>
       <button
-        aria-label="{t.t("close_antsy_jannes_praise")}"
+        aria-label={t.t("close_antsy_jannes_praise")}
         class:hide={i == images.length - 1}
         onclick={slide(+1)}
       >
@@ -76,7 +81,7 @@
     img {
       min-width: 100%;
       aspect-ratio: 1/1;
-      object-fit: cover;
+      object-fit: contain;
     }
   }
 </style>

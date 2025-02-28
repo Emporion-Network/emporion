@@ -3,7 +3,7 @@ import { Api } from '@ts-client/api';
 import { EmporionClient, EmporionQueryClient } from '@ts-client/Emporion.client';
 import { bechToBech, type FileMetaReq, type FileMetaRes, type ProductMetadata, type Result, type UploadFiles } from '@common';
 import { GasPrice } from '@cosmjs/stargate';
-import { storage } from './localStorage';
+import { storage } from './localStorage.svelte';
 import { Decimal } from "@cosmjs/math"
 
 class User extends Api {

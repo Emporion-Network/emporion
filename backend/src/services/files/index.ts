@@ -3,6 +3,8 @@ import { jwt } from '@/middlewares/jwt';
 import { assert, isValidBech, assertIsFileMeta, bechToBech, assertIsDefinedUnsafe } from '@common';
 import { randomUUIDv7 } from 'bun';
 import { Hono } from 'hono';
+import { fileTypeFromBuffer } from 'file-type';
+// import { fileT } from 'file-type';
 
 const uploadFile = new Hono()
   .use('/upload-files', jwt)
@@ -17,11 +19,14 @@ const uploadFile = new Hono()
     if (!Array.isArray(files)) {
       files = [files];
     }
-    files.forEach((f) => {
+    for (const f of files) {
       assert(f instanceof File, 'Invalid file');
-      assert(f.type.startsWith('image/'), 'File is not an image');
+      const b = await f.arrayBuffer();
+      const type = await fileTypeFromBuffer(b);
+      assertIsDefinedUnsafe(type, 'Invalid file');
+      assert(type.mime.startsWith('image/'), 'File is not an image');
       assert(f.size < c.var.state.uploadMaxSize, 'File is too large');
-    });
+    }
     const fileNames = files.map(async (f, i) => {
       const fileName = `${c.var.user.addr}/${randomUUIDv7()}`;
       meta[i].path = fileName;

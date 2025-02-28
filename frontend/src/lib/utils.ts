@@ -49,7 +49,7 @@ export function humanTimeLeft(locale: string, d: Date) {
   }
 }
 
-export const blur = ()=>{
+export const blur = () => {
   let e = document.createElement('input');
   e.setAttribute('style', 'position:absolute;scale(0.01);top:0;');
   document.body.append(e)
@@ -104,6 +104,43 @@ export async function getAvgColor(src: string) {
     Math.floor(color[0] / (data.length / 4)),
     Math.floor(color[1] / (data.length / 4)),
     Math.floor(color[2] / (data.length / 4)),
+  ];
+}
+
+export async function getBgColor(src: string) {
+  const { data } = await getImageData(src);
+  const w = 200;
+  const h = 200;
+  /// get color of 1px around the border
+  const color = [
+    data[0],
+    data[1],
+    data[2],
+  ]
+  for (let i = 0; i < w; i++) {
+    color[0] += data[i * 4 + 0];
+    color[1] += data[i * 4 + 1];
+    color[2] += data[i * 4 + 2];
+  }
+  for (let i = 0; i < h; i++) {
+    color[0] += data[i * 4 * w + 0];
+    color[1] += data[i * 4 * w + 1];
+    color[2] += data[i * 4 * w + 2];
+  }
+  for (let i = 0; i < w; i++) {
+    color[0] += data[(h - 1) * 4 * w + i * 4 + 0];
+    color[1] += data[(h - 1) * 4 * w + i * 4 + 1];
+    color[2] += data[(h - 1) * 4 * w + i * 4 + 2];
+  }
+  for (let i = 0; i < h; i++) {
+    color[0] += data[i * 4 + (w - 1) * 4 + 0];
+    color[1] += data[i * 4 + (w - 1) * 4 + 1];
+    color[2] += data[i * 4 + (w - 1) * 4 + 2];
+  }
+  return [
+    Math.floor(color[0] / (w * h * 4 + w * 2 + h * 2)),
+    Math.floor(color[1] / (w * h * 4 + w * 2 + h * 2)),
+    Math.floor(color[2] / (w * h * 4 + w * 2 + h * 2)),
   ];
 }
 

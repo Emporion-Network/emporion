@@ -11,6 +11,7 @@
   import Test from "@/routes/Test/Test.svelte";
   import MyStore from "@/routes/MyStore/MyStore.svelte";
   import Landing from "./routes/Landing/Landing.svelte";
+  import Cart from "./lib/Cart.svelte";
 </script>
 
 <Route path="/collection">
@@ -48,3 +49,4 @@
 
 <FilePicker />
 <Footer />
+<Cart />
