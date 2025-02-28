@@ -39,7 +39,6 @@
     stroke-dashoffset: 560;
     width: 1.5rem;
     transition: stroke-dashoffset 1200ms linear;
-    margin-bottom: -100px;
 
     path {
       stroke: var(--white-a4);

@@ -34,6 +34,12 @@
       scenes.forEach((s) => s.dispose());
     };
   });
+  const scrollToNext = ()=>{
+    document.documentElement.scrollBy({
+      top:window.innerHeight*1.2,
+      behavior:"smooth"
+    })
+  }
 </script>
 
 <div class="page dark">
@@ -57,7 +63,7 @@
         {t.t("next_sound_wasp_cut")}
       </p>
       <div class="buttons">
-        <button>{t.t("free_upper_giraffe_pull")}</button>
+        <button onclick={scrollToNext}>{t.t("free_upper_giraffe_pull")}</button>
 
         <a
           href="https://app.osmosis.zone/assets/EMPR?tab=buy"
@@ -234,6 +240,7 @@
 </div>
 
 <style lang="scss">
+  @use "../../mixins" as *;
   .page {
     background-color: #000;
     .header_gradient {
@@ -288,6 +295,43 @@
     .coin_canvas {
       width: 280px !important;
       height: auto !important;
+    }
+    @include media('<= phone'){
+      .header_gradient{
+        font-size: 50px;
+      }
+      .hero .content{
+        padding: 1rem;
+        nav{
+          top: 1rem;
+          left: 1rem;
+        }
+        h1 {
+          font-size: 55px;
+        }
+        .buttons{
+          flex-direction: column;
+        }
+      }
+      .feature {
+        :global(.cards){
+          grid-auto-flow: row;
+          gap:1rem;
+        }
+        .card{
+          max-width: unset;
+          border: 1px solid var(--white-a2);
+        }
+      }
+      .secure{
+        height: 50vh;
+        .content p {
+          color: var(--neutral-9);
+        }
+        :global(.itms){
+          display: none;
+        }
+      }
     }
   }
   .hero {
@@ -391,7 +435,7 @@
       }
       .buttons {
         display: flex;
-        width: 470px;
+        width: max-content;
         gap: 1rem;
         a {
           display: contents;
@@ -411,6 +455,7 @@
           background-color: white;
           color: var(--neutral-1);
           cursor: pointer;
+          white-space: nowrap;
           flex: 1;
         }
       }
@@ -441,6 +486,9 @@
     gap: 3rem;
     min-height: 120vh;
     position: relative;
+    h3{
+      text-align: center;
+    }
 
     & > p {
       text-align: center;
@@ -534,6 +582,7 @@
       align-items: center;
       flex-direction: column;
       gap: 1rem;
+      padding: 1rem;
       h2 {
         color: var(--white-a12);
       }
@@ -613,4 +662,5 @@
       }
     }
   }
+  
 </style>

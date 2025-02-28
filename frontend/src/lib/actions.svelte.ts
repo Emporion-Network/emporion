@@ -66,7 +66,6 @@ export const intersect: Action<
       rootMargin,
     },
   );
-  console.log(el);
   observer.observe(el);
   $effect(() => {
     return () => {

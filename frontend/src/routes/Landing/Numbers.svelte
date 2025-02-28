@@ -24,6 +24,7 @@
 </div>
 
 <style lang="scss">
+  @use "../../mixins" as *;
   .numbers {
     display: flex;
     margin: 5%;
@@ -40,13 +41,16 @@
       width: 100%;
       h2 {
         color: var(--white-a9);
-        font-size: 18.72px;
+        font-size: 1.3rem;
       }
       h3 {
         font-size: 80px;
         text-align: center;
         width: 100%;
       }
+    }
+    @include media('<= phone'){
+      flex-direction: column;
     }
   }
 </style>
