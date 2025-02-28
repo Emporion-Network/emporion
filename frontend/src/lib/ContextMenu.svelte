@@ -63,7 +63,7 @@
   }
   const handleClick = (e:MouseEvent)=>{
     show = true;
-    setTimeout(onf, 1);
+    setTimeout(onf, 10);
     e.stopPropagation();
   }
 
@@ -74,7 +74,7 @@
   };
 </script>
 
-<svelte:window onscroll={onf} onresize={onf} onclick={handleOutside}/>
+<svelte:window onscroll={()=>show = false} onresize={()=>show = false} onmousedown={handleOutside}/>
 
 
 <div class="context-menu" class:show>
@@ -102,11 +102,22 @@
       border-radius: 3px;
       z-index: 9;
       margin: var(--margin, 0);
+      opacity: 0;
+      width: max-content;
     }
     &.show{
       .content {
         display: flex;
         flex-direction: column;
+        animation: show 200ms 40ms ease-in-out forwards;
+        @keyframes show {
+          from{
+            opacity: 0;
+          }
+          to{
+            opacity: 1;
+          }
+        }
       }
     }
   }

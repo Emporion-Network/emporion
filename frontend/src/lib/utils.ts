@@ -51,7 +51,7 @@ export function humanTimeLeft(locale: string, d: Date) {
 
 export const blur = ()=>{
   let e = document.createElement('input');
-  e.setAttribute('style', 'position:absolute;scale(0.01)');
+  e.setAttribute('style', 'position:absolute;scale(0.01);top:0;');
   document.body.append(e)
   e.focus();
   e.remove();

@@ -271,7 +271,6 @@
                     aria-label="{t.t("direct_alive_ape_surge")}"
                     bind:this={get, set}
                     {...props}
-                    onclick={(e) => e.stopPropagation()}
                   >
                     <i class="ri-more-line"></i>
                   </button>

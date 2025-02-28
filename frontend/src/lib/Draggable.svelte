@@ -118,6 +118,7 @@
       justify-content: center;
       align-items: center;
       align-self: stretch;
+      touch-action: none;
       button {
         cursor: grab;
         background-color: transparent;
