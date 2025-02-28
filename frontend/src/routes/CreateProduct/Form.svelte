@@ -389,7 +389,7 @@
     }
   }
   .form {
-    flex: 3;
+    flex: 1;
     position: relative;
     display: flex;
     overflow: hidden;
