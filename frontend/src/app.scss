@@ -48,6 +48,10 @@
   margin: 0;
 }
 
+html{
+  font-size: 16px;
+}
+
 body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
@@ -321,3 +325,4 @@ h1 {
     pointer-events: none;
   }
 }
+

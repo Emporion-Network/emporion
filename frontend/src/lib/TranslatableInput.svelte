@@ -131,7 +131,7 @@
       max-width: max-content;
       border: none;
       outline: none;
-      aspect-ratio: 1;
+      aspect-ratio: 1/1;
       border-radius: 3px;
       border-width: 3px;
       align-self: flex-start;

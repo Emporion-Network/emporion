@@ -65,7 +65,7 @@
         border: none;
         outline: none;
         color: var(--neutral-12);
-        aspect-ratio: 1;
+        aspect-ratio: 1/1;
         border-radius: 3px;
         cursor: pointer;
         &.hide {
@@ -75,7 +75,7 @@
     }
     img {
       min-width: 100%;
-      aspect-ratio: 1;
+      aspect-ratio: 1/1;
       object-fit: cover;
     }
   }

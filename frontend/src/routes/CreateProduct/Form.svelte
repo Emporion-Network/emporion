@@ -383,13 +383,13 @@
     border: none;
     border-radius: 4px;
     font-size: 2rem;
-    aspect-ratio: 1;
+    aspect-ratio: 1/1;
     @include media(">= phone"){
       display: none;
     }
   }
   .form {
-    flex: 1;
+    flex: 3;
     position: relative;
     display: flex;
     overflow: hidden;
@@ -397,8 +397,6 @@
     background-color: var(--parent-bg);
     border-right: 1px solid var(--neutral-6);
     transition: transform 200ms ease-in-out;
-    z-index: 1;
-
     &.hide{
       transform: translateX(-100%);
     }
@@ -494,7 +492,7 @@
           height: 80px;
           object-fit: cover;
           border-radius: 2px;
-          aspect-ratio: 1;
+          aspect-ratio: 1/1;
           display: flex;
           justify-content: center;
           align-items: center;
@@ -532,8 +530,7 @@
       }
     }
     .primary-button {
-      margin-left: 1rem;
-      margin-right: 1rem;
+      margin: 1rem;
     }
   }
 </style>

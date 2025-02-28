@@ -246,7 +246,7 @@
         border: none;
         background-color: transparent;
         border-radius: 1rem;
-        aspect-ratio: 1;
+        aspect-ratio: 1/1;
         color: inherit;
         cursor: pointer;
         &:hover {

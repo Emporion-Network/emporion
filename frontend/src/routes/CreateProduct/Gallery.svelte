@@ -202,7 +202,7 @@
     }
     .main-img {
       width: 100%;
-      aspect-ratio: 1;
+      aspect-ratio: 1/1;
     }
     .wpr {
       display: grid;
@@ -215,14 +215,14 @@
 
       .img {
         min-width: 100px;
-        aspect-ratio: 1;
+        aspect-ratio: 1/1;
       }
     }
     .apply-img {
       max-width: max-content;
       border: none;
       outline: none;
-      aspect-ratio: 1;
+      aspect-ratio: 1/1;
       border-radius: 3px;
       align-self: flex-start;
       border-style: solid;

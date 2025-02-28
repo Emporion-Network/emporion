@@ -93,7 +93,9 @@
     gap: 1rem;
     @include media("<=phone") {
       .secondary-accent-button {
-        aspect-ratio: 1;
+        aspect-ratio: 1/1 !important;
+        width: auto;
+        padding: 0;
       }
       :global(.secondary-accent-button > .address) {
         display: none;
@@ -101,7 +103,7 @@
     }
     .secondary-button {
       min-width: var(--height-2);
-      aspect-ratio: 1;
+      aspect-ratio: 1/1;
       border-color: transparent;
     }
   }

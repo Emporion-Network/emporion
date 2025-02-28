@@ -9,7 +9,7 @@
         {
           get: () => HTMLElement;
           set: (e: HTMLElement) => void;
-          onfocus: () => void;
+          onclick: (e:MouseEvent) => void;
         },
       ]
     >;
@@ -46,6 +46,7 @@
 
   let ref: HTMLElement = $state(null!);
   let contentE: HTMLElement = $state(null!);
+  let show = $state(false);
 
   const get = () => {
     return ref;
@@ -54,6 +55,18 @@
     ref = v;
   };
 
+  const handleOutside = (e:MouseEvent)=>{
+    if(!show) return;
+    if(!contentE.contains(e.target as HTMLElement)){
+      show = false;
+    }
+  }
+  const handleClick = (e:MouseEvent)=>{
+    show = true;
+    setTimeout(onf, 1);
+    e.stopPropagation();
+  }
+
   const close = () => {
     // @ts-expect-error doesnt know its an element
     document.activeElement?.blur();
@@ -61,10 +74,11 @@
   };
 </script>
 
-<svelte:window onscroll={onf} onresize={onf} />
+<svelte:window onscroll={onf} onresize={onf} onclick={handleOutside}/>
 
-<div class="context-menu">
-  {@render opener({ get, set, onfocus: onf })}
+
+<div class="context-menu" class:show>
+  {@render opener({ get, set, onclick: handleClick })}
   <div
     class="content"
     style="--l:{pos.l}px; --t:{pos.t}px;--rw:{pos.rw}px; --rh:{pos.rh}px;--cw:{pos.cw}px; --ch:{pos.ch}px;"
@@ -77,12 +91,6 @@
 <style lang="scss">
   .context-menu {
     display: contents;
-    &:focus-within {
-      .content {
-        display: flex;
-        flex-direction: column;
-      }
-    }
     .content {
       display: none;
       position: fixed;
@@ -92,8 +100,14 @@
       background-color: var(--parent-bg);
       border: 1px solid var(--neutral-6);
       border-radius: 3px;
-      z-index: 1;
+      z-index: 9;
       margin: var(--margin, 0);
+    }
+    &.show{
+      .content {
+        display: flex;
+        flex-direction: column;
+      }
     }
   }
 </style>

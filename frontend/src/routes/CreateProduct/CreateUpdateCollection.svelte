@@ -63,5 +63,6 @@
     min-height: 100vh;
     background-color: var(--neutral-2);
     border-bottom: 1px solid var(--neutral-6);
+    isolation: isolate;
   }
 </style>

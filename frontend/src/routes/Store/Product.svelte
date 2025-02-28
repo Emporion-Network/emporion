@@ -33,7 +33,7 @@
         overflow: hidden;
         .skeleton-img {
             width: 100%;
-            aspect-ratio: 1;
+            aspect-ratio: 1/1;
             background-color: var(--neutral-2);
         }
         .skeleton-title {

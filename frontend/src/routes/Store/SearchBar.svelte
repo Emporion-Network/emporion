@@ -23,6 +23,7 @@
 </div>
 
 <style lang="scss">
+  @use "../../mixins" as *;
   .search-bar {
     display: flex;
     border: 1px solid var(--neutral-6);
@@ -61,10 +62,14 @@
         border: none;
       }
     }
+    @include media('> phone'){
+      :global(.multi-select .options) {
+        width: max-content;
+      }
+    }
     :global(.multi-select) {
-      border-radius: 2px 0 0 2px;
+      border-radius: 2px 0px 0px 2px !important;
       margin-top: 0;
-      min-width: 300px;
     }
   }
 </style>

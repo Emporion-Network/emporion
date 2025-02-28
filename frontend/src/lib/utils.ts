@@ -49,6 +49,14 @@ export function humanTimeLeft(locale: string, d: Date) {
   }
 }
 
+export const blur = ()=>{
+  let e = document.createElement('input');
+  e.setAttribute('style', 'position:absolute;scale(0.01)');
+  document.body.append(e)
+  e.focus();
+  e.remove();
+}
+
 
 
 export function findMap<T, R>(arr: T[], cb: (v: T) => R) {

@@ -56,7 +56,7 @@
         cursor: pointer;
         height: var(--height-1) !important;
         width: var(--height-1) !important;
-        aspect-ratio: 1;
+        aspect-ratio: 1/1;
         border-radius: 50%;
         border: 1px solid var(--neutral-8);
         position: relative;

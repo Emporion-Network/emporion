@@ -1,6 +1,8 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
   import type { SvelteSet } from "svelte/reactivity";
+  import { blur } from "./utils";
+  import { getTranslator } from "@/stores/translate.svelte";
 
   // eslint-disable-next-line no-undef
   type T = $$Generic;
@@ -30,6 +32,8 @@
     label?: string;
     placeholder?: string;
   } = $props();
+
+  const t = getTranslator();
 
   const isMultiple = (b: SvelteSet<T> | T): b is SvelteSet<T> => {
     return multiple === true;
@@ -88,11 +92,17 @@
     class="options"
     style="--l{pos.left}px; --t:{pos.top + pos.height}px; --w:{pos.width}px"
   >
-    {#if filterRenderer}
-      <div class="filter">
-        {@render filterRenderer?.()}
-      </div>
-    {/if}
+    <div class="filter">
+      {@render filterRenderer?.()}
+      <button
+        class="close"
+        aria-labelledby={t.t("tense_upper_panther_mix")}
+        onclick={() => blur()}
+      >
+        <i class="ri-close-line"></i>
+      </button>
+    </div>
+
     {#each options as option (option)}
       {#if !filter || filter(option)}
         <button onclick={slectOption(option)}>
@@ -204,25 +214,44 @@
       border-radius: 3px;
 
       overflow-y: auto;
+      overscroll-behavior: contain;
+
       display: none;
       flex-direction: column;
       border: 1px solid var(--neutral-6);
       background-color: var(--parent-bg, var(--neutral-1));
+      &::-webkit-scrollbar {
+        display: none;
+      }
 
       .filter {
         position: sticky;
         top: 0;
         background-color: var(--parent-bg, var(--neutral-1));
         width: 100%;
+        padding: 0.5rem;
+        display: flex;
+        gap: 1rem;
+        :global(.input) {
+          flex: 1;
+        }
+      }
+      .close{
+        margin-left: auto;
+        display: none;
       }
 
       @include m.media("<=phone") {
         width: 100vw;
-        min-height: 70vh;
+        min-height: 100vh;
         position: fixed;
-        top: 30vh;
-        left: 0;
+        top: 0 !important;
+        left: 0 !important;
+        bottom: 0;
         padding: 0 0.5rem;
+        .close{
+          display: block;
+        }
       }
 
       button {

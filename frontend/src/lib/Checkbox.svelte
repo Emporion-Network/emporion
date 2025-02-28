@@ -33,8 +33,9 @@
   button {
     width: 1rem;
     height: 1rem;
+    padding: 0;
     aspect-ratio: 1/1;
-    display: inline-flex;
+    display: flex;
     justify-content: center;
     align-items: center;
     border: 1px solid var(--neutral-7);

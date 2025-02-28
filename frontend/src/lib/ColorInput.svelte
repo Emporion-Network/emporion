@@ -142,7 +142,7 @@
     }
 
     .color {
-      aspect-ratio: 1;
+      aspect-ratio: 1/1;
       height: 1.5rem;
       border-radius: 3px;
       position: relative;
@@ -205,7 +205,7 @@
       gap: 1rem;
       button {
         background-color: var(--c);
-        aspect-ratio: 1;
+        aspect-ratio: 1/1;
         outline: none;
         border-radius: 3px;
         border: none;

@@ -102,6 +102,7 @@
     align-self: flex-start;
     gap: 1rem;
     padding: 1rem;
+    z-index: -1;
     .options {
       background-color: var(--neutral-1);
       align-items: flex-start;

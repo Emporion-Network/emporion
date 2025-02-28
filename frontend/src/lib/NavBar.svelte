@@ -18,7 +18,6 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    z-index: 9;
     position: relative;
     padding: 1rem;
     border-bottom: 1px solid var(--neutral-6);
