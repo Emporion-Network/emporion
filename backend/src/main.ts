@@ -15,7 +15,6 @@ import { Indexer } from './state/blockchain';
 import { version } from 'package.json';
 
 const app = new Hono<{ Variables: { state: State } }>();
-
 const {
   S3_SECRET_KEY = '',
   S3_ACCESS_KEY = '',
