@@ -1,13 +1,15 @@
 <script>
+  import { getTranslator } from "@/stores/translate.svelte";
   import { user } from "@/stores/user.svelte";
+  let t= getTranslator();
 </script>
 
 <div class="orders">
-  <h2>Reviews</h2>
+  <h2>{t.t("alert_tidy_horse_buy")}</h2>
   {#if [].length > 0}
     <div class="table"></div>
   {:else}
-    <p>You have no reviews yet.</p>
+    <p>{t.t("stock_noble_kestrel_assure")}</p>
   {/if}
 </div>
 

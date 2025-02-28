@@ -1,5 +1,7 @@
 <script lang="ts">
+  import { getTranslator } from "@/stores/translate.svelte";
   import { tick } from "svelte";
+  const t = getTranslator();
   let {
     value = $bindable(),
     label,
@@ -170,7 +172,7 @@
             <span>{char}</span>
           {/each}</span
         >
-        <button onclick={removeTag(tag)} aria-labelledby="remove tag">
+        <button onclick={removeTag(tag)} aria-labelledby="{t.t("aware_yummy_stingray_pause")}">
           <i class="ri-close-line"></i>
         </button>
       </div>

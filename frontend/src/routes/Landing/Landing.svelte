@@ -13,7 +13,9 @@
   import { intersect } from "@/lib/actions.svelte";
   import Numbers from "./Numbers.svelte";
   import { getLocation } from "@/stores/location.svelte";
+  import { getTranslator } from "@/stores/translate.svelte";
   const { goTo } = getLocation();
+  const t = getTranslator();
 
   let scenes: Map<string, Application> = new Map();
   const load = (selector: string, scene: string) => () => {
@@ -52,54 +54,52 @@
         <span>Marketplace.</span>
       </h1>
       <p>
-        Buy, sell, and stake with EMPR on a decentralized platform built for
-        you.
+        {t.t("next_sound_wasp_cut")}
       </p>
       <div class="buttons">
-        <button>Discover Emporion</button>
+        <button>{t.t("free_upper_giraffe_pull")}</button>
 
         <a
           href="https://app.osmosis.zone/assets/EMPR?tab=buy"
           target="_blank"
           rel="noopener"
         >
-          <button>Buy on Osmosis</button>
+          <button>{t.t("fluffy_frail_myna_embrace")}</button>
         </a>
       </div>
     </div>
   </div>
 
   <div class="logos">
-    <h2 class="header_gradient">Powered by the Interchain</h2>
+    <h2 class="header_gradient">{t.t("shy_gaudy_gazelle_sing")}</h2>
     <LogoSlider />
     <Separator />
   </div>
 
   <div class="feature">
-    <h2 class="header_gradient">Stake EMPR <br /> Shape the Future</h2>
+    <h2 class="header_gradient">Stake EMPR <br /> {t.t("direct_plane_sparrow_savor")}</h2>
     <p>
-      Stake EMPR to earn marketplace fees and gain voting power. Grow your
-      rewards while influencing Emporion’s evolution.
+      {t.t("major_vexed_lion_spark")}
     </p>
     <Cards>
       <div class="card flip-coin">
         <i class="ri-copper-diamond-fill"></i>
-        <h3>Fee Sharing</h3>
-        <p>Collect a share of fees the more you stake, the bigger your cut.</p>
+        <h3>{t.t("every_safe_rook_conquer")}</h3>
+        <p>{t.t("steep_every_nils_seek")}</p>
       </div>
       <div class="card talk">
         <i class="ri-megaphone-fill"></i>
-        <h3>Voting Power</h3>
-        <p>Have your say in Emporion’s decisions with every EMPR staked.</p>
+        <h3>{t.t("fuzzy_true_quail_snap")}</h3>
+        <p>{t.t("silly_seemly_bat_bask")}</p>
       </div>
       <div class="card potential">
         <i class="ri-line-chart-fill"></i>
-        <h3>Growth Potential</h3>
-        <p>Benefit as Emporion scales and EMPR adoption rises.</p>
+        <h3>{t.t("busy_upper_frog_sail")}</h3>
+        <p>{t.t("cozy_known_octopus_talk")}</p>
       </div>
     </Cards>
     <button class="action_btn" onclick={() => goTo("/staking")}>
-      Start Staking
+     {t.t("acidic_due_poodle_reap")}
     </button>
     <Separator />
   </div>
@@ -107,11 +107,10 @@
   <div class="secure">
     <div class="content">
       <h2 class="header_gradient">
-        Secure Trades<br /> No Middlemen
+        {t.t("blue_mean_jackdaw_amaze")}<br /> {t.t("broad_upper_wren_ask")}
       </h2>
       <p>
-        Keep funds safe until delivery with a trustless system. FairSplit
-        ensures equitable dispute resolution, all automated by the blockchain.
+        {t.t("super_spare_buzzard_swim")}
       </p>
     </div>
     <Secure />
@@ -123,114 +122,107 @@
 
   <div class="feature">
     <h2 class="header_gradient">
-      Shop Globally<br />
-      Save More
+      {t.t("sweet_zippy_nils_flow")}<br />
+      {t.t("pink_aqua_martin_bend")}
     </h2>
     <p>
-      Explore a decentralized marketplace tailored for buyers. Benefit from low
-      fees, multilingual support, secure purchases with FairSplit, and
-      blockchain-stored ratings.
+      {t.t("dull_big_kudu_conquer")}
     </p>
     <Cards>
       <div class="card">
         <i class="ri-earth-fill"></i>
-        <h3>Shop Worldwide</h3>
-        <p>Browse in your language and connect with sellers globally.</p>
+        <h3>{t.t("upper_away_opossum_fetch")}</h3>
+        <p>{t.t("late_quiet_raven_boost")}</p>
       </div>
       <div class="card">
         <i
           class="ri-funds-fill"
           style="transform: scaleY(-1); display: inline-block"
         ></i>
-        <h3>Low Fees</h3>
-        <p>Save more with industry-low transaction costs.</p>
+        <h3>{t.t("topical_zippy_trout_devour")}</h3>
+        <p>{t.t("active_curly_baboon_enjoy")}</p>
       </div>
       <div class="card">
         <i class="ri-shield-fill"></i>
-        <h3>FairSplit</h3>
+        <h3>{t.t("orange_solid_firefox_fade")}</h3>
         <p>
-          Safeguard your purchases. Set a FairSplit Ratio for fair fund
-          distribution in disputes.
+          {t.t("patchy_glad_impala_compose")}
         </p>
       </div>
       <div class="card">
         <i class="ri-star-fill"></i>
-        <h3>Transparent Ratings</h3>
-        <p>Build trust with seller ratings secured on the blockchain.</p>
+        <h3>{t.t("basic_wise_termite_praise")}</h3>
+        <p>{t.t("silly_fluffy_mule_link")}</p>
       </div>
     </Cards>
     <button class="action_btn" onclick={() => goTo("/store")}>
-      Explore the Marketplace</button
-    >
-    <Separator />
-  </div>
-
-  <div class="wpr">
-    <h2 class="header_gradient">Trust Built on Verified Reviews</h2>
-    <Reviews />
-    <Separator />
-  </div>
-
-  <div class="feature">
-    <h2 class="header_gradient">Your Global <br />Storefront</h2>
-    <p>
-      Sell smarter on a platform designed for you. Create listings with AI
-      tools, reach buyers worldwide with auto-translation, and pick transactions
-      with confidence using FairSplit.
-    </p>
-    <Cards>
-      <div class="card">
-        <i class="ri-paint-brush-fill"></i>
-        <h3>Easy Listing Tools</h3>
-        <p>
-          Craft listings fast with AI autocompletion and automatic translation.
-        </p>
-      </div>
-      <div class="card">
-        <i class="ri-checkbox-fill"></i>
-        <h3>Transaction Control</h3>
-        <p>
-          Approve sales based on buyer history and FairSplit for secure deals.
-        </p>
-      </div>
-      <div class="card">
-        <i
-          class="ri-funds-fill"
-          style="transform: scaleY(-1); display: inline-block"
-        ></i>
-        <h3>Low Fees</h3>
-        <p>Keep more profits with minimal transaction fees.</p>
-      </div>
-      <div class="card">
-        <i class="ri-earth-fill"></i>
-        <h3>Global Reach</h3>
-        <p>
-          Sell to the world with automatic translation breaking language
-          barriers.
-        </p>
-      </div>
-    </Cards>
-    <button class="action_btn" onclick={() => goTo("/my-store")}>
-      Become a Seller
+      {t.t("whole_polite_spider_gleam")}
     </button>
     <Separator />
   </div>
 
   <div class="wpr">
-    <h2 class="header_gradient">The Numbers</h2>
+    <h2 class="header_gradient">{t.t("close_gross_ray_fry")}</h2>
+    <Reviews />
+    <Separator />
+  </div>
+
+  <div class="feature">
+    <h2 class="header_gradient">{t.t("active_male_alligator_inspire")} <br />{t.t("factual_honest_panther_embrace")}</h2>
+    <p>
+      {t.t("lower_funny_hornet_hint")}
+    </p>
+    <Cards>
+      <div class="card">
+        <i class="ri-paint-brush-fill"></i>
+        <h3>{t.t("watery_chunky_dachshund_exhale")}</h3>
+        <p>
+          {t.t("long_trite_lemming_fold")}
+        </p>
+      </div>
+      <div class="card">
+        <i class="ri-checkbox-fill"></i>
+        <h3>{t.t("odd_loose_shrike_assure")}</h3>
+        <p>
+          {t.t("funny_empty_ostrich_file")}
+        </p>
+      </div>
+      <div class="card">
+        <i
+          class="ri-funds-fill"
+          style="transform: scaleY(-1); display: inline-block"
+        ></i>
+        <h3>{t.t("misty_gaudy_lemur_dance")}</h3>
+        <p>{t.t("hour_ok_angelfish_aid")}</p>
+      </div>
+      <div class="card">
+        <i class="ri-earth-fill"></i>
+        <h3>{t.t("patient_yummy_parrot_blend")}</h3>
+        <p>
+          {t.t("zany_awful_peacock_build")}
+        </p>
+      </div>
+    </Cards>
+    <button class="action_btn" onclick={() => goTo("/my-store")}>
+      {t.t("seemly_pretty_dachshund_peel")}
+    </button>
+    <Separator />
+  </div>
+
+  <div class="wpr">
+    <h2 class="header_gradient">{t.t("pink_nimble_kitten_scoop")}</h2>
     <Numbers />
     <Separator />
   </div>
 
   <div class="feature">
-    <h2 class="header_gradient">Our Vision</h2>
-    <h3>Global commerce, optimized by decentralization.</h3>
+    <h2 class="header_gradient">{t.t("fine_free_barbel_mend")}</h2>
+    <h3>{t.t("heroic_big_bee_play")}</h3>
     <p>
-      Emporion delivers a scalable, trustless platform that enhances efficiency,
-      reduces costs, and empowers participants worldwide.
+      {t.t("honest_true_seal_pride")}
     </p>
     <a href="https://app.osmosis.zone/pool/2702" target="_blank">
-      <button class="action_btn">Participate Now</button>
+      <button class="action_btn">{t.t("gray_weird_albatross_laugh")}</button>
     </a>
     <canvas
       class="coin_canvas"

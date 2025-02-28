@@ -5,8 +5,10 @@
   import ContextMenu from "./ContextMenu.svelte";
   import { Decimal } from "@cosmjs/math";
   import { getLocation } from "@/stores/location.svelte";
+  import { getTranslator } from "@/stores/translate.svelte";
   let { goTo } = getLocation();
   let theme = getTheme();
+  const t = getTranslator();
 </script>
 
 <div class="account">
@@ -18,7 +20,7 @@
           class="secondary-accent-button"
           bind:this={get, set}
           {...props}
-          aria-labelledby="user profile"
+          aria-labelledby="{t.t("weird_aqua_sawfish_reap")}"
         >
           <i class="ri-user-line"></i>
           <Address address={user.address!} />
@@ -45,40 +47,40 @@
 
           <button class="secondary-button" onclick={() => goTo("/staking")}>
             <i class="ri-bank-fill"></i>
-            Stake
+            {t.t("patchy_bad_mallard_belong")}
           </button>
 
           <button class="secondary-button" onclick={() => goTo("/my-store")}>
             <i class="ri-store-2-line"></i>
-            My store
+            {t.t("sad_tasty_racoon_pop")}
           </button>
 
           <button class="secondary-button" onclick={() => theme.toggle()}>
             {#if theme.theme == "dark"}
               <i class="ri-sun-fill"></i>
-              Light Mode
+              {t.t("key_trick_badger_expand")}
             {:else}
               <i class="ri-moon-fill"></i>
-              Dark Mode
+             {t.t("vivid_awful_alligator_evoke")}
             {/if}
           </button>
           <button class="secondary-button" onclick={() => user.logout()}>
             <i class="ri-logout-box-line"></i>
-            Log out
+            {t.t("gray_early_wombat_hunt")}
           </button>
         </div>
       {/snippet}
     </ContextMenu>
-    <button class="secondary-button" aria-labelledby="notifications">
+    <button class="secondary-button" aria-labelledby="{t.t("real_mellow_niklas_snap")}">
       <i class="ri-notification-fill"></i>
     </button>
   {:else}
     <button
       class="primary-accent-button"
-      aria-labelledby="user profile"
+      aria-labelledby="{t.t("weird_aqua_sawfish_reap")}"
       onclick={() => user.auth()}
     >
-      Connect wallet
+      {t.t("teary_gross_boar_gasp")}
     </button>
   {/if}
 </div>

@@ -1,6 +1,6 @@
 <script lang="ts">
   import ImageSlider from "@/lib/ImageSlider.svelte";
-  import type { SupportedLanguage } from "@/stores/translate.svelte";
+  import { getTranslator, type SupportedLanguage } from "@/stores/translate.svelte";
   import Rendered from "./Attributes/Rendered.svelte";
   import type { Product } from "./Form.svelte";
   import { Decimal } from "@cosmjs/math";
@@ -8,6 +8,7 @@
   import Address from "@/lib/Address.svelte";
   import Rating from "@/lib/Rating.svelte";
   import ContextMenu from "@/lib/ContextMenu.svelte";
+  const t = getTranslator();
 
   let {
     selectedLang,
@@ -36,14 +37,14 @@
       {/if}
       <Rating type="long" url="" nb_ratings={100} avg_rating={4.5}></Rating>
       <div class="link">
-        <span>{"Seller:"}</span>
+        <span>{t.t("upper_novel_shark_commend")}</span>
         <Address address={user.address!} />
         <ContextMenu>
           {#snippet opener({ get, set, ...props })}
             {/*@ts-ignore*/ null}
             <button
               class="ghost-button"
-              aria-label="More"
+              aria-label="{t.t("sour_curly_gorilla_edit")}"
               bind:this={get, set}
               {...props}
               onclick={(e) => e.stopPropagation()}
@@ -55,15 +56,15 @@
             <div class="options">
               <button class="ghost-button">
                 <i class="ri-share-forward-line"></i>
-                Share
+                {t.t("odd_sleek_penguin_adapt")}
               </button>
               <button class="ghost-button">
                 <i class="ri-file-copy-line"></i>
-                Copy address
+                {t.t("candid_stout_lobster_stop")}
               </button>
               <button class="ghost-button red">
                 <i class="ri-flag-fill"></i>
-                Report listing
+                {t.t("smug_elegant_cat_conquer")}
               </button>
             </div>
           {/snippet}
@@ -84,7 +85,7 @@
       ></Rendered>
 
       <button class="primary-button">
-        {"Add to cart"}
+        {t.t("lofty_smart_okapi_bubble")}
       </button>
     </div>
   {/if}

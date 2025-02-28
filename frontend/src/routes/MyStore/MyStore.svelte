@@ -5,6 +5,8 @@
   import Address from "@/lib/Address.svelte";
   import Rating from "@/lib/Rating.svelte";
   import Reviews from "./Reviews.svelte";
+  import { getTranslator } from "@/stores/translate.svelte";
+  let t = getTranslator()
 </script>
 
 <div class="my-store">
@@ -12,23 +14,23 @@
     {#if user.address}
       <div class="wpr">
         <h1>
-          <span>Hello,</span>
+          <span>{t.t("born_icy_goldfish_heart")}</span>
           <Address address={user.address!}></Address>
           <span>👋</span>
         </h1>
         <Rating type="long" nb_ratings={0} avg_rating={0}></Rating>
         <div class="numbers">
           <div class="number">
-            <span>{"Revenue This Week"}</span>
+            <span>{t.t("chunky_gray_ox_jest")}</span>
             <span>$0</span>
           </div>
           <div class="number">
-            <span>{"Orders Pending"}</span>
+            <span>{t.t("heroic_same_dove_delight")}</span>
             <span>0</span>
           </div>
           <div class="number">
-            <span>{"Processing Time"}</span>
-            <span>0days</span>
+            <span>{t.t("these_east_parrot_zap")}</span>
+            <span>0</span>
           </div>
         </div>
       </div>

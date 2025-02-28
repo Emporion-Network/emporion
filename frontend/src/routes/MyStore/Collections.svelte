@@ -61,14 +61,14 @@
     <h2>{t.t("male_patient_cheetah_urge")}</h2>
     <button class="primary-button" onclick={() => goTo(`/collection`)}>
       <i class="ri-add-line"></i>
-      <span>New collection</span>
+      <span>{t.t("safe_agent_guppy_shine")}</span>
     </button>
   </div>
   <div class="search">
     <Input
       type="search"
-      placeholder="Search collection..."
-      label="Search collection"
+      placeholder={t.t("mean_patient_ladybug_learn")}
+      label={t.t("mad_spry_elk_lead")}
       bind:value={search}
     ></Input>
   </div>
@@ -103,7 +103,7 @@
   </div>
   {#if !collections.length}
     <p class="info">
-      {"You don't have any collections yet."}
+      {t.t("icy_polite_ape_fold")}
     </p>
   {/if}
 </div>

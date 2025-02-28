@@ -61,6 +61,4 @@
 </div>
 
 <style lang="scss">
-  .editor {
-  }
 </style>

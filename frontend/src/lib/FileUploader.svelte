@@ -1,6 +1,8 @@
 <script lang="ts">
   import { type ChangeEventHandler } from "svelte/elements";
   import { type Snippet } from "svelte";
+  import { getTranslator } from "@/stores/translate.svelte";
+  const t = getTranslator();
   let {
     onchange,
     children,
@@ -59,8 +61,8 @@
   {#if children}
     {@render children?.()}
   {:else}
-    <h2>Drag and drop photos here</h2>
-    <button class="button-secondary">Or Add Photos</button>
+    <h2>{t.t("tame_giant_raven_wish")}</h2>
+    <button class="button-secondary">{t.t("tasty_stale_insect_kick")}</button>
   {/if}
 </div>
 

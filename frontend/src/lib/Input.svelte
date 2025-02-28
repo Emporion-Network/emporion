@@ -2,6 +2,8 @@
   import type { Snippet } from "svelte";
   import Autocompleter from "./Autocompleter.svelte";
   import { Decimal } from "@cosmjs/math";
+  import { getTranslator } from "@/stores/translate.svelte";
+  const t = getTranslator();
 
   let {
     value = $bindable(),
@@ -76,7 +78,7 @@
   {:else if type == "search"}
     {@render children?.()}
     <input class="native" type="text" {placeholder} bind:value />
-    <button aria-label="clear" onclick={clear}>
+    <button aria-label="{t.t("caring_polite_ape_sew")}" onclick={clear}>
       {#if typeof value == "string" && value.length > 0}
         <i class="ri-close-line"></i>
       {:else}

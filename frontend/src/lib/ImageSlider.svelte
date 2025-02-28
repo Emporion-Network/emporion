@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { getTranslator } from "@/stores/translate.svelte";
+
   let {
     images,
     alt,
@@ -6,6 +8,8 @@
     images: string[];
     alt: string;
   } = $props();
+
+  const t = getTranslator();
 
   let element: HTMLElement = $state()!;
   let i = $state(0);
@@ -25,11 +29,11 @@
   {/each}
   {#if images.length}
     <div class="buttons">
-      <button aria-label="prev image" class:hide={i == 0} onclick={slide(-1)}>
+      <button aria-label="{t.t("neat_sound_meerkat_drum")}" class:hide={i == 0} onclick={slide(-1)}>
         <i class="ri-arrow-left-wide-line"></i>
       </button>
       <button
-        aria-label="next image"
+        aria-label="{t.t("close_antsy_jannes_praise")}"
         class:hide={i == images.length - 1}
         onclick={slide(+1)}
       >

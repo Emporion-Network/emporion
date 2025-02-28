@@ -1,6 +1,8 @@
 <script lang="ts">
   import Input from "@/lib/Input.svelte";
+  import { getTranslator } from "@/stores/translate.svelte";
   import { Decimal } from "@cosmjs/math";
+  const t = getTranslator();
 
   let {
     value = $bindable(),
@@ -36,8 +38,8 @@
 </script>
 
 <Input
-  label="Price"
-  placeholder="Price"
+  label={t.t("super_calm_buzzard_roar")}
+  placeholder={t.t("super_calm_buzzard_roar")}
   type="number"
   bind:value={get, set}
   max="100000000000"

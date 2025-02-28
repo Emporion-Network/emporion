@@ -174,10 +174,10 @@
   <div class="head" class:wpr={toStore}>
     <button
       onclick={() => (toStore ? goTo("/my-store") : (showProduct = false))}
-      aria-labelledby={"back"}
+      aria-labelledby={t.t("great_spare_frog_kiss")}
     >
       <i class="ri-arrow-left-long-line"></i>
-      <span>{toStore ? "Back to my store" : "Back to collection"}</span>
+      <span>{toStore ?t.t("ok_deft_poodle_gaze") : t.t("due_super_goldfish_swim")}</span>
     </button>
     <MultiSelect
       options={supportedLangs}
@@ -203,7 +203,7 @@
       {@render head()}
       <Collapsable opened>
         {#snippet head()}
-          <h3>General</h3>
+          <h3>{t.t("early_tangy_capybara_enchant")}</h3>
         {/snippet}
         <div class="wpr">
           <Input
@@ -218,7 +218,7 @@
       </Collapsable>
       <Collapsable opened>
         {#snippet head()}
-          <h3>Attributes</h3>
+          <h3>{t.t("busy_happy_bird_treat")}</h3>
         {/snippet}
         <AttributesInCollection
           {onremove}
@@ -230,7 +230,7 @@
       </Collapsable>
       <Collapsable opened>
         {#snippet head()}
-          <h3>Products</h3>
+          <h3>{t.t("frail_livid_marmot_harbor")}</h3>
         {/snippet}
         <div class="products" bind:this={registry["products"]}>
           {#each products as product, i}
@@ -255,7 +255,7 @@
                 {#snippet opener({ get, set, ...props })}
                   {/*@ts-ignore*/ null}
                   <button
-                    aria-label="More"
+                    aria-label="{t.t("direct_alive_ape_surge")}"
                     bind:this={get, set}
                     {...props}
                     onclick={(e) => e.stopPropagation()}
@@ -270,7 +270,7 @@
                   </button>
                   <button onclick={() => close() && cloneProduct(i)}>
                     <i class="ri-file-copy-line"></i>
-                    Clone Product
+                    {t.t("crisp_stout_elk_delight")}
                   </button>
                   {#if "id" in product}
                     <button
@@ -278,7 +278,7 @@
                       onclick={() => close() && selectProduct(i)}
                     >
                       <i class="ri-eye-off-line"></i>
-                      Unlist product
+                      {t.t("active_tangy_wolf_hint")}
                     </button>
                   {:else}
                     <button
@@ -286,7 +286,7 @@
                       onclick={() => close() && deleteProduct(i)}
                     >
                       <i class="ri-delete-bin-line"></i>
-                      Delete product
+                      {t.t("grand_front_swan_hike")}
                     </button>
                   {/if}
                 {/snippet}
@@ -310,9 +310,9 @@
         disabled={!isValid || (!changed && products.some((p) => "id" in p))}
       >
         {#if products.some((p) => "id" in p)}
-          {"Update Collection"}
+          {t.t("these_sound_skate_prosper")}
         {:else}
-          {"Create Collection"}
+          {t.t("crisp_tough_mammoth_fear")}
         {/if}
       </button>
     </div>
@@ -321,7 +321,7 @@
       {@render head(false)}
       <label>
         <Checkbox value={products[selectedProduct].listed}></Checkbox>
-        {"Active"}
+        {t.t("ideal_whole_mole_win")}
       </label>
       <Gallery
         {selectedLang}

@@ -234,19 +234,15 @@
             </p>
         {/if}
         {#if v === 'attribute_0'}
-            <h3>Color attribute</h3>
+            <h3>{t.t("formal_alive_earthworm_work")}</h3>
             <p>
-                Here, we chose to use a color selector for the Color attribute.
-                This allows users to visually select their preferred color for
-                the product, ensuring a more intuitive and engaging experience.
+                {t.t("calm_wide_jay_kick")}
             </p>
         {/if}
         {#if v === 'attribute_1'}
-            <h3>Dropdown</h3>
+            <h3>{t.t("top_aloof_wolf_launch")}</h3>
             <p>
-                Here, we chose to use a dropdown for the Storage attribute. This
-                allows users to easily select the desired storage capacity for
-                the product from a simple and intuitive menu.
+                {t.t("lazy_caring_jackal_slide")}
             </p>
         {/if}
         {#if v === 'gallery'}
@@ -274,26 +270,21 @@
             </p>
         {/if}
         {#if v === 'fill_missing'}
-            <h3>Best Practices for Attributes</h3>
+            <h3>{t.t("lazy_free_chipmunk_roam")}</h3>
             <p>
-                Always select the attribute type that provides the best
-                experience for users. Additionally, ensure that all information is
-                accurate and complete to help users make informed decisions and
-                enhance their shopping experience.
+                {t.t("spare_nimble_goat_pet")}
             </p>
         {/if}
         {#if v === 'close_product'}
-            <h3>Add More Products</h3>
+            <h3>{t.t("quiet_livid_niklas_slurp")}</h3>
             <p>
-                You can repeat the same process to add as many products as you
-                need to this collection.
+               {t.t("each_gray_swan_type")}
             </p>
         {/if}
         {#if v === 'repeat_add'}
-            <h3>Add More Products</h3>
+            <h3>{t.t("ideal_inner_parakeet_fond")}</h3>
             <p>
-                You can repeat the same process to add as many products as you
-                need to this collection.
+                {t.t("wide_ago_crab_cherish")}
             </p>
         {/if}
     {/snippet}

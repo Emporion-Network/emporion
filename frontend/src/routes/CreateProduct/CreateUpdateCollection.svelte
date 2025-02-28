@@ -21,7 +21,6 @@
   };
 
   const loadCollection = () => {
-    console.log(l.url.searchParams, user.address);
     if (l.url.searchParams.has("name") && user.address) {
       user.getCollections(user.address!).then((result) => {
         if (result.error) return;

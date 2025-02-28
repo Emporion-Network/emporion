@@ -37,8 +37,8 @@
   </button>
   <TranslatableInput
     type="text"
-    label={"Color name"}
-    bind:selectedLang={lang}
+    label={t.t("fancy_formal_vulture_mop")}
+    selectedLang={lang}
     bind:value={attribute.label}
   />
 </div>

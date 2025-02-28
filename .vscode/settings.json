@@ -1,4 +1,7 @@
 {
   "rust-analyzer.checkOnSave": true,
   "todo-tree.tree.showBadges": true,
+  "i18n-ally.localesPaths": [
+    "i18n"
+  ],
 }

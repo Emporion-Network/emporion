@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { getTranslator } from "@/stores/translate.svelte";
   import type { Snippet } from "svelte";
 
   let {
@@ -43,6 +44,8 @@
     }
   };
 
+  const t = getTranslator();
+
   export { el as element };
 </script>
 
@@ -56,7 +59,7 @@
   <div class="wrpr">
     <div class="handler">
       <button
-        aria-label="Drag"
+        aria-label={t.t("quaint_teal_cheetah_fold")}
         onmousedown={dragStart}
         ontouchstart={dragStart}
       >

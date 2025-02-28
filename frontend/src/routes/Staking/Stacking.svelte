@@ -3,8 +3,11 @@
   import Input from "@/lib/Input.svelte";
   import Route from "@/lib/Route.svelte";
   import { humanTimeLeft } from "@/lib/utils";
+  import { getTranslator } from "@/stores/translate.svelte";
   import { user } from "@/stores/user.svelte";
   import { Decimal } from "@cosmjs/math";
+
+  const t = getTranslator();
 
   let [claimable, unstaking] = $derived.by(() => {
     let claimable = user.bank.unstaking
@@ -73,13 +76,13 @@
   <div class="staking-page">
     <div class="grid">
       <div class="number">
-        <h3>Staking</h3>
+        <h3>{t.t("muddy_weary_halibut_enjoy")}</h3>
         <div>
-          <span>Staked:</span>
+          <span>{t.t("bald_spare_cowfish_loop")}</span>
           <span>{Decimal.fromAtomics(user.bank.staked, 6)} EMPR</span>
         </div>
         <div>
-          <span>Voting power:</span>
+          <span>{t.t("top_every_earthworm_expand")}</span>
           <span>
             {100 *
               Math.floor(
@@ -90,7 +93,7 @@
         </div>
       </div>
       <div class="number">
-        <h3>Available</h3>
+        <h3>{t.t("silly_least_mole_hope")}</h3>
         <div>
           <span>EMPR</span>
           <span>{Decimal.fromAtomics(user.bank.stakable, 6)}</span>
@@ -105,59 +108,59 @@
         </div>
       </div>
       <div class="number">
-        <h3>Rewards</h3>
+        <h3>{t.t("key_brave_pig_taste")}</h3>
         <div>
-          <span>Available:</span>
+          <span>{t.t("kind_quiet_macaw_slide")}</span>
           <span>{Decimal.fromAtomics(user.bank.rewards, 6)} USDC</span>
         </div>
         <div>
-          <span>Total left:</span>
+          <span>{t.t("short_less_chicken_drum")}</span>
           <span
             >{Decimal.fromAtomics(params.undistributed_rewards, 6)} USDC</span
           >
         </div>
       </div>
       <div class="number">
-        <h3>Platform params</h3>
+        <h3>{t.t("vexed_large_bison_charm")}</h3>
         <div>
-          <span>Platform fee:</span>
+          <span>{t.t("topical_mad_flea_favor")}</span>
           <span>{Number(params.platform_fee) * 100}%</span>
         </div>
         <div>
-          <span>R&D:</span>
+          <span>{t.t("home_ok_skate_build")}</span>
           <span>{Number(params.distribution.rnd) * 100}%</span>
         </div>
         <div>
-          <span>Rewards:</span>
+          <span>{t.t("least_nimble_ostrich_spur")}</span>
           <span>{Number(params.distribution.rewards) * 100}%</span>
         </div>
       </div>
       <div class="number">
-        <h3>Accumulated Fees</h3>
+        <h3>{t.t("real_noisy_gadfly_dazzle")}</h3>
         <div>
-          <span>Rewards:</span>
+          <span>{t.t("ornate_lost_puma_talk")}</span>
           <span>{Decimal.fromAtomics(params.bank.rewards, 6)} USDC</span>
         </div>
         <div>
-          <span>R&D:</span>
+          <span>{t.t("home_ok_skate_build")}</span>
           <span>{Decimal.fromAtomics(params.bank.rnd, 6)} USDC</span>
         </div>
       </div>
       <div class="number">
-        <h3>Total Supply</h3>
+        <h3>{t.t("royal_deft_shrike_express")}</h3>
         <div>
-          <span>Total supply:</span>
+          <span>{t.t("smart_inclusive_polecat_accept")}</span>
           <span>12M EMPR</span>
         </div>
         <div>
-          <span>Total staked:</span>
+          <span>{t.t("lucky_nimble_meerkat_strive")}</span>
           <span>{Decimal.fromAtomics(params.total_staked, 6)} EMPR</span>
         </div>
       </div>
     </div>
 
     <div class="claim-rewards">
-      <h2>Claim your rewards</h2>
+      <h2>{t.t("brave_zany_tern_dazzle")}</h2>
       <h1>{Decimal.fromAtomics(user.bank.rewards, 6)} USDC</h1>
       <button
         class="primary-accent-button"
@@ -167,7 +170,7 @@
         {#if loading.claim}
           <i class="ri-loader-2-line loader"></i>
         {:else}
-          Claim
+          {t.t("sunny_dry_chicken_promise")}
         {/if}
       </button>
     </div>
@@ -182,8 +185,8 @@
         <Input
           max={user.bank.stakable}
           type="number"
-          label="Amount to Stake"
-          placeholder="Amount to Stake"
+          label={t.t("awful_game_guppy_bubble")}
+          placeholder={t.t("awful_game_guppy_bubble")}
           bind:value={toStake}
         >
           EMPR
@@ -228,15 +231,15 @@
           {#if loading.stake}
             <i class="ri-loader-2-line loader"></i>
           {:else}
-            Stake
+            {t.t("raw_fine_myna_push")}
           {/if}
         </button>
       {:else}
         <Input
           max={user.bank.staked}
           type="number"
-          label="Amount to Unstake"
-          placeholder="Amount to Unstake"
+          label={t.t("cool_acidic_goldfish_buy")}
+          placeholder={t.t("cool_acidic_goldfish_buy")}
           bind:value={toUnstake}
         >
           EMPR
@@ -286,22 +289,19 @@
         </button>
       {/if}
       <div class="info">
-        <h3><i class="ri-information-line"></i> Unstaking period: 1 week</h3>
+        <h3><i class="ri-information-line"></i> {t.t("stock_aware_otter_rush")}</h3>
         <p>
-          It will take one week from the time you unstake your tokens until you
-          can withdraw them. During this period, you will not receive voting
-          power for the unstaked tokens, nor will you be able to cancel the
-          unstaking process.
+          {t.t("glad_small_rook_bask")}
         </p>
       </div>
     </div>
 
     <div class="claims">
-      <h2>Unstaking claims</h2>
+      <h2>{t.t("fresh_light_pigeon_jolt")}</h2>
       {#if claimable.isGreaterThan(Decimal.zero(6))}
         <div class="available">
           <i class="ri-checkbox-circle-fill"></i>
-          <span>Available</span>
+          <span>{t.t("fine_pretty_marten_love")}</span>
           <div class="amount">
             <span>{claimable}</span> EMPR
           </div>
@@ -313,7 +313,7 @@
             {#if loading.withdraw}
               <i class="ri-loader-2-line loader"></i>
             {:else}
-              Withdraw
+              {t.t("ok_giant_termite_cheer")}
             {/if}
           </button>
         </div>
@@ -321,7 +321,7 @@
       {#each unstaking as unstaking}
         <div class="unstaking">
           <i class="ri-hourglass-line"></i>
-          <span>Unstaking</span>
+          <span>{t.t("short_aloof_eagle_clip")}</span>
           <div class="amount">
             <span>{Decimal.fromAtomics(unstaking.amount, 6)}</span> EMPR
           </div>
@@ -331,7 +331,7 @@
         </div>
       {/each}
       {#if claimable.equals(Decimal.zero(6)) && unstaking.length == 0}
-        <p class="empty">You have no unstaking claims.</p>
+        <p class="empty">{t.t("tense_knotty_lionfish_skip")}</p>
       {/if}
     </div>
   </div>

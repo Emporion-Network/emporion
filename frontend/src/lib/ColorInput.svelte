@@ -1,7 +1,8 @@
 <script lang="ts">
   import ts from "typescript";
   import ContextMenu from "./ContextMenu.svelte";
-  import ToolTip from "./ToolTip.svelte";
+    import { getTranslator } from "@/stores/translate.svelte";
+  const t = getTranslator();
 
   let {
     value = $bindable("FFFFFF"),
@@ -83,13 +84,13 @@
             <button
               style="--c:#{c}"
               class:active={c == value}
-              aria-label="color"
+              aria-label="{t.t("honest_warm_cod_fond")}"
               onclick={() => (value = c)}
             ></button>
           {/each}
         </div>
         <div class="custom-color">
-          <span> Custom color </span>
+          <span>{t.t("awful_left_iguana_nail")}</span>
           <div class="color-input">
             <div class="color" class:invalid style="--c:#{value}"></div>
             <input type="text" bind:value={get, set} placeholder="FA6DE3" />

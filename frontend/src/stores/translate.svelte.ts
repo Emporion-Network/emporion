@@ -1,11 +1,11 @@
-import { type msg, langs } from '../../messages.d.js';
+import { langs } from '../../messages.d.js';
 import { I18n } from 'i18n-js';
 import en from '../../../messages/en.json';
 import { storage } from './localStorage.js';
 
 const tst = $derived.by(() => {
   const _ = lang;
-  return (text: msg) => {
+  return (text: string) => {
     return window.ini.t(text);
   };
 });

@@ -22,7 +22,7 @@
 </script>
 <div class="attribute" bind:this={element}>
     <Input type="text" label={t.t('heavy_late_leopard_snap')} placeholder={t.t('heavy_late_leopard_snap')} bind:value={attribute.trait_type}/>
-    <TranslatableInput type="textarea" label={t.t('smug_tiny_gazelle_sway')} bind:selectedLang={lang} bind:value={attribute.value}/>
+    <TranslatableInput type="textarea" label={t.t('smug_tiny_gazelle_sway')} selectedLang={lang} bind:value={attribute.value}/>
 </div>
 
 <style lang="scss">

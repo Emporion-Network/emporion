@@ -7,7 +7,9 @@
   import Input from "./Input.svelte";
   import Modal from "./Modal.svelte";
   import { onMount } from "svelte";
+    import { getTranslator } from "@/stores/translate.svelte";
   let show: "gallery" | "upload" = $state("gallery");
+  const t = getTranslator();
   let isOpen = $state(false);
   let files: FileMetaRes[] = $state([]);
   let filter = $state("");
@@ -101,13 +103,13 @@
       </ButtonGroup>
       {#if show == "gallery"}
         <div class="search">
-          <input placeholder="Search..." type="text" bind:value={filter} />
+          <input placeholder={t.t("lost_spare_anaconda_grin")} type="text" bind:value={filter} />
           {#if filter.length > 0}
-            <button aria-label="clear search" onclick={() => (filter = "")}>
+            <button aria-label={t.t("salty_actual_starfish_drop")} onclick={() => (filter = "")}>
               <i class="ri-close-line"></i>
             </button>
           {:else}
-            <button aria-label="search">
+            <button aria-label={t.t("ideal_witty_loris_lend")}>
               <i class="ri-search-line"></i>
             </button>
           {/if}
@@ -135,19 +137,19 @@
             <img src="{user.root}/files/{selected.path}" alt={selected.name} />
             <Input
               type="textarea"
-              placeholder="Name"
-              label="Name"
+              placeholder={t.t("keen_giant_swallow_trim")}
+              label={t.t("keen_giant_swallow_trim")}
               bind:value={selected.name}
               onchange={update}
             />
-            <TagInput label="Tags" bind:value={selected.tags} onchange={update}
+            <TagInput label={t.t("level_east_flamingo_launch")} bind:value={selected.tags} onchange={update}
             ></TagInput>
             <div class="buttons">
               <button
                 class="primary-accent-button"
                 disabled={!selected}
                 onclick={() => onfile(`${user.root}/files/${selected!.path}`)}
-                >Select</button
+                >{t.t("extra_tough_finch_savor")}</button
               >
             </div>
           {/if}
