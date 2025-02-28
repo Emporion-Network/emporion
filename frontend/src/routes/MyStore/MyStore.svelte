@@ -67,6 +67,7 @@
 </div>
 
 <style lang="scss">
+  @use "../../mixins" as *;
   .my-store {
     margin: 0 5%;
     padding-top: 1rem;
@@ -74,6 +75,19 @@
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    @include media('<= phone'){
+      .head{
+        flex-direction: column;
+        .numbers{
+          flex-direction: column;
+        }
+        .rating-detail{
+          width: 100%;
+          justify-content: center;
+          align-items: center;
+        }
+      }
+    }
     .head {
       display: flex;
       justify-content: space-between;

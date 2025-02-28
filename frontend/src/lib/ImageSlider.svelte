@@ -77,7 +77,6 @@
       min-width: 100%;
       aspect-ratio: 1;
       object-fit: cover;
-      background-color: var(--neutral-3);
     }
   }
 </style>

@@ -62,6 +62,7 @@
   let categories: SvelteSet<string> = $state(new SvelteSet());
   let category = $derived(Array.from(categories.values()));
   let prevProducts: Product[] = $state([]); // used to detect changes in products
+  let hide = $state(false);
 
   let changed = $derived.by(() => {
     return !looseEq(prevProducts, products);
@@ -168,6 +169,10 @@
       })
     );
   });
+
+  const showPreview = ()=>{
+    hide = !hide;
+  }
 </script>
 
 {#snippet head(toStore: boolean = true)}
@@ -197,7 +202,15 @@
   </div>
 {/snippet}
 
-<div class="form">
+<button class="showPreview" onclick={showPreview}>
+  {#if hide}
+  <i class="ri-eye-off-fill"></i>
+  {:else}
+  <i class="ri-eye-fill"></i>
+  {/if}
+</button>
+
+<div class="form" class:hide>
   {#if !showProduct}
     <div class="collection">
       {@render head()}
@@ -359,6 +372,22 @@
 </div>
 
 <style lang="scss">
+  @use "../../mixins" as *;
+  .showPreview{
+    position: fixed;
+    z-index: 2;
+    right: 1rem;
+    bottom: 1rem;
+    background-color: var(--neutral-a2);
+    color: var(--neutral-12);
+    border: none;
+    border-radius: 4px;
+    font-size: 2rem;
+    aspect-ratio: 1;
+    @include media(">= phone"){
+      display: none;
+    }
+  }
   .form {
     flex: 3;
     position: relative;
@@ -367,6 +396,19 @@
     --parent-bg: var(--neutral-1);
     background-color: var(--parent-bg);
     border-right: 1px solid var(--neutral-6);
+    transition: transform 200ms ease-in-out;
+    z-index: 1;
+
+    &.hide{
+      transform: translateX(-100%);
+    }
+
+    @include media(">= phone"){
+      &.hide{
+        transform: none;
+      }
+    }
+    
 
     .wpr {
       display: flex;
@@ -374,6 +416,7 @@
       padding: 1rem;
       gap: 1rem;
     }
+    
 
     .head {
       display: flex;

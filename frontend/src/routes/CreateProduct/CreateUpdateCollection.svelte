@@ -56,6 +56,7 @@
 </div>
 
 <style lang="scss">
+  @use "../../mixins" as *;
   .create-product {
     display: flex;
     position: relative;

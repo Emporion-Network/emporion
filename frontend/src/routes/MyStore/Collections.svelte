@@ -109,6 +109,7 @@
 </div>
 
 <style lang="scss">
+  @use "../../mixins" as *;
   .collections {
     display: flex;
     flex-direction: column;
@@ -121,6 +122,11 @@
     .search {
       display: flex;
       justify-content: flex-start;
+      width: 100%;
+      :global(.input){
+        flex:1;
+        max-width: 500px;
+      }
     }
     .grid {
       display: grid;
@@ -159,6 +165,11 @@
         border: 1px solid var(--neutral-6);
         background-color: var(--neutral-5);
         padding: 3px;
+      }
+    }
+    @include media('<= phone'){
+      .grid {
+        grid-template-columns: 1fr;
       }
     }
   }

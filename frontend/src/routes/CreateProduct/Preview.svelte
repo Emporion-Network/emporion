@@ -92,6 +92,7 @@
 </div>
 
 <style lang="scss">
+  @use "../../mixins" as *;
   .preview {
     flex: 5;
     display: flex;
@@ -144,6 +145,17 @@
       }
       p {
         line-height: 1.2em;
+      }
+    }
+    @include media("<= phone"){
+      position: absolute;
+      flex-direction: column;
+      :global(.gellery){
+        position: relative;
+        top: 0;
+      }
+      .picker{
+        width: 100%;
       }
     }
   }

@@ -68,8 +68,8 @@
         }
     }
     .content {
-        overflow: hidden;
-        transition-property: height padding;
+        overflow: hidden !important;
+        transition-property: height, padding;
         transition-duration: 250ms;
         transition-timing-function: ease-in-out;
         --parent-bg: var(--neutral-1);
