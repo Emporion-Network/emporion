@@ -1,7 +1,6 @@
 <script lang="ts">
-  import ts from "typescript";
   import ContextMenu from "./ContextMenu.svelte";
-    import { getTranslator } from "@/stores/translate.svelte";
+  import { getTranslator } from "@/stores/translate.svelte";
   const t = getTranslator();
 
   let {
@@ -64,14 +63,10 @@
 </script>
 
 <div class="color-picker" bind:this={element}>
-  <ContextMenu>
-    {#snippet opener(ref)}
+  <ContextMenu --margin="0.5rem 0 0 0">
+    {#snippet opener({ get, set, ...props })}
       {/*@ts-ignore*/ null}
-      <button
-        class="selected"
-        bind:this={ref.get, ref.set}
-        onfocus={ref.onfocus}
-      >
+      <button class="selected" bind:this={get, set} {...props}>
         <div class="color" class:invalid style="--c:#{value}"></div>
         <span>#{value}</span>
         <i class="ri-arrow-down-s-line"></i>
@@ -84,7 +79,7 @@
             <button
               style="--c:#{c}"
               class:active={c == value}
-              aria-label="{t.t("honest_warm_cod_fond")}"
+              aria-label={t.t("honest_warm_cod_fond")}
               onclick={() => (value = c)}
             ></button>
           {/each}
@@ -105,9 +100,6 @@
   .color-picker {
     position: relative;
     &:focus-within {
-      .drop-down {
-        display: flex;
-      }
       .selected,
       .selected:hover {
         border: 1px solid var(--main-10);
@@ -183,19 +175,14 @@
       }
     }
     .drop-down {
-      padding: 0.5rem;
       display: flex;
       flex-direction: column;
+      height: 100%;
       max-width: 350px;
+      padding: 0.5rem;
       gap: 1rem;
-      position: absolute;
-      top: 100%;
-      left: 0;
       background-color: var(--neutral-2);
-      border-radius: 3px;
-      margin-top: 0.5rem;
-      display: none;
-      border: 1px solid var(--neutral-6);
+      display: flex;
       z-index: 2;
     }
 
