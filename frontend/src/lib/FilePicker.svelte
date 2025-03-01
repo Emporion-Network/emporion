@@ -134,7 +134,7 @@
               class:selected={selected?.path === file.path}
               onclick={() => (selected = { ...file })}
             >
-              <img src="{user.root}/files/{file.path}" alt={file.name} />
+              <img src={file.path} alt={file.name} />
               <span>{file.name}</span>
             </button>
           {/each}
