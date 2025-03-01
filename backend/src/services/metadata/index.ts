@@ -16,7 +16,7 @@ const app = new Hono<{ Variables: { state: State } }>()
       m.seller = c.var.user.addr;
     });
 
-    const ids = metadata.map(async (m: ProductMetadata) => {
+    const ids = await Promise.all(metadata.map(async (m: ProductMetadata) => {
       const id = randomUUIDv7();
       const url = `${state.domainName}/metadata/${id}`;
       await state.fs.write(id, JSON.stringify(m), {
@@ -24,7 +24,7 @@ const app = new Hono<{ Variables: { state: State } }>()
         acl: 'public-read',
       });
       return url;
-    });
+    }));
     return c.json({
       error: false,
       result: ids,
