@@ -1,16 +1,3 @@
-<script lang="ts" module>
-  export interface Product {
-    title: T<string>;
-    listed: boolean;
-    price: string;
-    description: T<string>;
-    collection: string;
-    gallery: Record<SupportedLanguage, string[]>;
-    attributes: Attribute[];
-    category: string[];
-  }
-</script>
-
 <script lang="ts">
   import { untrack } from "svelte";
   import { SvelteSet } from "svelte/reactivity";
@@ -27,7 +14,6 @@
     TranslatedLanguages,
     translatedString,
     type SupportedLanguage,
-    type T,
   } from "@/stores/translate.svelte";
   import { Decimal } from "@cosmjs/math";
   import AttributesInCollection from "./Attributes/InCollection.svelte";
@@ -39,7 +25,7 @@
   import { getTutoRegistry } from "./tutoStore.svelte";
   import Checkbox from "@/lib/Checkbox.svelte";
   import { user } from "@/stores/user.svelte";
-  import { assertIsValidMetadata } from "@common";
+  import { assertIsValidMetadata, type ProductMetadata } from "@common";
   import { getLocation } from "@/stores/location.svelte";
   import { looseEq } from "@/lib/utils";
 
@@ -51,7 +37,7 @@
     products = $bindable(),
     selectedLang = $bindable(),
   }: {
-    products: Product[];
+    products: ProductMetadata[];
     selectedLang: SupportedLanguage;
     selectedProduct: number;
   } = $props();
@@ -61,7 +47,7 @@
   let showProduct = $state(false);
   let categories: SvelteSet<string> = $state(new SvelteSet());
   let category = $derived(Array.from(categories.values()));
-  let prevProducts: Product[] = $state([]); // used to detect changes in products
+  let prevProducts: ProductMetadata[] = $state([]); // used to detect changes in products
   let hide = $state(false);
 
   let changed = $derived.by(() => {
@@ -70,6 +56,7 @@
 
   const addProduct = () => {
     products.push({
+      id: undefined,
       title: translatedString(),
       description: translatedString(),
       collection: collectionName,
@@ -146,8 +133,17 @@
   };
 
   const createProducts = async () => {
+    const toUpdate = products.filter((p) => "id" in p);
+    const toCreate = products.filter((p) => !("id" in p));
     await user.createProducts(
-      products.map((p) => ({
+      toCreate.map((p) => ({
+        ...p,
+        category,
+        collection: collectionName,
+      })),
+    );
+    await user.updateProducts(
+      toUpdate.map((p) => ({
         ...p,
         category,
         collection: collectionName,
@@ -170,9 +166,9 @@
     );
   });
 
-  const showPreview = ()=>{
+  const showPreview = () => {
     hide = !hide;
-  }
+  };
 </script>
 
 {#snippet head(toStore: boolean = true)}
@@ -182,7 +178,11 @@
       aria-labelledby={t.t("great_spare_frog_kiss")}
     >
       <i class="ri-arrow-left-long-line"></i>
-      <span>{toStore ?t.t("ok_deft_poodle_gaze") : t.t("due_super_goldfish_swim")}</span>
+      <span
+        >{toStore
+          ? t.t("ok_deft_poodle_gaze")
+          : t.t("due_super_goldfish_swim")}</span
+      >
     </button>
     <MultiSelect
       options={supportedLangs}
@@ -204,9 +204,9 @@
 
 <button class="showPreview" onclick={showPreview}>
   {#if hide}
-  <i class="ri-eye-off-fill"></i>
+    <i class="ri-eye-off-fill"></i>
   {:else}
-  <i class="ri-eye-fill"></i>
+    <i class="ri-eye-fill"></i>
   {/if}
 </button>
 
@@ -268,7 +268,7 @@
                 {#snippet opener({ get, set, ...props })}
                   {/*@ts-ignore*/ null}
                   <button
-                    aria-label="{t.t("direct_alive_ape_surge")}"
+                    aria-label={t.t("direct_alive_ape_surge")}
                     bind:this={get, set}
                     {...props}
                   >
@@ -372,7 +372,7 @@
 
 <style lang="scss">
   @use "../../mixins" as *;
-  .showPreview{
+  .showPreview {
     position: fixed;
     z-index: 2;
     right: 1rem;
@@ -383,7 +383,7 @@
     border-radius: 4px;
     font-size: 2rem;
     aspect-ratio: 1/1;
-    @include media(">= phone"){
+    @include media(">= phone") {
       display: none;
     }
   }
@@ -396,16 +396,15 @@
     background-color: var(--parent-bg);
     border-right: 1px solid var(--neutral-6);
     transition: transform 200ms ease-in-out;
-    &.hide{
+    &.hide {
       transform: translateX(-100%);
     }
 
-    @include media(">= phone"){
-      &.hide{
+    @include media(">= phone") {
+      &.hide {
         transform: none;
       }
     }
-    
 
     .wpr {
       display: flex;
@@ -413,7 +412,6 @@
       padding: 1rem;
       gap: 1rem;
     }
-    
 
     .head {
       display: flex;

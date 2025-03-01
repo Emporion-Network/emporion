@@ -5,12 +5,12 @@
     type SupportedLanguage,
   } from "@/stores/translate.svelte";
   import Rendered from "./Attributes/Rendered.svelte";
-  import type { Product } from "./Form.svelte";
   import { Decimal } from "@cosmjs/math";
   import { user } from "@/stores/user.svelte";
   import Address from "@/lib/Address.svelte";
   import Rating from "@/lib/Rating.svelte";
   import ContextMenu from "@/lib/ContextMenu.svelte";
+  import type { ProductMetadata } from "@common";
   const t = getTranslator();
 
   let {
@@ -18,7 +18,7 @@
     products,
     selectedProduct = $bindable(),
   }: {
-    products: Product[];
+    products: ProductMetadata[];
     selectedLang: SupportedLanguage;
     selectedProduct: number;
   } = $props();

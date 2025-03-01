@@ -38,7 +38,7 @@ const app = new Hono<{ Variables: { state: State } }>()
     const ids = await Promise.all(metadata.map(async (m: ProductMetadata) => {
       assertIsValidMetadata(m);
       m.seller = c.var.user.addr;
-      const metadata_id = m.metadata_url.split('/').pop() || '';
+      const metadata_id = m.metadata_url?.split('/').pop() || '';
       const old = await state.fs.file(`metadata/${metadata_id}`).json();
       const url = `https://${state.domainName}/api/metadata/${metadata_id}`;
       assert(old.seller === c.var.user.addr, 'you are not the owner of this metadata');

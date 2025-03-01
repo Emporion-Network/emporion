@@ -3,17 +3,17 @@
   import { storage } from "@/stores/localStorage.svelte";
   import { getTranslator } from "@/stores/translate.svelte";
   import Form from "./Form.svelte";
-  import type { Product } from "./Form.svelte";
   import Tuto from "./Tuto.svelte";
   import Preview from "./Preview.svelte";
   import { getLocation } from "@/stores/location.svelte";
   import { user } from "@/stores/user.svelte";
+  import type { ProductMetadata } from "@common";
   let t = getTranslator();
 
   let didTutorial = storage<boolean>("product-tutorial");
   let selectedLang = $state(t.lang);
   let selectedProduct = $state(0);
-  let products: Product[] = $state([]);
+  let products: ProductMetadata[] = $state([]);
   let l = getLocation();
 
   const ondone = () => {

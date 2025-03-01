@@ -188,6 +188,7 @@ export type Attribute =
 export type Gallery = Record<SupportedLanguage, string[]>;
 export interface ProductMetadata {
   id: string
+  metadata_url: string
   listed: boolean
   seller: string
   title: T<string>
@@ -197,11 +198,12 @@ export interface ProductMetadata {
   attributes: Attribute[]
   price: string
   category: string[]
-  metadata_url: string
 }
 
+export type CreateProductMetadata = Omit<ProductMetadata, 'seller' | 'id' | 'metadata_url'>;
+
 export interface UploadMetadata {
-  req: Omit<ProductMetadata, 'seller' | 'id' | 'metadata_url'>[],
+  req: CreateProductMetadata[],
   res: Result<string[]>,
   method: 'post',
   path: '/upload-metadata',
