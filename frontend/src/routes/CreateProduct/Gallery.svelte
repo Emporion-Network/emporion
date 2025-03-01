@@ -128,7 +128,10 @@
       </ToolTip>
     {:else if missingImgages[i]?.length === 0}
       <ToolTip>
-        <button class="apply-img ok" aria-label={t.t("sour_main_cobra_laugh")}
+        <button
+          class="apply-img ok"
+          onclick={applyToAll(i)}
+          aria-label={t.t("sour_main_cobra_laugh")}
           ><i class="ri-translate"></i></button
         >
         {#snippet content()}
