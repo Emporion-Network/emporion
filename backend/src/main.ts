@@ -100,7 +100,7 @@ app
     rewriteRequestPath: path => path,
   }))
   .use('*', async (c) => {
-    c.html(await Bun.file('../frontend/dist/index.html').text());
+    return c.html(await Bun.file('../frontend/dist/index.html').text());
   })
   .notFound((c) => {
     return c.json({
