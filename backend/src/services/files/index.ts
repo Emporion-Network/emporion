@@ -28,8 +28,8 @@ const uploadFile = new Hono()
       assert(f.size < c.var.state.uploadMaxSize, 'File is too large');
     }
     const fileNames = files.map(async (f, i) => {
-      const fileName = `https://${c.var.state.domainName}/api/files/${c.var.user.addr}/${randomUUIDv7()}`;
-      meta[i].path = fileName;
+      const fileName = `${c.var.user.addr}/${randomUUIDv7()}`;
+      meta[i].path = `https://${c.var.state.domainName}/api/files/fileName`;
       const file = c.var.state.fs.file(fileName, {
         type: f.type,
         acl: 'public-read',
