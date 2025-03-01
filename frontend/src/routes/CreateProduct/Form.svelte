@@ -25,7 +25,11 @@
   import { getTutoRegistry } from "./tutoStore.svelte";
   import Checkbox from "@/lib/Checkbox.svelte";
   import { user } from "@/stores/user.svelte";
-  import { assertIsValidMetadata, type ProductMetadata } from "@common";
+  import {
+    assertIsValidMetadata,
+    type ProductMetadata,
+    type CreateProductMetadata,
+  } from "@common";
   import { getLocation } from "@/stores/location.svelte";
   import { looseEq } from "@/lib/utils";
 
@@ -37,7 +41,7 @@
     products = $bindable(),
     selectedLang = $bindable(),
   }: {
-    products: ProductMetadata[];
+    products: (ProductMetadata | CreateProductMetadata)[];
     selectedLang: SupportedLanguage;
     selectedProduct: number;
   } = $props();
@@ -47,7 +51,7 @@
   let showProduct = $state(false);
   let categories: SvelteSet<string> = $state(new SvelteSet());
   let category = $derived(Array.from(categories.values()));
-  let prevProducts: ProductMetadata[] = $state([]); // used to detect changes in products
+  let prevProducts: (ProductMetadata | CreateProductMetadata)[] = $state([]); // used to detect changes in products
   let hide = $state(false);
 
   let changed = $derived.by(() => {
@@ -56,7 +60,6 @@
 
   const addProduct = () => {
     products.push({
-      id: undefined,
       title: translatedString(),
       description: translatedString(),
       collection: collectionName,
@@ -133,7 +136,15 @@
   };
 
   const createProducts = async () => {
-    const toUpdate = products.filter((p) => "id" in p);
+    const toUpdate = products.filter((p) => {
+      return (
+        "id" in p &&
+        !looseEq(
+          p,
+          prevProducts.find((pp) => "id" in pp && pp.id === p.id),
+        )
+      );
+    }) as ProductMetadata[];
     const toCreate = products.filter((p) => !("id" in p));
     await user.createProducts(
       toCreate.map((p) => ({

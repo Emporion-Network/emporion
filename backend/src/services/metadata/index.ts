@@ -17,7 +17,10 @@ const app = new Hono<{ Variables: { state: State } }>()
       m.seller = c.var.user.addr;
       const id = randomUUIDv7();
       const url = `https://${state.domainName}/api/metadata/${id}`;
-      await state.fs.write(`metadata/${id}`, JSON.stringify(m), {
+      await state.fs.write(`metadata/${id}`, JSON.stringify({
+        ...m,
+        metadata_url: url,
+      }), {
         type: 'application/json',
         acl: 'public-read',
       });

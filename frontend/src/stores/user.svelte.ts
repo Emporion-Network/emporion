@@ -299,6 +299,8 @@ class User extends Api {
 
 }
 
+
+
 export const user = new User({
   apiRoot: `${location.protocol}//${location.hostname}:${location.port}/api/`,
   rpcUrl: 'https://juno-rpc.publicnode.com:443',
@@ -309,3 +311,6 @@ export const user = new User({
   stakeDenom: 'factory/juno1zjqsel42pj5e6wvxxw7hjs9gn06yqz4m3ffyua3x2v44m4l8trjsr92q9s/empr',
   acceptedDenom: "ibc/4A482FA914A4B9B05801ED81C33713899F322B24F76A06F4B8FE872485EA22FF",
 });
+
+//@ts-ignore
+window.user = user;
