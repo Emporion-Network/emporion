@@ -23,9 +23,13 @@ export class Db {
   }
 
   async init() {
-    await Promise.all([
-      this.#initProductMetadataName(),
-    ]);
+    try {
+      await Promise.all([
+        this.#initProductMetadataName(),
+      ]);
+    } catch (e: unknown) {
+      console.error((e as { data: string }).data);
+    }
   }
 
   async #initProductMetadataName() {
@@ -33,7 +37,7 @@ export class Db {
     if (!e) {
       this.client.createCollection(this.ProductMetadataName, {
         vectors: {
-          size: 768,
+          size: 384,
           distance: 'Cosine',
           on_disk: true,
         },
