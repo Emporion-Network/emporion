@@ -1,6 +1,9 @@
 <script lang="ts">
   import ImageSlider from "@/lib/ImageSlider.svelte";
-  import { getTranslator, type SupportedLanguage } from "@/stores/translate.svelte";
+  import {
+    getTranslator,
+    type SupportedLanguage,
+  } from "@/stores/translate.svelte";
   import Rendered from "./Attributes/Rendered.svelte";
   import type { Product } from "./Form.svelte";
   import { Decimal } from "@cosmjs/math";
@@ -44,7 +47,7 @@
             {/*@ts-ignore*/ null}
             <button
               class="ghost-button"
-              aria-label="{t.t("sour_curly_gorilla_edit")}"
+              aria-label={t.t("sour_curly_gorilla_edit")}
               bind:this={get, set}
               {...props}
               onclick={(e) => e.stopPropagation()}
@@ -89,6 +92,9 @@
       </button>
     </div>
   {/if}
+  {#if !product}
+    <div class="placeholder">{t.t("main_free_earthworm_peel")}</div>
+  {/if}
 </div>
 
 <style lang="scss">
@@ -97,9 +103,9 @@
     flex: 5;
     display: flex;
     align-items: flex-start;
+    align-self: flex-start;
     position: sticky;
     top: 1rem;
-    align-self: flex-start;
     gap: 1rem;
     padding: 1rem;
     z-index: -1;
@@ -148,14 +154,24 @@
         line-height: 1.2em;
       }
     }
-    @include media("<= phone"){
+    .placeholder {
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 2rem;
+      font-weight: 500;
+      color: var(--neutral-8);
+    }
+    @include media("<= phone") {
       position: absolute;
       flex-direction: column;
-      :global(.gellery){
+      :global(.gellery) {
         position: relative;
         top: 0;
       }
-      .picker{
+      .picker {
         width: 100%;
       }
     }
