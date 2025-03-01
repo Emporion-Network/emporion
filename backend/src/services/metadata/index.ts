@@ -18,8 +18,8 @@ const app = new Hono<{ Variables: { state: State } }>()
 
     const ids = await Promise.all(metadata.map(async (m: ProductMetadata) => {
       const id = randomUUIDv7();
-      const url = `${state.domainName}/metadata/${id}`;
-      await state.fs.write(id, JSON.stringify(m), {
+      const url = `${state.domainName}/api/metadata/${id}`;
+      await state.fs.write(`metadata/${id}`, JSON.stringify(m), {
         type: 'application/json',
         acl: 'public-read',
       });
