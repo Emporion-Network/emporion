@@ -36,6 +36,14 @@
     images[selectedLang][id] = x;
   };
 
+  const forceApply = (id: number) => (e: Event) => {
+    e.stopPropagation();
+    let t = images[selectedLang][id];
+    getKeys(images).forEach((lang) => {
+      images[lang][id] = t;
+    });
+  };
+
   const applyToAll = (id: number) => (e: Event) => {
     e.stopPropagation();
     let t = images[selectedLang][id];
@@ -130,7 +138,7 @@
       <ToolTip>
         <button
           class="apply-img ok"
-          onclick={applyToAll(i)}
+          onclick={forceApply(i)}
           aria-label={t.t("sour_main_cobra_laugh")}
           ><i class="ri-translate"></i></button
         >
