@@ -42,7 +42,7 @@
   const update = async () => {
     if (!selected) return;
     if (diff()) return;
-    await user.updateFileMeta(selected?.path.split("/")[1], {
+    await user.updateFileMeta(selected?.path.split("/").pop()!, {
       name: selected.name,
       tags: selected.tags,
     });
