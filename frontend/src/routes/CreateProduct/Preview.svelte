@@ -93,7 +93,7 @@
     </div>
   {/if}
   {#if !product}
-    <div class="placeholder">{t.t("main_free_earthworm_peel")}</div>
+    <div class="message">{t.t("main_free_earthworm_peel")}</div>
   {/if}
 </div>
 
@@ -154,7 +154,7 @@
         line-height: 1.2em;
       }
     }
-    .placeholder {
+    .message {
       width: 100%;
       height: 100vh;
       display: flex;
