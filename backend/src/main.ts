@@ -85,15 +85,15 @@ app
     await next();
   })
   .use(logger())
-  .get('/', async (c) => {
+  .get('/api', async (c) => {
     return c.json({ version: version });
   })
-  .route('/', fileUploder)
-  .route('/', auth)
-  .route('/', translate)
-  .route('/', autocomplete)
-  .route('/', metadata)
-  .route('/', wsHandler)
+  .route('/api', fileUploder)
+  .route('/api', auth)
+  .route('/api', translate)
+  .route('/api', autocomplete)
+  .route('/api', metadata)
+  .route('/api', wsHandler)
   .onError((e, c) => {
     return c.json({
       error: true,
