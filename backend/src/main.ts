@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import { serveStatic } from 'hono/bun';
 import { State } from './state';
 import ms, { type StringValue } from 'ms';
 import b from 'bytes';
@@ -85,20 +86,21 @@ app
     await next();
   })
   .use(logger())
-  .get('/api', async (c) => {
+  .get('/api/', async (c) => {
     return c.json({ version: version });
   })
-  .route('/api', fileUploder)
-  .route('/api', auth)
-  .route('/api', translate)
-  .route('/api', autocomplete)
-  .route('/api', metadata)
-  .route('/api', wsHandler)
-  .onError((e, c) => {
-    return c.json({
-      error: true,
-      message: e.message,
-    }, 500);
+  .route('/api/', fileUploder)
+  .route('/api/', auth)
+  .route('/api/', translate)
+  .route('/api/', autocomplete)
+  .route('/api/', metadata)
+  .route('/api/', wsHandler)
+  .use('*', serveStatic({
+    root: '../frontend/dist/',
+    rewriteRequestPath: path => path,
+  }))
+  .use('*', async (c) => {
+    c.html(await Bun.file('../frontend/dist/index.html').text());
   })
   .notFound((c) => {
     return c.json({

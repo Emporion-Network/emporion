@@ -95,7 +95,7 @@ const uploadFile = new Hono()
     assert(isValidBech(address), 'Invali address');
     address = bechToBech(address, 'cosmos');
     const id = c.req.param('id');
-    return c.body(c.var.state.fs.file(`https://${state.domainName}/api/files/${address}/${id}`).stream());
+    return c.body(await c.var.state.fs.file(`https://${state.domainName}/api/files/${address}/${id}`).stream());
   });
 
 export default uploadFile;
