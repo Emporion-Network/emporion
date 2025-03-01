@@ -41,7 +41,7 @@ impl Mark {
         Ok(ADDR_TO_MARK.save(deps.storage, addr, &self.into())?)
     }
 
-    pub fn load(deps:&Deps, addr: Addr) -> Result<Self, ContractError>{
+    pub fn load(deps: &Deps, addr: Addr) -> Result<Self, ContractError> {
         Ok(ADDR_TO_MARK.load(deps.storage, addr)?.into())
     }
 
@@ -279,11 +279,13 @@ impl Rating {
 fn test() {
     let mut deps = cosmwasm_std::testing::mock_dependencies();
     let addr = deps.api.addr_make("creator");
-    let m = to_json_binary::<[u32; 6]>(&Mark::default().into()).unwrap();
-    Mark::default().save(&mut deps.as_mut(), addr.clone()).unwrap();
-    let mut m =  Mark::load(&deps.as_ref(), addr.clone()).unwrap();
+    let _m = to_json_binary::<[u32; 6]>(&Mark::default().into()).unwrap();
+    Mark::default()
+        .save(&mut deps.as_mut(), addr.clone())
+        .unwrap();
+    let mut m = Mark::load(&deps.as_ref(), addr.clone()).unwrap();
     m = m + 5;
     m.save(&mut deps.as_mut(), addr.clone()).unwrap();
-    let m =  Mark::load(&deps.as_ref(), addr.clone()).unwrap();
+    let m = Mark::load(&deps.as_ref(), addr.clone()).unwrap();
     println!("{:?}", m);
 }

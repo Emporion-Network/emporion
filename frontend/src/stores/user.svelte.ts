@@ -263,6 +263,27 @@ class User extends Api {
     }
   }
 
+  async updateProducts(p: Parameters<Api['updateMetadata']>['0']) {
+    try {
+      if (!this.address) return;
+      let urls = await this.updateMetadata(p);
+      if (urls.error) return;
+      const ec = await this.ec as EmporionClient;
+      await ec.updateBulkProduct({
+        products: urls.result.map((url, i) => {
+          return {
+            product_id: p[i].id,
+            meta_data_url: url,
+            price: p[i].price,
+            listed: p[i].listed
+          }
+        })
+      })
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
   async getRating(addr: string) {
     const ec = await this.ec;
     return ec.getMark({ addr });

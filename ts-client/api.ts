@@ -1,4 +1,4 @@
-import type { Autocomplete, CheckToken, FileMetaReq, GetMetadata, ReqFiles, RequestNonce, RequestToken, ResponseSuccess, Result, Translate, UpdateFileMeta, UploadFiles, UploadMetadata } from '../common';
+import type { Autocomplete, CheckToken, FileMetaReq, GetMetadata, ReqFiles, RequestNonce, RequestToken, ResponseSuccess, Result, Translate, UpdateFileMeta, UpdateMetadata, UploadFiles, UploadMetadata } from '../common';
 
 
 /**
@@ -124,7 +124,7 @@ export class Api {
   }
 
   async updateFileMeta(id: string, req: FileMetaReq) {
-    return this['post' satisfies UpdateFileMeta['method']]<UpdateFileMeta['res']>(`/update-meta/${id}` satisfies UpdateFileMeta['path'], req);
+    return this['post' satisfies UpdateFileMeta['method']]<UpdateFileMeta['res']>(`/update-file-metadata/${id}` satisfies UpdateFileMeta['path'], req);
   }
 
   async autocomlete(req: Autocomplete['req']) {
@@ -133,6 +133,10 @@ export class Api {
 
   async uploadMetadata(req: UploadMetadata["req"]) {
     return this['post' satisfies UploadMetadata['method']]<UploadMetadata['res']>(`/upload-metadata` satisfies UploadMetadata['path'], req);
+  }
+
+  async updateMetadata(req: UpdateMetadata["req"]) {
+    return this['post' satisfies UpdateMetadata['method']]<UpdateMetadata['res']>(`/update-metadata` satisfies UpdateMetadata['path'], req);
   }
 
   async getCollections(req: GetMetadata["req"]) {

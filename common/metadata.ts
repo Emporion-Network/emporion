@@ -197,14 +197,23 @@ export interface ProductMetadata {
   attributes: Attribute[]
   price: string
   category: string[]
+  metadata_url: string
 }
 
 export interface UploadMetadata {
-  req: Omit<ProductMetadata, 'seller' | 'id'>[],
+  req: Omit<ProductMetadata, 'seller' | 'id' | 'metadata_url'>[],
   res: Result<string[]>,
   method: 'post',
   path: '/upload-metadata',
 }
+
+export interface UpdateMetadata {
+  req: Omit<ProductMetadata, 'seller'>[],
+  res: Result<string[]>,
+  method: 'post',
+  path: '/update-metadata',
+}
+
 
 export interface GetMetadata {
   req: string,

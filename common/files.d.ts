@@ -29,5 +29,5 @@ export interface UpdateFileMeta {
   req: FileMetaReq,
   res: Result<FileMetaRes[]>,
   method: 'post',
-  path: `/update-meta/${string}`
+  path: `/update-file-metadata/${string}`
 }

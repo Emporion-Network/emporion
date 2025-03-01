@@ -108,6 +108,7 @@ export class Indexer {
           listed: data.create_product.listed,
           seller: bechToBech(msg.data.sender, 'cosmos'),
           price: data.create_product.price,
+          metadata_url: url,
         });
       }
       if ('create_bulk_products' in data) {
@@ -123,6 +124,7 @@ export class Indexer {
             listed: d.listed,
             seller: bechToBech(msg.data.sender, 'cosmos'),
             price: d.price,
+            metadata_url: url,
           });
         });
         await Promise.all(inserts);
@@ -140,6 +142,7 @@ export class Indexer {
             listed: content.listed ?? metadata.listed,
             seller: bechToBech(msg.data.sender, 'cosmos'),
             price: content.price ?? metadata.price,
+            metadata_url: url,
           });
           return;
         }
@@ -150,6 +153,7 @@ export class Indexer {
           listed: content.listed ?? product.listed,
           seller: bechToBech(msg.data.sender, 'cosmos'),
           price: content.price ?? product.price,
+          metadata_url: product.metadata_url,
         });
       }
       if ('update_bulk_product' in data) {

@@ -98,15 +98,14 @@ export class Db {
           lowercase: true,
         },
       });
-      this.client.createPayloadIndex(this.ProductMetadataName, {
-        field_name: 'price',
-        field_schema: {
-          type: 'integer',
-          lookup: false,
-          range: true,
-        },
-      });
     }
+    this.client.createPayloadIndex(this.ProductMetadataName, {
+      field_name: 'metadata_url',
+      field_schema: {
+        type: 'keyword',
+        lookup: true,
+      },
+    });
   }
 
   async getCollections(addr: string) {

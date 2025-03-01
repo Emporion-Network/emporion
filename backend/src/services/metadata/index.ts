@@ -11,15 +11,42 @@ const app = new Hono<{ Variables: { state: State } }>()
     const metadata = await c.req.json();
     assert(Array.isArray(metadata), 'invalid metadata');
     assert(metadata.length > 0, 'invalid metadata');
-    metadata.forEach((m: ProductMetadata) => {
-      assertIsValidMetadata(m);
-      m.seller = c.var.user.addr;
-    });
 
     const ids = await Promise.all(metadata.map(async (m: ProductMetadata) => {
+      assertIsValidMetadata(m);
+      m.seller = c.var.user.addr;
       const id = randomUUIDv7();
       const url = `https://${state.domainName}/api/metadata/${id}`;
       await state.fs.write(`metadata/${id}`, JSON.stringify(m), {
+        type: 'application/json',
+        acl: 'public-read',
+      });
+      return url;
+    }));
+    return c.json({
+      error: false,
+      result: ids,
+    });
+  })
+  .use('/update-metadata', jwt)
+  .post('/update-metadata', async (c) => {
+    const state = c.var.state;
+    const metadata = await c.req.json();
+    assert(Array.isArray(metadata), 'invalid metadata');
+    assert(metadata.length > 0, 'invalid metadata');
+
+    const ids = await Promise.all(metadata.map(async (m: ProductMetadata) => {
+      assertIsValidMetadata(m);
+      m.seller = c.var.user.addr;
+      const metadata_id = m.metadata_url.split('/').pop() || '';
+      const old = await state.fs.file(`metadata/${metadata_id}`).json();
+      const url = `https://${state.domainName}/api/metadata/${metadata_id}`;
+      assert(old.seller === c.var.user.addr, 'you are not the owner of this metadata');
+      await state.fs.write(`metadata/${metadata_id}`, JSON.stringify({
+        ...m,
+        id: old.id,
+        seller: old.seller,
+      }), {
         type: 'application/json',
         acl: 'public-read',
       });

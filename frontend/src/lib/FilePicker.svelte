@@ -7,7 +7,7 @@
   import Input from "./Input.svelte";
   import Modal from "./Modal.svelte";
   import { onMount } from "svelte";
-    import { getTranslator } from "@/stores/translate.svelte";
+  import { getTranslator } from "@/stores/translate.svelte";
   let show: "gallery" | "upload" = $state("gallery");
   const t = getTranslator();
   let isOpen = $state(false);
@@ -103,9 +103,16 @@
       </ButtonGroup>
       {#if show == "gallery"}
         <div class="search">
-          <input placeholder={t.t("lost_spare_anaconda_grin")} type="text" bind:value={filter} />
+          <input
+            placeholder={t.t("lost_spare_anaconda_grin")}
+            type="text"
+            bind:value={filter}
+          />
           {#if filter.length > 0}
-            <button aria-label={t.t("salty_actual_starfish_drop")} onclick={() => (filter = "")}>
+            <button
+              aria-label={t.t("salty_actual_starfish_drop")}
+              onclick={() => (filter = "")}
+            >
               <i class="ri-close-line"></i>
             </button>
           {:else}
@@ -134,7 +141,7 @@
         </div>
         <div class="preview">
           {#if selected}
-            <img src="{user.root}/files/{selected.path}" alt={selected.name} />
+            <img src={selected.path} alt={selected.name} />
             <Input
               type="textarea"
               placeholder={t.t("keen_giant_swallow_trim")}
@@ -142,7 +149,10 @@
               bind:value={selected.name}
               onchange={update}
             />
-            <TagInput label={t.t("level_east_flamingo_launch")} bind:value={selected.tags} onchange={update}
+            <TagInput
+              label={t.t("level_east_flamingo_launch")}
+              bind:value={selected.tags}
+              onchange={update}
             ></TagInput>
             <div class="buttons">
               <button

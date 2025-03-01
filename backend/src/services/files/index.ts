@@ -54,8 +54,8 @@ const uploadFile = new Hono()
       result: meta,
     } satisfies UploadFiles['res']);
   })
-  .use('/update-meta/:id', jwt)
-  .post('/update-meta/:id', async (c) => {
+  .use('/update-file-metadata/:id', jwt)
+  .post('/update-file-metadata/:id', async (c) => {
     const newMeta = await c.req.json();
     assertIsFileMeta(newMeta);
     const id = c.req.param('id');
@@ -90,11 +90,12 @@ const uploadFile = new Hono()
     } satisfies ReqFiles['res']);
   })
   .get('/files/:address/:id', async (c) => {
+    const state = c.var.state;
     let address = c.req.param('address');
     assert(isValidBech(address), 'Invali address');
     address = bechToBech(address, 'cosmos');
     const id = c.req.param('id');
-    return c.body(c.var.state.fs.file(`${address}/${id}`).stream());
+    return c.body(c.var.state.fs.file(`https://${state.domainName}/api/files/${address}/${id}`).stream());
   });
 
 export default uploadFile;
