@@ -123,8 +123,8 @@
       display: flex;
       justify-content: flex-start;
       width: 100%;
-      :global(.input){
-        flex:1;
+      :global(.input) {
+        flex: 1;
         max-width: 500px;
       }
     }
@@ -157,9 +157,12 @@
         background-color: var(--neutral-4);
       }
       img {
-        width: 62px;
-        height: 62px;
-        object-fit: cover;
+        display: block;
+        min-width: 62px;
+        max-width: 62px;
+        max-height: 62px;
+        min-height: 62px;
+        object-fit: contain;
         background-color: var(--neutral-3);
         border-radius: 3px;
         border: 1px solid var(--neutral-6);
@@ -167,7 +170,7 @@
         padding: 3px;
       }
     }
-    @include media('<= phone'){
+    @include media("<= phone") {
       .grid {
         grid-template-columns: 1fr;
       }

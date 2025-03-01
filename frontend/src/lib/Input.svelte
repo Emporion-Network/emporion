@@ -13,6 +13,7 @@
     error,
     children,
     onchange = () => {},
+    readonly = false,
     // @ts-ignore
     completions = $bindable(),
     // @ts-ignore
@@ -21,6 +22,7 @@
     label: string;
     placeholder: string;
     error?: boolean;
+    readonly?: boolean;
     children?: Snippet<[]>;
     onchange?: () => void;
   } & (
@@ -70,15 +72,30 @@
   export { el as element };
 </script>
 
-<label class="input {type}" class:error bind:this={el}>
+<label class="input {type}" class:error class:readonly bind:this={el}>
   <div>{label}</div>
   {#if type == "text"}
-    <input class="native" type="text" {placeholder} bind:value {onchange} />
+    <input
+      class="native"
+      type="text"
+      {placeholder}
+      bind:value
+      {onchange}
+      {readonly}
+      disabled={readonly}
+    />
     {@render children?.()}
   {:else if type == "search"}
     {@render children?.()}
-    <input class="native" type="text" {placeholder} bind:value />
-    <button aria-label="{t.t("caring_polite_ape_sew")}" onclick={clear}>
+    <input
+      class="native"
+      type="text"
+      {placeholder}
+      bind:value
+      {readonly}
+      disabled={readonly}
+    />
+    <button aria-label={t.t("caring_polite_ape_sew")} onclick={clear}>
       {#if typeof value == "string" && value.length > 0}
         <i class="ri-close-line"></i>
       {:else}
@@ -90,6 +107,8 @@
       type="text"
       class="native"
       inputmode="numeric"
+      disabled={readonly}
+      {readonly}
       {placeholder}
       bind:value={get, set}
     />
@@ -98,7 +117,14 @@
     <Autocompleter bind:value bind:completions {placeholder} />
     {@render children?.()}
   {:else}
-    <textarea class="native" bind:value {placeholder} {onchange}></textarea>
+    <textarea
+      class="native"
+      bind:value
+      {placeholder}
+      {onchange}
+      {readonly}
+      disabled={readonly}
+    ></textarea>
     {@render children?.()}
   {/if}
 </label>
@@ -113,6 +139,11 @@
     border-radius: 2px;
     padding: 0 0.5rem;
     padding-top: 0.5rem;
+    &.readonly {
+      opacity: 0.5;
+      pointer-events: none;
+      cursor: default;
+    }
     button {
       background-color: transparent;
       color: var(--neutral-10);

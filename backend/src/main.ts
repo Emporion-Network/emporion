@@ -111,6 +111,8 @@ app
 
 blockchain.listen();
 
+console.log(`🚀 Emporion API server started on port ${QDRANT_ENDPOINT}`);
+
 export default {
   port: PORT,
   fetch: app.fetch,

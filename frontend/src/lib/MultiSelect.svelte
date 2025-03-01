@@ -19,6 +19,7 @@
     filter = $bindable(),
     label = "",
     placeholder = "",
+    readonly = false,
   }: {
     value: typeof multiple extends true ? NoInfer<SvelteSet<T>> : T;
     optionRenderer: Snippet<[T, boolean]>;
@@ -31,6 +32,7 @@
     multiple: K;
     label?: string;
     placeholder?: string;
+    readonly?: boolean;
   } = $props();
 
   const t = getTranslator();
@@ -59,6 +61,12 @@
     pos = el.getBoundingClientRect();
   };
 
+  const closeOnEscape = (e: KeyboardEvent) => {
+    if (e.key === "Escape") {
+      blur();
+    }
+  };
+
   export const actions = {
     setValue: (v: T) => slectOption(v)(),
     open: () => el.focus(),
@@ -74,8 +82,10 @@
   class="multi-select"
   class:hasValue={(isMultiple(value) && value.size > 0) ||
     (!isMultiple(value) && value)}
-  tabindex="0"
+  {...readonly ? {} : { tabIndex: 0 }}
   role="listbox"
+  onkeydown={closeOnEscape}
+  class:readonly
 >
   <div class="selected">
     {#if (isMultiple(value) && value.size > 0) || (!isMultiple(value) && value !== undefined)}
@@ -125,6 +135,10 @@
     position: relative;
     outline: none;
     background-color: var(--parent-bg, transparent);
+    &.readonly {
+      pointer-events: none;
+      opacity: 0.5;
+    }
 
     &:hover {
       .label {
@@ -236,7 +250,7 @@
           flex: 1;
         }
       }
-      .close{
+      .close {
         margin-left: auto;
         display: none;
       }
@@ -249,7 +263,7 @@
         left: 0 !important;
         bottom: 0;
         padding: 0 0.5rem;
-        .close{
+        .close {
           display: block;
         }
       }

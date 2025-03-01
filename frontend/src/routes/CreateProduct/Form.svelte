@@ -223,6 +223,7 @@
 
 <div class="form" class:hide>
   {#if !showProduct}
+    {@const exists = products.some((p) => "id" in p)}
     <div class="collection">
       {@render head()}
       <Collapsable opened>
@@ -234,6 +235,7 @@
             type="text"
             label={t.t("mealy_spare_thrush_gleam")}
             placeholder={t.t("mealy_spare_thrush_gleam")}
+            readonly={exists}
             bind:value={collectionName}
             bind:this={registry["collection_name"]}
           />
@@ -330,9 +332,9 @@
         onclick={createProducts}
         class="primary-button"
         bind:this={registry["add_product"]}
-        disabled={!isValid || (!changed && products.some((p) => "id" in p))}
+        disabled={!isValid || (!changed && exists)}
       >
-        {#if products.some((p) => "id" in p)}
+        {#if exists}
           {t.t("these_sound_skate_prosper")}
         {:else}
           {t.t("crisp_tough_mammoth_fear")}
