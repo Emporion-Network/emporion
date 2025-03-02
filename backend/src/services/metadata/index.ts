@@ -87,5 +87,31 @@ const app = new Hono<{ Variables: { state: State } }>()
         message: 'metadata not found',
       });
     }
+  })
+  .get('/scroll-products', async (c) => {
+    const {
+      limit,
+      category,
+      start_after,
+      search,
+      seller,
+      sort,
+      min_price,
+      max_price,
+    } = c.req.query();
+    const res = await c.var.state.db.scrollProducts({
+      start_after,
+      limit,
+      category,
+      search,
+      seller,
+      sort,
+      min_price,
+      max_price,
+    });
+    return c.json({
+      error: false,
+      result: res,
+    });
   });
 export default app;

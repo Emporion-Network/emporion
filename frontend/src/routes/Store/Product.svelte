@@ -1,9 +1,24 @@
 <script lang="ts">
   import Rating from "@/lib/Rating.svelte";
   import type { WithSkeleton } from "@/lib/utils";
+  import { getTranslator } from "@/stores/translate.svelte";
+  import { Decimal } from "@cosmjs/math";
   import type { ProductMetadata } from "@common";
+  import Address from "@/lib/Address.svelte";
+  const l = getTranslator();
 
-  let props: WithSkeleton<ProductMetadata> = $props();
+  let props: WithSkeleton<{ product: ProductMetadata & { mark: number[] } }> =
+    $props();
+  const getRating = (n: number[]) => {
+    const nb_ratings = n.reduce((acc, r) => acc + r, 0);
+    return {
+      nb_ratings,
+      avg_rating:
+        nb_ratings > 0
+          ? n.reduce((acc, r, i) => acc + r * i, 0) / nb_ratings
+          : 0,
+    };
+  };
 </script>
 
 <div class="product">
@@ -20,7 +35,20 @@
       </button>
     </div>
   {/if}
-  {#if !props.skeleton}{/if}
+  {#if !props.skeleton}
+    {@const p = props.product}
+    {@const rating = getRating(p.mark)}
+    <img src={p.gallery[l.lang][0]} alt={p.title[l.lang]} />
+    <div class="info">
+      <div class="title">
+        <h2>{p.title[l.lang]}</h2>
+        <h3>{Decimal.fromAtomics(p.price, 6)} USDC</h3>
+        <Address address={p.seller} />
+        <Rating type="long" {...rating} />
+      </div>
+      <button class="primary-accent-button"> Add to cart </button>
+    </div>
+  {/if}
 </div>
 
 <style lang="scss">
@@ -56,6 +84,16 @@
       background-color: var(--neutral-3);
       padding: 1rem;
       gap: 0.5rem;
+      flex: 1;
+      button {
+        margin-top: auto;
+      }
+    }
+    img {
+      width: 100%;
+      aspect-ratio: 1/1;
+      object-fit: contain;
+      padding: 0.5rem;
     }
   }
 </style>

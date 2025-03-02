@@ -224,6 +224,22 @@ export interface GetMetadata {
   path: `/collections/${string}`,
 }
 
+export interface ScrollProducts  {
+  req: {
+    start_after?: string,
+    limit?: string
+    category?: string
+    search?: string
+    seller?:string
+    sort?: string
+    min_price?: string
+    max_price?: string
+  },
+  res: Result<ProductMetadata[]>,
+  method: 'get',
+  path: `/scroll-products?${string}`,
+}
+
 /**
  * Validate metadata
  * @throws If metadata is invalid

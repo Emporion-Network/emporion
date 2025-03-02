@@ -1,6 +1,6 @@
-import { type ProductMetadata, stringify, type T } from '@common';
+import { type ProductMetadata, type ScrollProducts, stringify, type T } from '@common';
 import { QdrantClient } from '@qdrant/js-client-rest';
-import { embedDocument, embedQuery } from './embeddings';
+import { embedDocument } from './embeddings';
 
 const mergeTranslated = (a: T<string>): string => {
   return Object.keys(a).reduce((acc, k) => {
@@ -13,12 +13,10 @@ export class Db {
   private ProductMetadataName = 'products';
 
   embedDocument: typeof embedDocument;
-  embedQuery: typeof embedQuery;
 
   constructor(url: string) {
     this.client = new QdrantClient({ url });
     this.embedDocument = embedDocument;
-    this.embedQuery = embedQuery;
     this.init();
   }
 
@@ -153,6 +151,97 @@ export class Db {
       const message = (e as { data: unknown }).data;
       console.error(message);
     }
+  }
+
+  async scrollProducts(params: ScrollProducts['req']) {
+    type QueryParam = Parameters<typeof this.client.query>[1];
+    const filter: QueryParam['filter'] = {
+      ...(params.search
+        ? {
+            should: [
+              {
+                key: '_title',
+                match: {
+                  text: params.search,
+                },
+              },
+              {
+                key: '_description',
+                match: {
+                  text: params.search,
+                },
+              },
+            ],
+          }
+        : {}),
+      must: [
+        {
+          key: 'listed',
+          match: {
+            value: true,
+          },
+        },
+        ...(params.category
+          ? [{
+              key: 'category',
+              match: {
+                value: params.category,
+              },
+            }]
+          : []),
+        ...(params.seller
+          ? [{
+              key: 'seller',
+              match: {
+                value: params.seller,
+              },
+            }]
+          : []),
+        ...(params.max_price || params.min_price
+          ? [{
+              key: 'price',
+              range: {
+                lte: params.max_price ? Number(params.max_price) : undefined,
+                gte: params.min_price ? Number(params.min_price) : undefined,
+              },
+            }]
+          : []),
+      ],
+    };
+    const common: QueryParam = {
+      with_payload: {
+        exclude: ['_description', '_title'],
+      },
+      with_vector: false,
+      limit: Math.min(params?.limit ? Number(params.limit) : 100, 100),
+      offset: params?.start_after ? Number(params.start_after) : undefined,
+      filter,
+      ...(params.search || params.sort
+        ? { query: {
+            ...(params.search
+              ? {
+                  nearest: await this.embedDocument(params.search),
+                }
+              : {}),
+            ...(params.sort
+              ? {
+                  order_by: {
+                    key: 'price',
+                    direction: params.sort === 'asc' ? 'asc' : 'desc',
+                  },
+                }
+              : {}),
+          } }
+        : {}),
+    };
+    try {
+      return (await this.client.query(this.ProductMetadataName, {
+        ...common,
+      })).points.map(e => e.payload as unknown as ProductMetadata);
+    } catch (e: unknown) {
+      console.error((e as { data: string }).data);
+    }
+    return [];
   }
 
   async getProduct(id: string) {

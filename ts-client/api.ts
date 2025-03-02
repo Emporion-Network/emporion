@@ -1,4 +1,4 @@
-import type { Autocomplete, CheckToken, FileMetaReq, GetMetadata, ReqFiles, RequestNonce, RequestToken, ResponseSuccess, Result, Translate, UpdateFileMeta, UpdateMetadata, UploadFiles, UploadMetadata } from '../common';
+import type { Autocomplete, CheckToken, FileMetaReq, GetMetadata, ReqFiles, RequestNonce, RequestToken, ResponseSuccess, Result, ScrollProducts, Translate, UpdateFileMeta, UpdateMetadata, UploadFiles, UploadMetadata } from '../common';
 
 
 /**
@@ -148,6 +148,13 @@ export class Api {
       })
       return e;
     });
+  }
+
+  async scrollProducts(req: ScrollProducts["req"]){
+    const params = new URLSearchParams(Object.fromEntries(
+      Object.entries(req).filter(([_, value]) => value)
+    )).toString();
+    return this['get' satisfies ScrollProducts['method']]<ScrollProducts['res']>(`/scroll-products?${params}` satisfies ScrollProducts['path']);
   }
 }
 
