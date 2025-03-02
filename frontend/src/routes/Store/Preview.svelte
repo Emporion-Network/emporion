@@ -1,47 +1,66 @@
 <script lang="ts">
   import ImageSlider from "@/lib/ImageSlider.svelte";
-  import {
-    getTranslator,
-    type SupportedLanguage,
-  } from "@/stores/translate.svelte";
-  import Rendered from "./Attributes/Rendered.svelte";
+  import { getTranslator } from "@/stores/translate.svelte";
+  import Rendered from "@/routes/CreateProduct/Attributes/Rendered.svelte";
   import { Decimal } from "@cosmjs/math";
   import { user } from "@/stores/user.svelte";
   import Address from "@/lib/Address.svelte";
   import Rating from "@/lib/Rating.svelte";
   import ContextMenu from "@/lib/ContextMenu.svelte";
-  import type { ProductMetadata } from "@common";
+  import { bechToBech, type ProductMetadata } from "@common";
+  import { getLocation } from "@/stores/location.svelte";
+  import { onMount, untrack } from "svelte";
   const t = getTranslator();
+  const l = getLocation();
+  let selectedProduct = $state("");
+  let products: ProductMetadata[] = $state([]);
+  let selectedProductIdx = $state(-1);
 
-  let {
-    selectedLang,
-    products,
-    selectedProduct = $bindable(),
-  }: {
-    products: ProductMetadata[];
-    selectedLang: SupportedLanguage;
-    selectedProduct: number;
-  } = $props();
-
-  let product = $derived(products[selectedProduct]);
+  const fetchCollection = async (id: string) => {
+    const req = await user.getCollection(id);
+    const ec = await user.ec;
+    let m: number[];
+    if (req.error) return;
+    products = await Promise.all(
+      req.result.map(async (e) => {
+        const p = await ec.getProduct({ id: e.id });
+        if (!m) {
+          m = await ec.getMark({ addr: bechToBech(e.seller, "juno") });
+          return { ...e, mark: m, price: p.price };
+        } else {
+          return { ...e, price: p.price };
+        }
+      }),
+    );
+    selectedProductIdx = products.findIndex((p) => p.id == id);
+  };
+  let product = $derived(products[selectedProductIdx]);
+  $effect(() => {
+    selectedProductIdx;
+    untrack(() => {
+      if (products[selectedProductIdx]) {
+        l.url.searchParams.set("p", products[selectedProductIdx].id);
+        l.replace(l.url.href);
+      }
+    });
+  });
+  onMount(() => {
+    const p = l.url.searchParams.get("p");
+    if (!p) return;
+    selectedProduct = p;
+    fetchCollection(selectedProduct);
+  });
 </script>
 
 <div class="preview">
   {#if product}
-    <ImageSlider
-      images={product.gallery[selectedLang]}
-      alt={product.title[selectedLang]}
-    />
+    <ImageSlider images={product.gallery[t.lang]} alt={product.title[t.lang]} />
     <div class="picker">
-      {#if product.title[selectedLang]}
-        <h1>{product.title[selectedLang]}</h1>
-      {:else}
-        <div class="placeholder"></div>
-      {/if}
+      <h1>{product.title[t.lang]}</h1>
       <Rating type="long" url="" nb_ratings={100} avg_rating={4.5}></Rating>
       <div class="link">
         <span>{t.t("upper_novel_shark_commend")}</span>
-        <Address address={user.address!} />
+        <Address address={product.seller} />
         <ContextMenu>
           {#snippet opener({ get, set, ...props })}
             {/*@ts-ignore*/ null}
@@ -79,21 +98,15 @@
         <span>USDC</span>
       </h2>
 
-      <p>{product.description[selectedLang]}</p>
+      <p>{product.description[t.lang]}</p>
 
-      <Rendered
-        {selectedLang}
-        {products}
-        bind:selectedProductIdx={selectedProduct}
+      <Rendered selectedLang={t.lang} {products} bind:selectedProductIdx
       ></Rendered>
 
       <button class="primary-button">
         {t.t("lofty_smart_okapi_bubble")}
       </button>
     </div>
-  {/if}
-  {#if !product}
-    <div class="message">{t.t("main_free_earthworm_peel")}</div>
   {/if}
 </div>
 
@@ -153,16 +166,6 @@
       p {
         line-height: 1.2em;
       }
-    }
-    .message {
-      width: 100%;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 2rem;
-      font-weight: 500;
-      color: var(--neutral-8);
     }
     @include media("<= phone") {
       position: absolute;

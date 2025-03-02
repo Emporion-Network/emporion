@@ -1,4 +1,4 @@
-import type { Autocomplete, CheckToken, FileMetaReq, GetMetadata, ReqFiles, RequestNonce, RequestToken, ResponseSuccess, Result, ScrollProducts, Translate, UpdateFileMeta, UpdateMetadata, UploadFiles, UploadMetadata } from '../common';
+import type { Autocomplete, CheckToken, FileMetaReq, GetCollection, GetCollections, ReqFiles, RequestNonce, RequestToken, ResponseSuccess, Result, ScrollProducts, Translate, UpdateFileMeta, UpdateMetadata, UploadFiles, UploadMetadata } from '../common';
 
 
 /**
@@ -139,8 +139,8 @@ export class Api {
     return this['post' satisfies UpdateMetadata['method']]<UpdateMetadata['res']>(`/update-metadata` satisfies UpdateMetadata['path'], req);
   }
 
-  async getCollections(req: GetMetadata["req"]) {
-    return this['get' satisfies GetMetadata['method']]<GetMetadata['res']>(`/collections/${req}` satisfies GetMetadata['path']).then(e => {
+  async getCollections(req: GetCollections["req"]) {
+    return this['get' satisfies GetCollections['method']]<GetCollections['res']>(`/collections/${req}` satisfies GetCollections['path']).then(e => {
       if (e.error) return e;
       e.result.sort((a, b) => a.products[0].id > b.products[0].id ? -1 : 1)
       e.result.map(e => {
@@ -150,7 +150,15 @@ export class Api {
     });
   }
 
-  async scrollProducts(req: ScrollProducts["req"]){
+  async getCollection(req: GetCollections["req"]) {
+    return this['get' satisfies GetCollection['method']]<GetCollection['res']>(`/collection/${req}` satisfies GetCollection['path']).then(e => {
+      if (e.error) return e;
+      e.result.sort((a, b) => a.id > b.id ? -1 : 1);
+      return e;
+    });
+  }
+
+  async scrollProducts(req: ScrollProducts["req"]) {
     const params = new URLSearchParams(Object.fromEntries(
       Object.entries(req).filter(([_, value]) => value)
     )).toString();

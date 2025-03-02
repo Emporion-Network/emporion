@@ -88,6 +88,20 @@ const app = new Hono<{ Variables: { state: State } }>()
       });
     }
   })
+  .get('/collection/:id', async (c) => {
+    try {
+      const id = c.req.param('id');
+      return c.json({
+        error: false,
+        result: await c.var.state.db.getCollection(id),
+      });
+    } catch {
+      return c.json({
+        error: false,
+        result: [],
+      });
+    }
+  })
   .get('/scroll-products', async (c) => {
     const {
       limit,

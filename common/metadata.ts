@@ -217,20 +217,27 @@ export interface UpdateMetadata {
 }
 
 
-export interface GetMetadata {
+export interface GetCollections {
   req: string,
   res: Result<{ collection: string, products: ProductMetadata[] }[]>,
   method: 'get',
   path: `/collections/${string}`,
 }
 
-export interface ScrollProducts  {
+export interface GetCollection {
+  req: string,
+  res: Result<ProductMetadata[]>,
+  method: 'get',
+  path: `/collection/${string}`,
+}
+
+export interface ScrollProducts {
   req: {
     start_after?: string,
     limit?: string
     category?: string
     search?: string
-    seller?:string
+    seller?: string
     sort?: string
     min_price?: string
     max_price?: string

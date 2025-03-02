@@ -47,7 +47,6 @@
   });
 
   const onsearch = () => {
-    let change = false;
     const url = new URL(l.url.href);
     if (search !== "") {
       url.searchParams.set("search", search);

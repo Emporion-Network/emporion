@@ -12,6 +12,7 @@
   import MyStore from "@/routes/MyStore/MyStore.svelte";
   import Landing from "./routes/Landing/Landing.svelte";
   import Cart from "./lib/Cart.svelte";
+  import Preview from "./routes/Store/Preview.svelte";
 </script>
 
 <Route path="/collection">
@@ -27,6 +28,11 @@
 <Route path="/store">
   <NavBar></NavBar>
   <Store />
+</Route>
+
+<Route path="/product">
+  <NavBar></NavBar>
+  <Preview />
 </Route>
 
 <Route path="/staking">

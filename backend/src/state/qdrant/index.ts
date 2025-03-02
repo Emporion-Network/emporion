@@ -123,10 +123,30 @@ export class Db {
         order_by: 'price',
       },
       with_payload: true,
-      group_size: 500,
+      group_size: 100,
       limit: 100,
     });
     return res.groups.map(h => ({ collection: h.id, products: h.hits.map(h => ({ id: h.id.toString(), ...h.payload })) }));
+  }
+
+  async getCollection(id: string) {
+    const seller = (await this.getProduct(id))?.seller;
+    if (!seller) return [];
+    return (await this.client.queryGroups(this.ProductMetadataName, {
+      group_by: 'collection',
+      filter: {
+        must: [
+          {
+            key: 'seller',
+            match: {
+              value: seller,
+            },
+          },
+        ],
+      },
+      with_payload: true,
+      group_size: 100,
+    })).groups[0]?.hits.map(e => e.payload);
   }
 
   async upsertProduct(metaData: ProductMetadata) {
@@ -158,21 +178,21 @@ export class Db {
     const filter: QueryParam['filter'] = {
       ...(params.search
         ? {
-          should: [
-            {
-              key: '_title',
-              match: {
-                text: params.search,
+            should: [
+              {
+                key: '_title',
+                match: {
+                  text: params.search,
+                },
               },
-            },
-            {
-              key: '_description',
-              match: {
-                text: params.search,
+              {
+                key: '_description',
+                match: {
+                  text: params.search,
+                },
               },
-            },
-          ],
-        }
+            ],
+          }
         : {}),
       must: [
         // {
@@ -183,28 +203,28 @@ export class Db {
         // },
         ...(params.category
           ? [{
-            key: 'category',
-            match: {
-              value: params.category,
-            },
-          }]
+              key: 'category',
+              match: {
+                value: params.category,
+              },
+            }]
           : []),
         ...(params.seller
           ? [{
-            key: 'seller',
-            match: {
-              value: params.seller,
-            },
-          }]
+              key: 'seller',
+              match: {
+                value: params.seller,
+              },
+            }]
           : []),
         ...(params.max_price || params.min_price
           ? [{
-            key: 'price',
-            range: {
-              lte: params.max_price ? Number(params.max_price) : undefined,
-              gte: params.min_price ? Number(params.min_price) : undefined,
-            },
-          }]
+              key: 'price',
+              range: {
+                lte: params.max_price ? Number(params.max_price) : undefined,
+                gte: params.min_price ? Number(params.min_price) : undefined,
+              },
+            }]
           : []),
       ],
     };
@@ -218,22 +238,22 @@ export class Db {
       filter,
       ...(params.search || params.sort
         ? {
-          query: {
-            ...(params.search
-              ? {
-                nearest: await this.embedDocument(params.search),
-              }
-              : {}),
-            ...(params.sort
-              ? {
-                order_by: {
-                  key: 'price',
-                  direction: params.sort === 'asc' ? 'asc' : 'desc',
-                },
-              }
-              : {}),
+            query: {
+              ...(params.search
+                ? {
+                    nearest: await this.embedDocument(params.search),
+                  }
+                : {}),
+              ...(params.sort
+                ? {
+                    order_by: {
+                      key: 'price',
+                      direction: params.sort === 'asc' ? 'asc' : 'desc',
+                    },
+                  }
+                : {}),
+            },
           }
-        }
         : {}),
     };
     try {

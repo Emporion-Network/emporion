@@ -5,7 +5,9 @@
   import { Decimal } from "@cosmjs/math";
   import type { ProductMetadata } from "@common";
   import Address from "@/lib/Address.svelte";
-  const l = getTranslator();
+  import { getLocation } from "@/stores/location.svelte";
+  const t = getTranslator();
+  const l = getLocation();
 
   let props: WithSkeleton<{
     product: ProductMetadata & { mark: number[] };
@@ -40,10 +42,14 @@
   {#if !props.skeleton}
     {@const p = props.product}
     {@const rating = getRating(p.mark)}
-    <img src={p.gallery[l.lang][0]} alt={p.title[l.lang]} />
+    <img src={p.gallery[t.lang][0]} alt={p.title[t.lang]} />
     <div class="info">
       <div class="title">
-        <h2>{p.title[l.lang]}</h2>
+        <a
+          href={`/product?p=${p.id}`}
+          onclick={() => l.goTo(`/product?p=${p.id}`)}
+          ><h2>{p.title[t.lang]}</h2></a
+        >
         <h3>{Decimal.fromAtomics(p.price, 6)} USDC</h3>
         <Address address={p.seller} />
         <Rating type="long" {...rating} />

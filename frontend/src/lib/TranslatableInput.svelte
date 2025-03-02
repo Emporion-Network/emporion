@@ -78,7 +78,11 @@
 {#snippet button()}
   {#if missingTranslations.length}
     <ToolTip openTimout={200}>
-      <button aria-label={t.t("jolly_true_warthog_peek")} class="warn" onclick={translate}>
+      <button
+        aria-label={t.t("jolly_true_warthog_peek")}
+        class="warn"
+        onclick={translate}
+      >
         <i class="ri-translate"></i>
       </button>
       {#snippet content()}
@@ -92,7 +96,11 @@
     </ToolTip>
   {:else if value[selectedLang] !== ""}
     <ToolTip openTimout={200}>
-      <button aria-label="{t.t("sunny_noble_toucan_propel")}" class="ok" onclick={retranslate}>
+      <button
+        aria-label={t.t("sunny_noble_toucan_propel")}
+        class="ok"
+        onclick={retranslate}
+      >
         <i class="ri-translate"></i>
       </button>
       {#snippet content()}
@@ -100,7 +108,7 @@
       {/snippet}
     </ToolTip>
   {:else}
-    <button aria-label="{t.t("weird_early_weasel_jolt")}" disabled>
+    <button aria-label={t.t("weird_early_weasel_jolt")} disabled>
       <i class="ri-translate"></i>
     </button>
   {/if}
@@ -128,9 +136,10 @@
       align-self: flex-start;
     }
     button {
-      max-width: max-content;
       border: none;
       outline: none;
+      display: block;
+      height: 30px;
       aspect-ratio: 1/1;
       border-radius: 3px;
       border-width: 3px;

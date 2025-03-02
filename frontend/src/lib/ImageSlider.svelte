@@ -79,9 +79,11 @@
       }
     }
     img {
-      min-width: 100%;
+      max-height: 80vh;
       aspect-ratio: 1/1;
       object-fit: contain;
+      background-color: var(--neutral-3);
+      padding: 1rem;
     }
   }
 </style>
