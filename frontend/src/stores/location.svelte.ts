@@ -23,6 +23,7 @@ export const getLocation = () => {
       history.back();
     },
     replace(href: string) {
+      location.href = href;
       history.replaceState('', '', href);
     },
   };

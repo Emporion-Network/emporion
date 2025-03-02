@@ -2,13 +2,27 @@
   import { getTranslator } from "@/stores/translate.svelte";
   import MultiSelect from "@/lib/MultiSelect.svelte";
   import { CATEGORIES } from "@common";
-  let value = $state("");
-  let categorie = $state(CATEGORIES[0]);
+  import { untrack } from "svelte";
+  let {
+    search = $bindable(),
+    category: categorie = $bindable(),
+    onsearch = () => {},
+  }: {
+    search: string;
+    category: string;
+    onsearch: () => void;
+  } = $props();
   let t = getTranslator();
+  $effect(() => {
+    categorie;
+    untrack(() => {
+      onsearch();
+    });
+  });
 </script>
 
 <div class="search-bar">
-  <MultiSelect options={CATEGORIES} value={categorie} multiple={false}>
+  <MultiSelect options={CATEGORIES} bind:value={categorie} multiple={false}>
     {#snippet valueRenderer(v)}
       {t.t(v as any)}
     {/snippet}
@@ -16,8 +30,13 @@
       {t.t(v as any)}
     {/snippet}
   </MultiSelect>
-  <input placeholder={t.t("blue_alert_scallop_hope")} type="text" bind:value />
-  <button aria-label={t.t("careful_awful_myna_scold")}>
+  <input
+    placeholder={t.t("blue_alert_scallop_hope")}
+    type="text"
+    bind:value={search}
+    onkeypress={(e) => e.key == "Enter" && onsearch()}
+  />
+  <button onclick={onsearch} aria-label={t.t("careful_awful_myna_scold")}>
     <i class="ri-search-line"></i>
   </button>
 </div>
@@ -62,7 +81,7 @@
         border: none;
       }
     }
-    @include media('> phone'){
+    @include media("> phone") {
       :global(.multi-select .options) {
         width: max-content;
       }

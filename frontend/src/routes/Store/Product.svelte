@@ -7,8 +7,10 @@
   import Address from "@/lib/Address.svelte";
   const l = getTranslator();
 
-  let props: WithSkeleton<{ product: ProductMetadata & { mark: number[] } }> =
-    $props();
+  let props: WithSkeleton<{
+    product: ProductMetadata & { mark: number[] };
+  }> = $props();
+
   const getRating = (n: number[]) => {
     const nb_ratings = n.reduce((acc, r) => acc + r, 0);
     return {

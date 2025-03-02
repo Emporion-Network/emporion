@@ -158,53 +158,53 @@ export class Db {
     const filter: QueryParam['filter'] = {
       ...(params.search
         ? {
-            should: [
-              {
-                key: '_title',
-                match: {
-                  text: params.search,
-                },
+          should: [
+            {
+              key: '_title',
+              match: {
+                text: params.search,
               },
-              {
-                key: '_description',
-                match: {
-                  text: params.search,
-                },
+            },
+            {
+              key: '_description',
+              match: {
+                text: params.search,
               },
-            ],
-          }
+            },
+          ],
+        }
         : {}),
       must: [
-        {
-          key: 'listed',
-          match: {
-            value: true,
-          },
-        },
+        // {
+        //   key: 'listed',
+        //   match: {
+        //     value: true,
+        //   },
+        // },
         ...(params.category
           ? [{
-              key: 'category',
-              match: {
-                value: params.category,
-              },
-            }]
+            key: 'category',
+            match: {
+              value: params.category,
+            },
+          }]
           : []),
         ...(params.seller
           ? [{
-              key: 'seller',
-              match: {
-                value: params.seller,
-              },
-            }]
+            key: 'seller',
+            match: {
+              value: params.seller,
+            },
+          }]
           : []),
         ...(params.max_price || params.min_price
           ? [{
-              key: 'price',
-              range: {
-                lte: params.max_price ? Number(params.max_price) : undefined,
-                gte: params.min_price ? Number(params.min_price) : undefined,
-              },
-            }]
+            key: 'price',
+            range: {
+              lte: params.max_price ? Number(params.max_price) : undefined,
+              gte: params.min_price ? Number(params.min_price) : undefined,
+            },
+          }]
           : []),
       ],
     };
@@ -217,21 +217,23 @@ export class Db {
       offset: params?.start_after ? Number(params.start_after) : undefined,
       filter,
       ...(params.search || params.sort
-        ? { query: {
+        ? {
+          query: {
             ...(params.search
               ? {
-                  nearest: await this.embedDocument(params.search),
-                }
+                nearest: await this.embedDocument(params.search),
+              }
               : {}),
             ...(params.sort
               ? {
-                  order_by: {
-                    key: 'price',
-                    direction: params.sort === 'asc' ? 'asc' : 'desc',
-                  },
-                }
+                order_by: {
+                  key: 'price',
+                  direction: params.sort === 'asc' ? 'asc' : 'desc',
+                },
+              }
               : {}),
-          } }
+          }
+        }
         : {}),
     };
     try {
