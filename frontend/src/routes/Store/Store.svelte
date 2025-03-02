@@ -14,7 +14,6 @@
   let category = $state(CATEGORIES[0]);
   const l = getLocation();
   async function fetchProducts() {
-    console.log(l.url.href);
     const req = await user.scrollProducts({
       search: l.url.searchParams.get("search") || undefined,
       max_price: l.url.searchParams.get("max_price") || undefined,
@@ -44,6 +43,8 @@
   }
   onMount(async () => {
     await fetchProducts();
+    search = l.url.searchParams.get("search") || "";
+    category = l.url.searchParams.get("category") || CATEGORIES[0];
   });
 
   const onsearch = () => {

@@ -3,7 +3,7 @@ import { Api } from '@ts-client/api';
 import { EmporionClient, EmporionQueryClient } from '@ts-client/Emporion.client';
 import { bechToBech, type FileMetaReq, type FileMetaRes, type ProductMetadata, type Result, type UploadFiles } from '@common';
 import { GasPrice } from '@cosmjs/stargate';
-import { storage } from './localStorage.svelte';
+import { Storage, storage } from './localStorage.svelte';
 import { Decimal } from "@cosmjs/math"
 
 class User extends Api {
@@ -28,6 +28,7 @@ class User extends Api {
     }[],
     rewards: '0',
   });
+  cart: Storage<ProductMetadata[]> = $state()!;
 
   constructor({
     apiRoot,
@@ -59,6 +60,7 @@ class User extends Api {
     this.#acceptedDenom = acceptedDenom;
     // TODO: Find a way to remove ts gymnastics
     this.ec = this.wc.then(wc => new EmporionQueryClient(wc as Parameters<typeof EmporionQueryClient['bind']>[0], this.#contractAddress));
+    this.cart = new Storage<ProductMetadata[]>("cart", []);
     window.addEventListener('keplr_keystorechange', () => {
       storage('token').clear();
       this.auth();
@@ -106,9 +108,11 @@ class User extends Api {
           address: this.address,
         });
       }
+      this.cart = new Storage<ProductMetadata[]>(`cart_${this.address}`, []);
       await this.updateWalletBalance();
     } catch (e) {
       console.log(e);
+      this.cart = new Storage<ProductMetadata[]>(`cart`, []);
       this.address = undefined;
     }
   }

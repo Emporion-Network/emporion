@@ -9,6 +9,10 @@
   let { goTo } = getLocation();
   let theme = getTheme();
   const t = getTranslator();
+
+  const openCart = () => {
+    window.dispatchEvent(new CustomEvent("cart-open"));
+  };
 </script>
 
 <div class="account">
@@ -20,7 +24,7 @@
           class="secondary-accent-button"
           bind:this={get, set}
           {...props}
-          aria-labelledby="{t.t("weird_aqua_sawfish_reap")}"
+          aria-labelledby={t.t("weird_aqua_sawfish_reap")}
         >
           <i class="ri-user-line"></i>
           <Address address={user.address!} />
@@ -61,7 +65,7 @@
               {t.t("key_trick_badger_expand")}
             {:else}
               <i class="ri-moon-fill"></i>
-             {t.t("vivid_awful_alligator_evoke")}
+              {t.t("vivid_awful_alligator_evoke")}
             {/if}
           </button>
           <button class="secondary-button" onclick={() => user.logout()}>
@@ -71,18 +75,31 @@
         </div>
       {/snippet}
     </ContextMenu>
-    <button class="secondary-button" aria-labelledby="{t.t("real_mellow_niklas_snap")}">
+    <button
+      class="secondary-button"
+      aria-labelledby={t.t("real_mellow_niklas_snap")}
+    >
       <i class="ri-notification-fill"></i>
     </button>
   {:else}
     <button
       class="primary-accent-button"
-      aria-labelledby="{t.t("weird_aqua_sawfish_reap")}"
+      aria-labelledby={t.t("weird_aqua_sawfish_reap")}
       onclick={() => user.auth()}
     >
       {t.t("teary_gross_boar_gasp")}
     </button>
   {/if}
+  <button
+    class="secondary-button cart"
+    aria-labelledby={t.t("real_mellow_niklas_snap")}
+    onclick={openCart}
+  >
+    <i class="ri-shopping-bag-3-fill"></i>
+    {#if user.cart.value.length > 0}
+      <span>{user.cart.value.length > 9 ? "+" : user.cart.value.length}</span>
+    {/if}
+  </button>
 </div>
 
 <style lang="scss">
@@ -105,6 +122,23 @@
       min-width: var(--height-2);
       aspect-ratio: 1/1;
       border-color: transparent;
+    }
+  }
+  .cart {
+    position: relative;
+    span {
+      position: absolute;
+      font-size: 0.8rem;
+      background-color: rgb(var(--brand));
+      color: white;
+      width: 1.2rem;
+      height: 1.2rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 1rem;
+      top: 0;
+      right: 0;
     }
   }
   .bank {

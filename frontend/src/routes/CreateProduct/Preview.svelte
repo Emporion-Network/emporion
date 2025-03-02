@@ -50,7 +50,6 @@
               aria-label={t.t("sour_curly_gorilla_edit")}
               bind:this={get, set}
               {...props}
-              onclick={(e) => e.stopPropagation()}
             >
               <i class="ri-more-line"></i>
             </button>

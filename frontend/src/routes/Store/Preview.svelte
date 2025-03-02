@@ -10,26 +10,40 @@
   import { bechToBech, type ProductMetadata } from "@common";
   import { getLocation } from "@/stores/location.svelte";
   import { onMount, untrack } from "svelte";
+  import SearchBar from "./SearchBar.svelte";
+  import { CATEGORIES } from "@common";
+
   const t = getTranslator();
   const l = getLocation();
+  let category = $state(CATEGORIES[0]);
+  let search = $state("");
   let selectedProduct = $state("");
   let products: ProductMetadata[] = $state([]);
   let selectedProductIdx = $state(-1);
+  let m = $state([0, 0, 0, 0, 0, 0]);
+
+  const rating = $derived.by(() => {
+    const nb_ratings = m.reduce((acc, r) => acc + r, 0);
+    return {
+      nb_ratings,
+      avg_rating:
+        nb_ratings > 0
+          ? m.reduce((acc, r, i) => acc + r * i, 0) / nb_ratings
+          : 0,
+    };
+  });
 
   const fetchCollection = async (id: string) => {
     const req = await user.getCollection(id);
     const ec = await user.ec;
-    let m: number[];
     if (req.error) return;
     products = await Promise.all(
       req.result.map(async (e) => {
         const p = await ec.getProduct({ id: e.id });
         if (!m) {
           m = await ec.getMark({ addr: bechToBech(e.seller, "juno") });
-          return { ...e, mark: m, price: p.price };
-        } else {
-          return { ...e, price: p.price };
         }
+        return { ...e, price: p.price };
       }),
     );
     selectedProductIdx = products.findIndex((p) => p.id == id);
@@ -50,14 +64,34 @@
     selectedProduct = p;
     fetchCollection(selectedProduct);
   });
+  const onsearch = () => {
+    const url = new URL(l.url.href);
+    url.pathname = "/store";
+    if (search !== "") {
+      url.searchParams.set("search", search);
+    } else {
+      url.searchParams.delete("search");
+    }
+    if (category !== CATEGORIES[0]) {
+      url.searchParams.set("category", category);
+    } else {
+      url.searchParams.delete("category");
+    }
+    l.goTo(url.href);
+  };
+
+  const addToCart = () => {
+    window.dispatchEvent(new CustomEvent("cart-push", { detail: product }));
+  };
 </script>
 
+<SearchBar bind:category bind:search {onsearch} />
 <div class="preview">
   {#if product}
     <ImageSlider images={product.gallery[t.lang]} alt={product.title[t.lang]} />
     <div class="picker">
       <h1>{product.title[t.lang]}</h1>
-      <Rating type="long" url="" nb_ratings={100} avg_rating={4.5}></Rating>
+      <Rating type="long" {...rating}></Rating>
       <div class="link">
         <span>{t.t("upper_novel_shark_commend")}</span>
         <Address address={product.seller} />
@@ -69,7 +103,6 @@
               aria-label={t.t("sour_curly_gorilla_edit")}
               bind:this={get, set}
               {...props}
-              onclick={(e) => e.stopPropagation()}
             >
               <i class="ri-more-line"></i>
             </button>
@@ -103,7 +136,7 @@
       <Rendered selectedLang={t.lang} {products} bind:selectedProductIdx
       ></Rendered>
 
-      <button class="primary-button">
+      <button class="primary-button" onclick={addToCart}>
         {t.t("lofty_smart_okapi_bubble")}
       </button>
     </div>
@@ -121,7 +154,6 @@
     top: 1rem;
     gap: 1rem;
     padding: 1rem;
-    z-index: -1;
     .options {
       background-color: var(--neutral-1);
       align-items: flex-start;

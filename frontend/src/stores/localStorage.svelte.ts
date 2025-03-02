@@ -32,8 +32,10 @@ export class Storage<T> {
       localStorage.setItem(key, JSON.stringify(d));
       this.value = d;
     }
-    $effect(() => {
-      localStorage.setItem(key, JSON.stringify(this.value));
+    $effect.root(() => {
+      $effect(() => {
+        localStorage.setItem(key, JSON.stringify(this.value));
+      })
     });
   }
   clear() {

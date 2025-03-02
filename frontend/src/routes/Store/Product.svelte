@@ -23,6 +23,10 @@
           : 0,
     };
   };
+
+  const addToCart = (product: ProductMetadata) => () => {
+    window.dispatchEvent(new CustomEvent("cart-push", { detail: product }));
+  };
 </script>
 
 <div class="product">
@@ -54,7 +58,9 @@
         <Address address={p.seller} />
         <Rating type="long" {...rating} />
       </div>
-      <button class="primary-accent-button"> Add to cart </button>
+      <button class="primary-accent-button" onclick={addToCart(p)}>
+        Add to cart
+      </button>
     </div>
   {/if}
 </div>
@@ -102,6 +108,11 @@
       aspect-ratio: 1/1;
       object-fit: contain;
       padding: 0.5rem;
+    }
+    h2 {
+      &:hover {
+        text-decoration: underline;
+      }
     }
   }
 </style>

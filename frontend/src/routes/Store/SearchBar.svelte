@@ -13,7 +13,12 @@
     onsearch: () => void;
   } = $props();
   let t = getTranslator();
+  let onInit = false;
   $effect(() => {
+    if (!onInit) {
+      onInit = true;
+      return;
+    }
     categorie;
     untrack(() => {
       onsearch();
@@ -36,9 +41,21 @@
     bind:value={search}
     onkeypress={(e) => e.key == "Enter" && onsearch()}
   />
-  <button onclick={onsearch} aria-label={t.t("careful_awful_myna_scold")}>
-    <i class="ri-search-line"></i>
-  </button>
+  {#if search.length > 0}
+    <button
+      onclick={() => {
+        search = "";
+        onsearch();
+      }}
+      aria-label={t.t("gray_sunny_otter_scold")}
+    >
+      <i class="ri-close-fill"></i>
+    </button>
+  {:else}
+    <button onclick={onsearch} aria-label={t.t("careful_awful_myna_scold")}>
+      <i class="ri-search-line"></i>
+    </button>
+  {/if}
 </div>
 
 <style lang="scss">
