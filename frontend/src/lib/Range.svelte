@@ -20,11 +20,12 @@
   const dragEnd = () => {
     selected = -1;
   };
-  const drag = (e: MouseEvent) => {
+  const drag = (e: MouseEvent | TouchEvent) => {
     if (selected == -1) return;
     e.preventDefault();
     const rect = el.getBoundingClientRect();
-    const x = e.clientX - rect.left;
+    const x =
+      (e instanceof TouchEvent ? e.touches[0].clientX : e.clientX) - rect.left;
     let l = x / rect.width;
     for (let i = 0; i < snapPoints.length; i++) {
       const p = snapPoints[i];
@@ -40,7 +41,7 @@
   };
 </script>
 
-<svelte:window on:mousemove={drag} on:mouseup={dragEnd} />
+<svelte:window onmousemove={drag} onmouseup={dragEnd} ontouchmove={drag} />
 
 <div class="range" bind:this={el}>
   {#each value as v, i}
@@ -50,6 +51,7 @@
       aria-labelledby="handle"
       style="--l:{v}"
       onmousedown={dragStart(i)}
+      ontouchstart={dragStart(i)}
     >
       {#if tooltip}
         <div class="tooltip">

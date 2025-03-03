@@ -150,7 +150,6 @@
     display: flex;
     align-items: flex-start;
     align-self: flex-start;
-    position: sticky;
     top: 1rem;
     gap: 1rem;
     padding: 1rem;

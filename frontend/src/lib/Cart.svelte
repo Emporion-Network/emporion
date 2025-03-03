@@ -70,6 +70,7 @@
 <div class="cart" class:show>
   <div class="content">
     <h1>
+      Your cart
       <button
         aria-labelledby="Close cart"
         class="ghost-button"
@@ -77,7 +78,6 @@
       >
         <i class="ri-close-line"></i>
       </button>
-      Your cart
     </h1>
     {#each Object.entries(grouped) as [seller, products]}
       {@const total = products.reduce(
@@ -160,6 +160,12 @@
         .content {
           width: 100vw;
         }
+      }
+    }
+    h1 {
+      display: flex;
+      button {
+        margin-left: auto;
       }
     }
     &.show {
