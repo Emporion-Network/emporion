@@ -142,6 +142,7 @@
 </div>
 
 <style lang="scss">
+  @use "../mixins" as *;
   .cart {
     position: fixed;
     top: 0;
@@ -154,6 +155,13 @@
     opacity: 0;
     pointer-events: none;
     transition: opacity 200ms ease-in-out;
+    @include media("<=phone") {
+      &.show {
+        .content {
+          width: 100vw;
+        }
+      }
+    }
     &.show {
       opacity: 1;
       pointer-events: all;
@@ -173,12 +181,14 @@
       margin-left: auto;
       transform: translateX(100%);
       transition: transform 200ms ease-in-out;
+      overflow-y: auto;
     }
     .seller {
       display: flex;
       flex-direction: column;
-      gap: 1rem;
+      margin-bottom: 1rem;
       :global(.range) {
+        margin-top: 1rem;
         max-width: unset;
         height: 10px;
         background: linear-gradient(
@@ -189,10 +199,42 @@
         );
       }
 
+      .product {
+        display: flex;
+        justify-content: flex-start;
+        gap: 1rem;
+        .wpr {
+          flex: 1;
+        }
+        img {
+          width: 70px;
+          aspect-ratio: 1/1;
+          object-fit: contain;
+        }
+        .quantity {
+          align-self: center;
+          display: flex;
+          button {
+            aspect-ratio: 1;
+            height: 2rem;
+            padding: 0 !important;
+          }
+          span {
+            display: flex;
+            min-width: 3rem;
+            text-align: center;
+            justify-content: center;
+            align-items: center;
+          }
+        }
+      }
+
       .products {
         display: flex;
         flex-direction: column;
         gap: 1rem;
+        margin-top: 1rem;
+        margin-bottom: 1rem;
       }
       .total {
         display: flex;
@@ -208,35 +250,8 @@
         border: 1px solid var(--orange-6);
         color: var(--orange-12);
         border-radius: 3px;
-      }
-    }
-    .product {
-      display: flex;
-      justify-content: flex-start;
-      gap: 1rem;
-      .wpr {
-        flex: 1;
-      }
-      img {
-        width: 70px;
-        aspect-ratio: 1/1;
-        object-fit: contain;
-      }
-      .quantity {
-        align-self: center;
-        display: flex;
-        button {
-          aspect-ratio: 1;
-          height: 2rem;
-          padding: 0 !important;
-        }
-        span {
-          display: flex;
-          min-width: 3rem;
-          text-align: center;
-          justify-content: center;
-          align-items: center;
-        }
+        margin-bottom: 1rem;
+        margin-top: 1rem;
       }
     }
   }

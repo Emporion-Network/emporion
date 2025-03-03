@@ -200,7 +200,6 @@
       }
     }
     @include media("<= phone") {
-      position: absolute;
       flex-direction: column;
       :global(.gellery) {
         position: relative;

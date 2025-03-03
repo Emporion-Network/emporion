@@ -3,7 +3,7 @@
   let {
     value = $bindable(),
     tooltip,
-    snapStrength = 0.01,
+    snapStrength = 0.02,
     snapPoints = [0, 0.25, 0.5, 0.75, 1],
   }: {
     value: number[];
