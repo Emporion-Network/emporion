@@ -1,6 +1,7 @@
-import { type ProductMetadata, type ScrollProducts, stringify, type T } from '@common';
+import { type ProductMetadata, type ScrollProducts, stringify, type T, type UserData } from '@common';
 import { QdrantClient } from '@qdrant/js-client-rest';
 import { embedDocument } from './embeddings';
+import { randomUUIDv7 } from 'bun';
 
 const mergeTranslated = (a: T<string>): string => {
   return Object.keys(a).reduce((acc, k) => {
@@ -11,6 +12,7 @@ const mergeTranslated = (a: T<string>): string => {
 export class Db {
   private client: QdrantClient;
   private ProductMetadataName = 'products';
+  private UserDataName = 'user';
 
   embedDocument: typeof embedDocument;
 
@@ -24,6 +26,7 @@ export class Db {
     try {
       await Promise.all([
         this.#initProductMetadataName(),
+        this.#initUserData(),
       ]);
     } catch (e: unknown) {
       console.error((e as { data: string }).data);
@@ -98,6 +101,21 @@ export class Db {
       });
       this.client.createPayloadIndex(this.ProductMetadataName, {
         field_name: 'metadata_url',
+        field_schema: {
+          type: 'keyword',
+          lookup: true,
+        },
+      });
+    }
+  }
+
+  async #initUserData() {
+    const e = await (await this.client.collectionExists(this.UserDataName)).exists;
+    if (!e) {
+      this.client.createCollection(this.UserDataName, {
+      });
+      this.client.createPayloadIndex(this.UserDataName, {
+        field_name: 'addr',
         field_schema: {
           type: 'keyword',
           lookup: true,
@@ -273,5 +291,66 @@ export class Db {
       with_payload: true,
     });
     return res[0]?.payload as unknown as ProductMetadata | undefined;
+  }
+
+  #newUserData(addr: string): UserData {
+    return {
+      id: randomUUIDv7(),
+      addr,
+      postalAddresses: [],
+      positiveProducts: [],
+      negativeProducts: [],
+    };
+  }
+
+  async addPostalAddress(addr: string, postalAddress: string) {
+    const old = (await this.client.query(this.UserDataName, {
+      filter: {
+        must: [{
+          key: 'addr',
+          match: {
+            value: addr,
+          },
+        }],
+      },
+      with_payload: true,
+    })).points[0]?.payload as unknown as { postalAddress: string[], addr: string, id: string } | undefined;
+    if (!old) {
+      const user = this.#newUserData(addr);
+      user.postalAddresses.push(postalAddress);
+      this.client.upsert(this.UserDataName, {
+        points: [{
+          id: randomUUIDv7(),
+          vector: [],
+          payload: user as unknown as Record<string, unknown>,
+        }],
+      });
+    } else {
+      this.client.upsert(this.UserDataName, {
+        points: [{
+          id: old.id,
+          vector: [],
+          payload: {
+            ...old,
+            postalAddress: [...old.postalAddress, postalAddress],
+          },
+        }],
+      });
+    }
+  }
+
+  async getUserData(addr: string): Promise<UserData | undefined> {
+    const res = await this.client.query(this.UserDataName, {
+      filter: {
+        must: [{
+          key: 'addr',
+          match: {
+            value: addr,
+          },
+        }],
+      },
+      with_payload: true,
+    });
+    return res.points[0]?.payload as unknown as UserData;
   }
 }
