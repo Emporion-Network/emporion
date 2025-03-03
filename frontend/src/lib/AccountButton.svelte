@@ -109,6 +109,7 @@
     display: flex;
     gap: 1rem;
     @include media("<=phone") {
+      gap: 0.1rem;
       .secondary-accent-button {
         aspect-ratio: 1/1 !important;
         width: auto;
