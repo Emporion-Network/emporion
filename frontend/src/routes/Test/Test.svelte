@@ -1,15 +1,12 @@
 <script lang="ts">
+  import PostalAddressForm from "@/lib/PostalAddressForm.svelte";
   import Range from "@/lib/Range.svelte";
-  let v = [0, 0.5, 1];
+  let name = $state("");
+  let addr = $state("");
 </script>
 
 <div class="page">
-  <input type="range" />
-  <Range bind:value={v}>
-    {#snippet tooltip(p)}
-      {Math.floor(p * 100)}%
-    {/snippet}
-  </Range>
+  <PostalAddressForm bind:name bind:postalAddress={addr} />
 </div>
 
 <style lang="scss">

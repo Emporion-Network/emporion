@@ -62,6 +62,14 @@
     l.replace(url.href);
     fetchProducts();
   };
+
+  const reset = () => {
+    const url = new URL(l.url.href);
+    url.search = "";
+    l.replace(url.href);
+    fetchProducts();
+    // setTimeout(fetchProducts);
+  };
 </script>
 
 <SearchBar {onsearch} bind:search bind:category></SearchBar>
@@ -73,9 +81,14 @@
     {#if products.length == 0}
       <div class="empty">
         <h1>No products found</h1>
-        <button class="primary-button" onclick={() => l.goTo("/my-store")}>
-          List your products
-        </button>
+        <div class="buttons">
+          <button class="primary-button" onclick={reset}>
+            Back to products
+          </button>
+          <button class="secondary-button" onclick={() => l.goTo("/my-store")}>
+            List your products
+          </button>
+        </div>
       </div>
     {/if}
   {:else}
@@ -90,7 +103,7 @@
 </div>
 
 <style lang="scss">
-  @use "../../mixins" as m;
+  @use "../../mixins" as *;
 
   .products {
     display: grid;
@@ -108,19 +121,28 @@
       h1 {
         font-size: xx-large;
       }
+      .buttons {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
       button {
         padding-left: 2rem;
         padding-right: 2rem;
+        flex: 1;
       }
     }
-    @include m.media("<=tablet-lg") {
+    @include media("<=tablet-lg") {
       grid-template-columns: 1fr 1fr 1fr;
     }
-    @include m.media("<=tablet") {
+    @include media("<=tablet") {
       grid-template-columns: 1fr 1fr;
     }
-    @include m.media("<=phone") {
+    @include media("<=phone") {
       grid-template-columns: 1fr;
+      .empty .buttons {
+        flex-direction: column;
+      }
     }
   }
 </style>

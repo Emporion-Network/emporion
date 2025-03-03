@@ -190,6 +190,7 @@
       left: 0.5rem;
       top: 1.75rem;
       transform: translateY(-50%);
+      transform-origin: center left;
 
       color: var(--neutral-10);
       pointer-events: none;

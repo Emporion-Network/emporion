@@ -17,6 +17,7 @@ export class State {
   readonly fs: Fs;
   readonly tracking: Tracking;
   readonly domainName: string;
+  readonly addressAutocompleteApiKey: string;
 
   constructor(params: {
     jwtSecret: string
@@ -37,6 +38,7 @@ export class State {
     fedexClientId: string
     fedexClientSecret: string
     domainName: string
+    addressAutocompleteApiKey: string
   }) {
     this.nonces = new Map();
     this.domainName = params.domainName;
@@ -46,6 +48,7 @@ export class State {
     this.translationApiKey = params.translationApiKey;
     this.translationApiEndpoint = params.translationApiEndpoint;
     this.uploadMaxSize = params.uploadMaxSize;
+    this.addressAutocompleteApiKey = params.addressAutocompleteApiKey;
     this.fs = new Fs({
       s3AccessKey: params.s3AccessKey,
       s3SecretKey: params.s3SecretKey,

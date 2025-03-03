@@ -9,7 +9,7 @@
         {
           get: () => HTMLElement;
           set: (e: HTMLElement) => void;
-          onclick: (e:MouseEvent) => void;
+          onclick: (e: MouseEvent) => void;
         },
       ]
     >;
@@ -55,17 +55,17 @@
     ref = v;
   };
 
-  const handleOutside = (e:MouseEvent)=>{
-    if(!show) return;
-    if(!contentE.contains(e.target as HTMLElement)){
+  const handleOutside = (e: MouseEvent) => {
+    if (!show) return;
+    if (!contentE.contains(e.target as HTMLElement)) {
       show = false;
     }
-  }
-  const handleClick = (e:MouseEvent)=>{
+  };
+  const handleClick = (e: MouseEvent) => {
     show = true;
     setTimeout(onf, 10);
     e.stopPropagation();
-  }
+  };
 
   const close = () => {
     // @ts-expect-error doesnt know its an element
@@ -74,8 +74,11 @@
   };
 </script>
 
-<svelte:window onscroll={()=>show = false} onresize={()=>show = false} onmousedown={handleOutside}/>
-
+<svelte:window
+  onscroll={() => (show = false)}
+  onresize={() => (show = false)}
+  onmousedown={handleOutside}
+/>
 
 <div class="context-menu" class:show>
   {@render opener({ get, set, onclick: handleClick })}
@@ -105,16 +108,16 @@
       opacity: 0;
       width: max-content;
     }
-    &.show{
+    &.show {
       .content {
         display: flex;
         flex-direction: column;
         animation: show 200ms 40ms ease-in-out forwards;
         @keyframes show {
-          from{
+          from {
             opacity: 0;
           }
-          to{
+          to {
             opacity: 1;
           }
         }

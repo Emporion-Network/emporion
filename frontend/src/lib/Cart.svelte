@@ -7,6 +7,7 @@
   import Address from "./Address.svelte";
   import { user } from "@/stores/user.svelte";
   import Range from "./Range.svelte";
+  import PostalAddressForm from "./PostalAddressForm.svelte";
 
   let show = $state(false);
   let t = getTranslator();
@@ -65,6 +66,8 @@
     const p = user.cart.value.find((x) => x.id == id)!;
     user.cart.value.push(p);
   };
+
+  const toAddressPicker = () => {};
 </script>
 
 <div class="cart" class:show>
@@ -79,6 +82,7 @@
         <i class="ri-close-line"></i>
       </button>
     </h1>
+    <PostalAddressForm name="" postalAddress="" />
     {#each Object.entries(grouped) as [seller, products]}
       {@const total = products.reduce(
         (acc, p) =>
@@ -178,7 +182,8 @@
     .content {
       width: 40vw;
       height: 100vh;
-      background-color: var(--neutral-2);
+      --parent-bg: var(--neutral-2);
+      background-color: var(--parent-bg);
       padding: 1rem;
       overflow-y: auto;
       display: flex;

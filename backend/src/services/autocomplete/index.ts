@@ -27,6 +27,30 @@ const translate = new Hono<{ Variables: { state: State } }>()
       error: false,
       result: suggestions,
     });
+  })
+  .use('/address-autocomplete', jwt)
+  .get('/address-autocomplete', async (c) => {
+    const input = c.req.query('q');
+    let resp = [];
+    try {
+      if (input)
+        resp = (await (await fetch('https://places.googleapis.com/v1/places:autocomplete', {
+          method: 'POST',
+          headers: {
+            'X-Goog-Api-Key': c.var.state.addressAutocompleteApiKey,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            input,
+          }),
+        })).json()).suggestions.map((s: { placePrediction: { text: { text: string } } }) => s.placePrediction.text.text);
+    } catch (e: unknown) {
+      console.log((e as Error).message);
+    }
+    return c.json({
+      result: resp,
+      error: false,
+    });
   });
 
 export default translate;

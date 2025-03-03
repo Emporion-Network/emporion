@@ -166,7 +166,6 @@
       div {
         top: 0%;
         transform: translateY(-50%) scale(0.8);
-        transform-origin: center left;
         color: var(--main-10);
       }
     }
@@ -195,6 +194,7 @@
       padding: 0 0.2rem;
       top: 0%;
       transform: translateY(-50%) scale(0.8);
+      transform-origin: center left;
       color: var(--neutral-10);
       pointer-events: none;
       user-select: none;

@@ -6,3 +6,10 @@ export interface Autocomplete {
   method: 'post'
   path: '/autocomplete'
 }
+
+export interface AddressAutocomplete {
+  req: string,
+  res: Result<string[]>,
+  method: 'get',
+  path: `/address-autocomplete?q=${string}`
+}

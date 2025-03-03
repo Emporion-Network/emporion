@@ -3,6 +3,7 @@
   import MultiSelect from "@/lib/MultiSelect.svelte";
   import { CATEGORIES } from "@common";
   import { untrack } from "svelte";
+  import Input from "@/lib/Input.svelte";
   let {
     search = $bindable(),
     category: categorie = $bindable(),
@@ -24,10 +25,22 @@
       onsearch();
     });
   });
+  let catFilter = $state("");
+  const filter = (v: string) => {
+    return t.t(v).toLocaleLowerCase().includes(catFilter.toLocaleLowerCase());
+  };
 </script>
 
 <div class="search-bar">
-  <MultiSelect options={CATEGORIES} bind:value={categorie} multiple={false}>
+  <MultiSelect
+    options={CATEGORIES}
+    bind:value={categorie}
+    multiple={false}
+    {filter}
+  >
+    {#snippet filterRenderer()}
+      <Input type="search" label="" placeholder="" bind:value={catFilter} />
+    {/snippet}
     {#snippet valueRenderer(v)}
       {t.t(v as any)}
     {/snippet}
@@ -106,6 +119,9 @@
     :global(.multi-select) {
       border-radius: 2px 0px 0px 2px !important;
       margin-top: 0;
+    }
+    :global(.multi-select .options > button) {
+      padding: 0 0.5rem;
     }
   }
 </style>

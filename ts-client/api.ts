@@ -1,4 +1,4 @@
-import type { Autocomplete, CheckToken, FileMetaReq, GetCollection, GetCollections, ReqFiles, RequestNonce, RequestToken, ResponseSuccess, Result, ScrollProducts, Translate, UpdateFileMeta, UpdateMetadata, UploadFiles, UploadMetadata } from '../common';
+import type { AddressAutocomplete, Autocomplete, CheckToken, FileMetaReq, GetCollection, GetCollections, ReqFiles, RequestNonce, RequestToken, ResponseSuccess, Result, ScrollProducts, Translate, UpdateFileMeta, UpdateMetadata, UploadFiles, UploadMetadata } from '../common';
 
 
 /**
@@ -156,6 +156,10 @@ export class Api {
       e.result.sort((a, b) => a.id > b.id ? -1 : 1);
       return e;
     });
+  }
+
+  async addressAutocomplete(req: AddressAutocomplete['req']) {
+    return this['get' satisfies AddressAutocomplete['method']]<AddressAutocomplete['res']>(`/address-autocomplete?q=${req}` satisfies AddressAutocomplete['path'])
   }
 
   async scrollProducts(req: ScrollProducts["req"]) {

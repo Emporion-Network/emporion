@@ -38,6 +38,7 @@ const {
   EMPORION_CONTRACT_ADDRESS = '',
   DOMAIN_NAME = 'emporion.network',
   WS_RPCS = 'wss://rpc-juno.mib.tech/websocket,wss://juno-rpc.publicnode.com:443/websocket',
+  ADDRESS_AUTOCOMPLETE_API_KEY = '',
 } = Bun.env;
 
 /**
@@ -64,6 +65,7 @@ const state = new State({
   dhlApiKey: DHL_API_KEY,
   upsClientId: UPS_CLIENT_ID,
   upsClientSecret: UPS_CLIENT_SECRET,
+  addressAutocompleteApiKey: ADDRESS_AUTOCOMPLETE_API_KEY,
 });
 
 const blockchain = new Indexer(WS_RPCS.split(','), state, {
@@ -95,6 +97,12 @@ app
   .route('/api/', autocomplete)
   .route('/api/', metadata)
   .route('/api/', wsHandler)
+  .onError((e, c) => {
+    return c.json({
+      error: true,
+      message: e.message,
+    }, 400);
+  })
   .use('*', serveStatic({
     root: '../frontend/dist/',
     rewriteRequestPath: path => path,
@@ -110,8 +118,6 @@ app
   });
 
 blockchain.listen();
-
-console.log(QDRANT_ENDPOINT);
 
 export default {
   port: PORT,
