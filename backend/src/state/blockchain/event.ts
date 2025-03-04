@@ -157,7 +157,7 @@ export class TxDecoder {
     });
   };
 
-  getEvents(tx: Uint8Array, height: number, hash: string) {
+  getEvents(tx: Uint8Array, height: number, hash: string): BlockchainEvent[] {
     const decoded = this.registry.decode({
       typeUrl: Tx.typeUrl,
       value: tx,

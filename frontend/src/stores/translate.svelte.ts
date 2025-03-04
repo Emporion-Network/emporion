@@ -1,6 +1,6 @@
 import { langs } from '../../messages.d.js';
 import { I18n } from 'i18n-js';
-import en from '../../../messages/en.json';
+import en from '../../../locales/en.json';
 import { storage } from './localStorage.svelte.js';
 
 const tst = $derived.by(() => {
@@ -35,7 +35,7 @@ $effect.root(() => {
     locale: 'en',
   });
   window.ini = ini;
-  import(`../../../messages/${defLang}.json`).then((e) => {
+  import(`../../../locales/${defLang}.json`).then((e) => {
     window.ini.locale = defLang;
     window.ini.store({
       [defLang]: e,
@@ -51,7 +51,7 @@ export const getTranslator = () => {
     },
     set lang(v) {
       store.set(v);
-      import(`../../../messages/${v}.json`).then((e) => {
+      import(`../../../locales/${v}.json`).then((e) => {
         window.ini.locale = v;
         window.ini.store({
           [v]: e,

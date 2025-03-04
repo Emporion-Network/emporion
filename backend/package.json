@@ -2,7 +2,7 @@
   "name": "server",
   "module": "main.ts",
   "type": "module",
-  "version": "0.0.26",
+  "version": "0.0.27",
   "scripts": {
     "start": "bun run src/main.ts",
     "dev": "bun run --watch src/main.ts",

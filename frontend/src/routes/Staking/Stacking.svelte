@@ -1,7 +1,6 @@
 <script lang="ts">
   import ButtonGroup from "@/lib/ButtonGroup.svelte";
   import Input from "@/lib/Input.svelte";
-  import Route from "@/lib/Route.svelte";
   import { humanTimeLeft } from "@/lib/utils";
   import { getTranslator } from "@/stores/translate.svelte";
   import { user } from "@/stores/user.svelte";
@@ -84,11 +83,10 @@
         <div>
           <span>{t.t("top_every_earthworm_expand")}</span>
           <span>
-            {100 *
-              Math.floor(
-                Number(user.bank.staked) / Number(params.total_staked),
-              )}
-            %
+            {(
+              (100 * Number(user.bank.staked)) /
+              Number(params.total_staked)
+            ).toFixed(2)}%
           </span>
         </div>
       </div>
@@ -289,7 +287,10 @@
         </button>
       {/if}
       <div class="info">
-        <h3><i class="ri-information-line"></i> {t.t("stock_aware_otter_rush")}</h3>
+        <h3>
+          <i class="ri-information-line"></i>
+          {t.t("stock_aware_otter_rush")}
+        </h3>
         <p>
           {t.t("glad_small_rook_bask")}
         </p>

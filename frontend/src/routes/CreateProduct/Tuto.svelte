@@ -5,7 +5,8 @@
     import { getTutoRegistry } from './tutoStore.svelte';
     import { typeStr, wait } from '@/lib/utils';
     import { TUTORIAL_PRODUCT } from './tutorialProduct';
-    import type { Product } from './Form.svelte';
+    import type { ProductMetadata } from '@common';
+
     // import Product from '../Store/Product.svelte';
     let tgt = TUTORIAL_PRODUCT[0];
     let {
@@ -13,7 +14,7 @@
       ondone,
     }: {
       ondone: () => void
-      products: Product[]
+      products: ProductMetadata[]
     } = $props();
     let t = getTranslator();
     let registry = getTutoRegistry();
@@ -203,7 +204,7 @@
         stepName: 'repeat_add',
         async in() {
           await point(registry['add_product'] as HTMLElement);
-          let p2 = TUTORIAL_PRODUCT[1] as unknown as Product;
+          let p2 = TUTORIAL_PRODUCT[1] as unknown as ProductMetadata;
           p2.attributes[0].trait_type = tgt.attribute_1[t.lang];
           p2.attributes[1].trait_type = tgt.attribute_2[t.lang];
           products.push(p2);

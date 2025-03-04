@@ -4,7 +4,7 @@
 
 <footer>
   <div>
-    <Logo bg="transparent" />
+    <Logo bg="transparent" color="var(--neutral-12)" />
     <span>©{new Date().getFullYear()} Emporion. All rights reserved.</span>
   </div>
   <div>

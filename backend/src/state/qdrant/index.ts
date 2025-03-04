@@ -300,10 +300,14 @@ export class Db {
       postalAddresses: [],
       positiveProducts: [],
       negativeProducts: [],
+      notifications: [],
     };
   }
 
-  async addPostalAddress(addr: string, postalAddress: string) {
+  async addPostalAddress(addr: string, deliveryData: {
+    postalAddress: string
+    name: string
+  }) {
     const old = (await this.client.query(this.UserDataName, {
       filter: {
         must: [{
@@ -314,10 +318,10 @@ export class Db {
         }],
       },
       with_payload: true,
-    })).points[0]?.payload as unknown as { postalAddress: string[], addr: string, id: string } | undefined;
+    })).points[0]?.payload as unknown as UserData | undefined;
     if (!old) {
       const user = this.#newUserData(addr);
-      user.postalAddresses.push(postalAddress);
+      user.postalAddresses.push(deliveryData);
       this.client.upsert(this.UserDataName, {
         points: [{
           id: randomUUIDv7(),
@@ -326,14 +330,12 @@ export class Db {
         }],
       });
     } else {
+      old.postalAddresses.push(deliveryData);
       this.client.upsert(this.UserDataName, {
         points: [{
           id: old.id,
           vector: [],
-          payload: {
-            ...old,
-            postalAddress: [...old.postalAddress, postalAddress],
-          },
+          payload: old as unknown as Record<string, unknown>,
         }],
       });
     }
