@@ -245,12 +245,18 @@ const app = new Hono<{ Variables: { state: State } }>()
                   'ratingValue': r.mark,
                 },
               })),
-              'aggregateRating': {
-                '@type': 'AggregateRating',
-                ratingValue,
-                ratingCount,
-                bestRating,
-              },
+              ...(ratingCount > 0
+                ? {
+                    aggregateRating: {
+                      '@type': 'AggregateRating',
+                      ratingValue,
+                      ratingCount,
+                      bestRating,
+                    },
+                  }
+                : {
+
+                  }),
             },
           },
         })),
