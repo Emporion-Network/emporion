@@ -109,7 +109,7 @@ const withJSON = async ({
       </script>
       ${json.map(e => html`
         <script type="application/ld+json">
-          ${JSON.stringify(e)}
+          ${raw(JSON.stringify(e))}
         </script>
       `)}
       `;
