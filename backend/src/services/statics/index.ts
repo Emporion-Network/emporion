@@ -234,6 +234,7 @@ const app = new Hono<{ Variables: { state: State } }>()
             'seller': {
               '@type': 'Organization',
               'name': e.seller,
+              'url': '',
               'review': r.map(r => ({
                 '@type': 'Review',
                 'reviewRating': {
