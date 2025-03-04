@@ -45,11 +45,12 @@
   let el: HTMLElement = $state()!;
 
   const reg =
-    /(^[0-9][\.,][0-9]{0,6}$)|(^[0-9][\.,]?$)|(^[1-9][0-9]*[\.,]?$)|(^[1-9][0-9]*[\.,][0-9]{0,6}$)|(^$)/;
+    /(^[0-9]\.[0-9]{0,6}$)|(^[0-9]\.?$)|(^[1-9][0-9]*\.?$)|(^[1-9][0-9]*\.[0-9]{0,6}$)|(^$)/;
   const set = (v: string) => {
+    v = v.replace(",", ".");
     if (!reg.test(v)) return;
     let wanted;
-    if (v.endsWith(".") || v.endsWith(",")) {
+    if (v.endsWith(".")) {
       wanted = Decimal.fromUserInput(v + "0", 6);
     } else {
       wanted = Decimal.fromUserInput(v, 6);
@@ -90,6 +91,7 @@
     <input
       class="native"
       type="text"
+      inputmode="search"
       {placeholder}
       bind:value
       {readonly}
