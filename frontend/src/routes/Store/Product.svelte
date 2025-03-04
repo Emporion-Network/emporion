@@ -38,11 +38,9 @@
     <img src={p.gallery[t.lang][0]} alt={p.title[t.lang]} />
     <div class="info">
       <div class="title">
-        <a
-          href={`/product?p=${p.id}`}
-          onclick={() => l.goTo(`/product?p=${p.id}`)}
-          ><h2>{p.title[t.lang]}</h2></a
-        >
+        <a onclick={() => l.goTo(`/product?p=${p.id}`)} href="#/">
+          <h2>{p.title[t.lang]}</h2>
+        </a>
         <h3>{Decimal.fromAtomics(p.price, 6)} USDC</h3>
         <Address address={p.seller} />
         <Rating type="long" {...rating} />
