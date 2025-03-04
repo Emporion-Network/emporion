@@ -222,6 +222,7 @@ const app = new Hono<{ Variables: { state: State } }>()
       json: [{
         '@context': 'https://schema.org/',
         '@type': 'ProductGroup',
+        'name': pdt.title[lang],
         'hasVariant': collection.map(e => ({
           '@type': 'Product',
           'name': e.title[lang],
