@@ -1,5 +1,5 @@
 import type { State } from '@/state';
-import { aggregateRating, type Any } from '@common';
+import { aggregateRating, bechToBech, type Any } from '@common';
 import { Hono } from 'hono';
 import { serveStatic } from 'hono/bun';
 import { html, raw } from 'hono/html';
@@ -187,7 +187,8 @@ const app = new Hono<{ Variables: { state: State } }>()
                 'url': `https://emporion.network/product?p=${e.id}`,
                 'seller': {
                   '@type': 'Organization',
-                  'name': e.seller,
+                  'identifier': e.seller,
+                  'url': e.seller,
                 },
               },
             };
@@ -204,8 +205,9 @@ const app = new Hono<{ Variables: { state: State } }>()
     const collection = await getCollectionFromProductId(p, c.var.state.db);
     const pdt = collection.find(pdt => pdt.id == p);
     if (!pdt) return c.html(withDefaultHead({ lang }));
-    const m = await ec.getMark({ addr: pdt.seller });
-    const r = await ec.listRatingsForUser({ addr: pdt.seller, pagination: {} });
+    const addr = bechToBech(pdt.seller, 'juno');
+    const m = await ec.getMark({ addr: addr });
+    const r = await ec.listRatingsForUser({ addr: addr, pagination: {} });
     const bestRating = m.findLastIndex(i => i != 0);
     const {
       avg_rating: ratingValue,
@@ -233,7 +235,7 @@ const app = new Hono<{ Variables: { state: State } }>()
             'url': `https://emporion.network/product?p=${e.id}`,
             'seller': {
               '@type': 'Organization',
-              'name': e.seller,
+              'identifier': e.seller,
               'url': '',
               'review': r.map(r => ({
                 '@type': 'Review',
