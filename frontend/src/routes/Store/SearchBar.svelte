@@ -50,6 +50,7 @@
   </MultiSelect>
   <input
     placeholder={t.t("blue_alert_scallop_hope")}
+    inputmode="search"
     type="text"
     bind:value={search}
     onkeypress={(e) => e.key == "Enter" && onsearch()}

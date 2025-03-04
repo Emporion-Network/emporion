@@ -88,6 +88,14 @@ const requestToken = new Hono<{ Variables: { state: State } }>()
     return c.json({
       error: false,
     });
+  })
+  .use('/user-data', jwt)
+  .get('/user-data', async (c) => {
+    const state = c.var.state;
+    return c.json({
+      error: false,
+      result: await state.db.getUserData(c.var.user.addr),
+    });
   });
 
 export default requestToken;

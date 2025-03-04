@@ -318,27 +318,15 @@ export class Db {
         }],
       },
       with_payload: true,
-    })).points[0]?.payload as unknown as UserData | undefined;
-    if (!old) {
-      const user = this.#newUserData(addr);
-      user.postalAddresses.push(deliveryData);
-      this.client.upsert(this.UserDataName, {
-        points: [{
-          id: randomUUIDv7(),
-          vector: [],
-          payload: user as unknown as Record<string, unknown>,
-        }],
-      });
-    } else {
-      old.postalAddresses.push(deliveryData);
-      this.client.upsert(this.UserDataName, {
-        points: [{
-          id: old.id,
-          vector: [],
-          payload: old as unknown as Record<string, unknown>,
-        }],
-      });
-    }
+    })).points[0]?.payload as unknown as UserData;
+    old.postalAddresses.push(deliveryData);
+    this.client.upsert(this.UserDataName, {
+      points: [{
+        id: old.id,
+        vector: [],
+        payload: old as unknown as Record<string, unknown>,
+      }],
+    });
   }
 
   async getUserData(addr: string): Promise<UserData | undefined> {
@@ -353,6 +341,17 @@ export class Db {
       },
       with_payload: true,
     });
-    return res.points[0]?.payload as unknown as UserData;
+    let user = res.points[0]?.payload as unknown as UserData;
+    if (!user) {
+      user = this.#newUserData(addr);
+      await this.client.upsert(this.UserDataName, {
+        points: [{
+          id: user.id,
+          vector: [],
+          payload: user as unknown as Record<string, unknown>,
+        }],
+      });
+    }
+    return user as UserData;
   }
 }
