@@ -1,4 +1,4 @@
-import { langs } from '../../messages.d.js';
+import { findClosestLanguage, LANGS, type SupportedLanguage } from '@common';
 import { I18n } from 'i18n-js';
 import en from '../../../locales/en.json';
 import { storage } from './localStorage.svelte.js';
@@ -19,14 +19,8 @@ $effect.root(() => {
   if (store.exists()) {
     defLang = store.get() || 'en';
   } else {
-    const prefered = navigator.languages;
-    const p = prefered.filter((e) => {
-      return langs.includes(e as SupportedLanguage);
-    }) as SupportedLanguage[];
-    if (p.length > 0) {
-      defLang = p[0];
-      store.set(defLang);
-    }
+    const prefered = navigator.languages.map(e => e);
+    defLang = findClosestLanguage(prefered);
   }
 
   const ini = new I18n({
@@ -83,9 +77,9 @@ export const TranslatedLanguages = {
   'hi': 'weak_hour_dragonfly_dial',
   'ru': 'zesty_lower_bumblebee_pinch',
   'gu': 'bright_real_lemur_emerge',
-} as const satisfies Record<typeof langs[number], string>;
+} as const satisfies Record<typeof LANGS[number], string>;
 
-export const supportedLangs = langs as unknown as SupportedLanguage[];
+export const supportedLangs = LANGS as unknown as SupportedLanguage[];
 
 export const Languages = {
   'en': 'English',
@@ -105,24 +99,27 @@ export const Languages = {
   'hi': 'हिन्दी',
   'ru': 'Русский',
   'gu': 'ગુજરાતી',
-} satisfies Record<typeof langs[number], string>;
+} satisfies Record<typeof LANGS[number], string>;
 
-export type SupportedLanguage = typeof langs[number];
 
 export type T<K> = {
   -readonly [k in keyof typeof TranslatedLanguages]: K;
 };
 
 export const translatedString = () => {
-  return langs.reduce((acc, lang) => {
+  return LANGS.reduce((acc, lang) => {
     acc[lang] = '';
     return acc;
   }, {} as T<string>);
 };
 
 export const translatedArray = <U>() => {
-  return langs.reduce((acc, lang) => {
+  return LANGS.reduce((acc, lang) => {
     acc[lang] = [];
     return acc;
   }, {} as T<U[]>);
 };
+
+export {
+  type SupportedLanguage
+}

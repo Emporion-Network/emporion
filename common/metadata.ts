@@ -131,6 +131,18 @@ export type T<K> = Record<typeof LANGS[number], K>;
 export type TranslatedString = T<string>;
 export const DISPLAY_TYPES = ['buttons', 'checkbox', 'select', 'color', 'title', 'paragraph', 'image_buttons'] as const;
 
+
+export const findClosestLanguage = (prefered: string[]): SupportedLanguage => {
+  const baseA = new Set(LANGS.map(l => l.split('-')[0].toLowerCase()));
+  const defaultL: SupportedLanguage = 'en';
+  for (const b of prefered) {
+    if (LANGS.includes(b as SupportedLanguage)) return b as SupportedLanguage;
+    const baseB = b.split('-')[0].toLowerCase();
+    if (baseA.has(baseB)) return LANGS.find(l => l.split('-')[0].toLowerCase() === baseB) || defaultL;
+  }
+  return defaultL;
+};
+
 interface ButtonAttribute {
   display_type: 'buttons'
   trait_type: string
@@ -236,7 +248,7 @@ export interface ScrollProducts {
     start_after?: string,
     limit?: string
     category?: string
-    search?: string
+    q?: string
     seller?: string
     sort?: string
     min_price?: string
@@ -244,7 +256,7 @@ export interface ScrollProducts {
   },
   res: Result<ProductMetadata[]>,
   method: 'get',
-  path: `/scroll-products?${string}`,
+  path: `/search?${string}`,
 }
 
 /**

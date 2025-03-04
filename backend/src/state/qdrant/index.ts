@@ -164,7 +164,7 @@ export class Db {
       },
       with_payload: true,
       group_size: 100,
-    })).groups[0]?.hits.map(e => e.payload);
+    })).groups[0]?.hits.map(e => e.payload) as unknown as ProductMetadata[];
   }
 
   async upsertProduct(metaData: ProductMetadata) {
@@ -194,19 +194,19 @@ export class Db {
   async scrollProducts(params: ScrollProducts['req']) {
     type QueryParam = Parameters<typeof this.client.query>[1];
     const filter: QueryParam['filter'] = {
-      ...(params.search
+      ...(params.q
         ? {
             should: [
               {
                 key: '_title',
                 match: {
-                  text: params.search,
+                  text: params.q,
                 },
               },
               {
                 key: '_description',
                 match: {
-                  text: params.search,
+                  text: params.q,
                 },
               },
             ],
@@ -254,12 +254,12 @@ export class Db {
       limit: Math.min(params?.limit ? Number(params.limit) : 100, 100),
       offset: params?.start_after ? Number(params.start_after) : undefined,
       filter,
-      ...(params.search || params.sort
+      ...(params.q || params.sort
         ? {
             query: {
-              ...(params.search
+              ...(params.q
                 ? {
-                    nearest: await this.embedDocument(params.search),
+                    nearest: await this.embedDocument(params.q),
                   }
                 : {}),
               ...(params.sort

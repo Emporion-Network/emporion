@@ -21,6 +21,7 @@ export class Api {
   root: string;
   useHaderToken: boolean;
   token = '';
+  extraHeaders: Record<string, string>;
   ws: WebSocket
 
   constructor(root: string, useHeaderToken = false) {
@@ -28,6 +29,7 @@ export class Api {
     this.useHaderToken = useHeaderToken;
     const url = new URL(root);
     this.ws = new WebSocket(`wss://${url.host}${url.pathname}ws`);
+    this.extraHeaders = {};
   }
 
   private async get<T>(path: string) {
@@ -35,6 +37,7 @@ export class Api {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
+        ...this.extraHeaders,
         ...(this.useHaderToken ? { Authorization: `Bearer ${this.token}` } : {}),
       },
     }).then(res => res.json()) as T;
@@ -44,6 +47,7 @@ export class Api {
     return fetch(new URL(`.${path}`, this.root), {
       method: 'POST',
       headers: {
+        ...this.extraHeaders,
         ...(body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
         ...(this.useHaderToken ? { Authorization: `Bearer ${this.token}` } : {}),
       },
@@ -166,7 +170,11 @@ export class Api {
     const params = new URLSearchParams(Object.fromEntries(
       Object.entries(req).filter(([_, value]) => value)
     )).toString();
-    return this['get' satisfies ScrollProducts['method']]<ScrollProducts['res']>(`/scroll-products?${params}` satisfies ScrollProducts['path']);
+    return this['get' satisfies ScrollProducts['method']]<ScrollProducts['res']>(`/search?${params}` satisfies ScrollProducts['path']);
+  }
+
+  async getUserData() {
+    return this['get']('/user-data')
   }
 }
 

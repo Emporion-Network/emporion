@@ -15,7 +15,7 @@
   const l = getLocation();
   async function fetchProducts() {
     const req = await user.scrollProducts({
-      search: l.url.searchParams.get("search") || undefined,
+      q: l.url.searchParams.get("q") || undefined,
       max_price: l.url.searchParams.get("max_price") || undefined,
       min_price: l.url.searchParams.get("min_price") || undefined,
       sort: l.url.searchParams.get("sort") || undefined,
@@ -43,16 +43,16 @@
   }
   onMount(async () => {
     await fetchProducts();
-    search = l.url.searchParams.get("search") || "";
+    search = l.url.searchParams.get("q") || "";
     category = l.url.searchParams.get("category") || CATEGORIES[0];
   });
 
   const onsearch = () => {
     const url = new URL(l.url.href);
     if (search !== "") {
-      url.searchParams.set("search", search);
+      url.searchParams.set("q", search);
     } else {
-      url.searchParams.delete("search");
+      url.searchParams.delete("q");
     }
     if (category !== CATEGORIES[0]) {
       url.searchParams.set("category", category);

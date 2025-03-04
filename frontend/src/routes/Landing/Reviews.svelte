@@ -77,9 +77,10 @@
           flex-direction: column;
           span:nth-child(1) {
             font-weight: bold;
+            color: var(--white-a12);
           }
           span:nth-child(2) {
-            color: var(--neutral-10);
+            color: var(--white-a10);
           }
         }
         img {
@@ -89,6 +90,7 @@
       }
       p {
         font-weight: 600;
+        color: var(--white-a10);
       }
     }
   }

@@ -44,12 +44,13 @@
         font-size: 1.3rem;
       }
       h3 {
+        color: var(--white-a12);
         font-size: 80px;
         text-align: center;
         width: 100%;
       }
     }
-    @include media('<= phone'){
+    @include media("<= phone") {
       flex-direction: column;
     }
   }

@@ -34,12 +34,12 @@
       scenes.forEach((s) => s.dispose());
     };
   });
-  const scrollToNext = ()=>{
+  const scrollToNext = () => {
     document.documentElement.scrollBy({
-      top:window.innerHeight*1.2,
-      behavior:"smooth"
-    })
-  }
+      top: window.innerHeight * 1.2,
+      behavior: "smooth",
+    });
+  };
 </script>
 
 <div class="page dark">
@@ -83,7 +83,10 @@
   </div>
 
   <div class="feature">
-    <h2 class="header_gradient">Stake EMPR <br /> {t.t("direct_plane_sparrow_savor")}</h2>
+    <h2 class="header_gradient">
+      Stake EMPR <br />
+      {t.t("direct_plane_sparrow_savor")}
+    </h2>
     <p>
       {t.t("major_vexed_lion_spark")}
     </p>
@@ -105,7 +108,7 @@
       </div>
     </Cards>
     <button class="action_btn" onclick={() => goTo("/staking")}>
-     {t.t("acidic_due_poodle_reap")}
+      {t.t("acidic_due_poodle_reap")}
     </button>
     <Separator />
   </div>
@@ -113,7 +116,8 @@
   <div class="secure">
     <div class="content">
       <h2 class="header_gradient">
-        {t.t("blue_mean_jackdaw_amaze")}<br /> {t.t("broad_upper_wren_ask")}
+        {t.t("blue_mean_jackdaw_amaze")}<br />
+        {t.t("broad_upper_wren_ask")}
       </h2>
       <p>
         {t.t("super_spare_buzzard_swim")}
@@ -174,7 +178,11 @@
   </div>
 
   <div class="feature">
-    <h2 class="header_gradient">{t.t("active_male_alligator_inspire")} <br />{t.t("factual_honest_panther_embrace")}</h2>
+    <h2 class="header_gradient">
+      {t.t("active_male_alligator_inspire")} <br />{t.t(
+        "factual_honest_panther_embrace",
+      )}
+    </h2>
     <p>
       {t.t("lower_funny_hornet_hint")}
     </p>
@@ -257,7 +265,7 @@
       background-color: transparent;
       border-radius: 1px;
       border: 2px solid rgb(var(--brand));
-      color: var(--white-12);
+      color: var(--white-a12);
       font-weight: bold;
       padding: 0.8rem 1.2rem;
       font-size: 1.1rem;
@@ -296,39 +304,39 @@
       width: 280px !important;
       height: auto !important;
     }
-    @include media('<= phone'){
-      .header_gradient{
+    @include media("<= phone") {
+      .header_gradient {
         font-size: 50px;
       }
-      .hero .content{
+      .hero .content {
         padding: 1rem;
-        nav{
+        nav {
           top: 1rem;
           left: 1rem;
         }
         h1 {
           font-size: 55px;
         }
-        .buttons{
+        .buttons {
           flex-direction: column;
         }
       }
       .feature {
-        :global(.cards){
+        :global(.cards) {
           grid-auto-flow: row;
-          gap:1rem;
+          gap: 1rem;
         }
-        .card{
+        .card {
           max-width: unset;
           border: 1px solid var(--white-a2);
         }
       }
-      .secure{
+      .secure {
         height: 50vh;
         .content p {
-          color: var(--neutral-9);
+          color: var(--white-a9);
         }
-        :global(.itms){
+        :global(.itms) {
           display: none;
         }
       }
@@ -393,6 +401,7 @@
         top: 2vw;
         left: 2%;
         gap: 1rem;
+        color: var(--white-a12);
         span {
           font-weight: bold;
           font-size: 1.4rem;
@@ -429,7 +438,7 @@
       }
       p {
         text-align: center;
-        color: var(--neutral-9);
+        color: var(--white-a9);
         max-width: 450px;
         font-size: 1.1rem;
       }
@@ -439,11 +448,11 @@
         gap: 1rem;
         a {
           display: contents;
-          color: var(--neutral-12);
+          color: var(--white-a12);
           button {
             background-color: transparent;
-            color: var(--neutral-12);
-            border: 1px solid var(--neutral-12);
+            color: var(--white-a12);
+            border: 1px solid var(--white-a12);
           }
         }
         button {
@@ -453,7 +462,7 @@
           border: none;
           border-radius: 3px;
           background-color: white;
-          color: var(--neutral-1);
+          color: var(--black-a12);
           cursor: pointer;
           white-space: nowrap;
           flex: 1;
@@ -486,14 +495,14 @@
     gap: 3rem;
     min-height: 120vh;
     position: relative;
-    h3{
+    h3 {
       text-align: center;
     }
 
     & > p {
       text-align: center;
       max-width: 700px;
-      color: var(--neutral-9);
+      color: var(--white-a9);
       font-size: 1.1rem;
     }
     .card {
@@ -504,13 +513,13 @@
       align-items: center;
       aspect-ratio: 1/1;
       max-width: 20vw;
-      border: 1px solid var(--neutral-2);
+      border: 1px solid var(--white-a2);
       border-right: none;
       position: relative;
       margin-left: -0.5px;
       margin-right: -0.5px;
       &:last-of-type {
-        border-right: 1px solid var(--neutral-2);
+        border-right: 1px solid var(--white-a2);
       }
       &::after,
       &::before {
@@ -588,7 +597,7 @@
       }
       p {
         max-width: 600px;
-        color: var(--neutral-11);
+        color: var(--white-a11);
         text-align: center;
       }
     }
@@ -662,5 +671,4 @@
       }
     }
   }
-  
 </style>

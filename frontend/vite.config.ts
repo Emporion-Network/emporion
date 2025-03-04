@@ -1,6 +1,5 @@
 import { defineConfig } from 'vite';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
-import basicSsl from '@vitejs/plugin-basic-ssl';
 
 import path from 'path';
 
@@ -27,4 +26,13 @@ export default defineConfig({
       },
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['@cosmjs/cosmwasm-stargate', '@cosmjs/stargate']
+        }
+      }
+    }
+  }
 });

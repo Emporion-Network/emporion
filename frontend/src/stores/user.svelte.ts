@@ -1,7 +1,7 @@
 import { CosmWasmClient, SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import { Api } from '@ts-client/api';
 import { EmporionClient, EmporionQueryClient } from '@ts-client/Emporion.client';
-import { bechToBech, type FileMetaReq, type FileMetaRes, type ProductMetadata, type Result, type UploadFiles } from '@common';
+import { bechToBech, type FileMetaReq, type FileMetaRes, type ProductMetadata, type Result, type SupportedLanguage, type UploadFiles } from '@common';
 import { GasPrice } from '@cosmjs/stargate';
 import { Storage, storage } from './localStorage.svelte';
 import { Decimal } from "@cosmjs/math"
@@ -61,6 +61,13 @@ class User extends Api {
     // TODO: Find a way to remove ts gymnastics
     this.ec = this.wc.then(wc => new EmporionQueryClient(wc as Parameters<typeof EmporionQueryClient['bind']>[0], this.#contractAddress));
     this.cart = new Storage<ProductMetadata[]>("cart", []);
+    const lang = storage<string>('lang').get();
+    if (lang) {
+      this.extraHeaders = {
+        "Accept-Language": lang,
+      }
+    }
+
     window.addEventListener('keplr_keystorechange', () => {
       storage('token').clear();
       this.auth();

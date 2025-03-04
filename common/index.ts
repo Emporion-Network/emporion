@@ -13,9 +13,9 @@ export type * from './files';
 export type * from './auth';
 export type * from './translate';
 export type * from './chat';
-export type * from './blockchain'
-export type * from './tracking'
-export type * from './metadata'
-export * from './metadata'
-export * from './utils'
+export type * from './blockchain';
+export type * from './tracking';
+export type * from './metadata';
+export * from './metadata';
+export * from './utils';
 export * from './user';

@@ -3,6 +3,8 @@ import { Hono } from 'hono';
 import { assert, assertIsValidMetadata, bechToBech, isValidBech, type ProductMetadata } from '@common';
 import { jwt } from '@/middlewares/jwt';
 import { randomUUIDv7 } from 'bun';
+import { scrollProducts } from './scrollProducts';
+import { getCollectionFromProductId } from './getCollection';
 
 const app = new Hono<{ Variables: { state: State } }>()
   .use('/upload-metadata', jwt)
@@ -93,7 +95,7 @@ const app = new Hono<{ Variables: { state: State } }>()
       const id = c.req.param('id');
       return c.json({
         error: false,
-        result: await c.var.state.db.getCollection(id),
+        result: await getCollectionFromProductId(id, c.var.state.db),
       });
     } catch {
       return c.json({
@@ -102,30 +104,30 @@ const app = new Hono<{ Variables: { state: State } }>()
       });
     }
   })
-  .get('/scroll-products', async (c) => {
+  .get('/search', async (c) => {
     const {
       limit,
       category,
       start_after,
-      search,
+      q,
       seller,
       sort,
       min_price,
       max_price,
     } = c.req.query();
-    const res = await c.var.state.db.scrollProducts({
-      start_after,
-      limit,
-      category,
-      search,
-      seller,
-      sort,
-      min_price,
-      max_price,
-    });
+
     return c.json({
       error: false,
-      result: res,
+      result: await scrollProducts({
+        limit,
+        category,
+        start_after,
+        q,
+        seller,
+        sort,
+        min_price,
+        max_price,
+      }, c.var.state.db),
     });
   });
 export default app;
