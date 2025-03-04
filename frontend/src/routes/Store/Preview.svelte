@@ -7,7 +7,7 @@
   import Address from "@/lib/Address.svelte";
   import Rating from "@/lib/Rating.svelte";
   import ContextMenu from "@/lib/ContextMenu.svelte";
-  import { bechToBech, type ProductMetadata } from "@common";
+  import { aggregateRating, bechToBech, type ProductMetadata } from "@common";
   import { getLocation } from "@/stores/location.svelte";
   import { onMount, untrack } from "svelte";
   import SearchBar from "./SearchBar.svelte";
@@ -22,16 +22,7 @@
   let selectedProductIdx = $state(-1);
   let m = $state([0, 0, 0, 0, 0, 0]);
 
-  const rating = $derived.by(() => {
-    const nb_ratings = m.reduce((acc, r) => acc + r, 0);
-    return {
-      nb_ratings,
-      avg_rating:
-        nb_ratings > 0
-          ? m.reduce((acc, r, i) => acc + r * i, 0) / nb_ratings
-          : 0,
-    };
-  });
+  const rating = $derived(aggregateRating(m));
 
   const fetchCollection = async (id: string) => {
     const req = await user.getCollection(id);

@@ -143,6 +143,17 @@ export const findClosestLanguage = (prefered: string[]): SupportedLanguage => {
   return defaultL;
 };
 
+export const aggregateRating = (rating: number[]) => {
+  const nb_ratings = rating.reduce((acc, r) => acc + r, 0);
+  return {
+    nb_ratings,
+    avg_rating:
+      nb_ratings > 0
+        ? rating.reduce((acc, r, i) => acc + r * i, 0) / nb_ratings
+        : 0,
+  };
+}
+
 interface ButtonAttribute {
   display_type: 'buttons'
   trait_type: string

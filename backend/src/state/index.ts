@@ -3,6 +3,7 @@ import type { WSContext } from 'hono/ws';
 import { Fs } from './fs';
 import { Db } from './qdrant';
 import { Tracking } from './tracking';
+import { Indexer } from './blockchain';
 
 export class State {
   private nonces: Map<string, { nonce: string, lifeTime: number }>;
@@ -18,6 +19,7 @@ export class State {
   readonly tracking: Tracking;
   readonly domainName: string;
   readonly addressAutocompleteApiKey: string;
+  readonly blockchain: Indexer;
 
   constructor(params: {
     jwtSecret: string
@@ -39,6 +41,9 @@ export class State {
     fedexClientSecret: string
     domainName: string
     addressAutocompleteApiKey: string
+    wsEndpoints: string
+    rpcEndpoints: string
+    emporionContractAddress: string
   }) {
     this.nonces = new Map();
     this.domainName = params.domainName;
@@ -63,6 +68,14 @@ export class State {
       upsClientSecret: params.upsClientSecret,
       fedexClientId: params.fedexClientId,
       fedexClientSecret: params.fedexClientSecret,
+    });
+    this.blockchain = new Indexer({
+      state: this,
+      wsEndpoints: params.wsEndpoints.split(','),
+      rpcEndpoints: params.rpcEndpoints.split(','),
+      contracts: {
+        emporionContractAddress: params.emporionContractAddress,
+      },
     });
   }
 

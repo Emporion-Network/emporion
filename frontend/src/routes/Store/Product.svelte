@@ -3,7 +3,7 @@
   import type { WithSkeleton } from "@/lib/utils";
   import { getTranslator } from "@/stores/translate.svelte";
   import { Decimal } from "@cosmjs/math";
-  import type { ProductMetadata } from "@common";
+  import { aggregateRating, type ProductMetadata } from "@common";
   import Address from "@/lib/Address.svelte";
   import { getLocation } from "@/stores/location.svelte";
   const t = getTranslator();
@@ -12,17 +12,6 @@
   let props: WithSkeleton<{
     product: ProductMetadata & { mark: number[] };
   }> = $props();
-
-  const getRating = (n: number[]) => {
-    const nb_ratings = n.reduce((acc, r) => acc + r, 0);
-    return {
-      nb_ratings,
-      avg_rating:
-        nb_ratings > 0
-          ? n.reduce((acc, r, i) => acc + r * i, 0) / nb_ratings
-          : 0,
-    };
-  };
 
   const addToCart = (product: ProductMetadata) => () => {
     window.dispatchEvent(new CustomEvent("cart-push", { detail: product }));
@@ -45,7 +34,7 @@
   {/if}
   {#if !props.skeleton}
     {@const p = props.product}
-    {@const rating = getRating(p.mark)}
+    {@const rating = aggregateRating(p.mark)}
     <img src={p.gallery[t.lang][0]} alt={p.title[t.lang]} />
     <div class="info">
       <div class="title">

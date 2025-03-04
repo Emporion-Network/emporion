@@ -3,6 +3,8 @@ import { TxDecoder } from './event';
 import type { State } from '@/state';
 import { bechToBech, ceheckIsVaildMetadata, type BlockchainEvent } from '@common';
 import type { ExecuteMsg } from '../../../../ts-client/Emporion.types';
+import { EmporionQueryClient } from '../../../../ts-client/Emporion.client';
+import { CosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 
 type Events = Record<string, string[]>;
 
@@ -14,22 +16,33 @@ export class Indexer {
   #sokets: WebSocket[] = [];
   #txDecoder = new TxDecoder();
   #state: State;
-  #enpoints: string[];
+  ws_endpoints: string[];
   #contracts: Record<string, string>;
   #height = 0;
+  #rpc_endpoints: string[];
+  ec: EmporionQueryClient | undefined;
 
-  constructor(
-    endpoints: string[],
-    state: State,
-    contracts: Record<string, string>,
-  ) {
-    this.#enpoints = endpoints;
+  constructor({
+    wsEndpoints,
+    state,
+    contracts,
+    rpcEndpoints,
+  }: {
+    wsEndpoints: string[]
+    state: State
+    contracts: Record<string, string>
+    rpcEndpoints: string[]
+  }) {
+    this.ws_endpoints = wsEndpoints;
     this.#state = state;
     this.#contracts = contracts;
+    this.#rpc_endpoints = rpcEndpoints;
+    CosmWasmClient.connect(this.#rpc_endpoints[0])
+      .then(e => this.ec = new EmporionQueryClient(e, this.#contracts['emporionContractAddress']));
   }
 
   listen() {
-    this.#sokets = this.#enpoints.map((url, idx) => this.#initEndpoint(url, idx));
+    this.#sokets = this.ws_endpoints.map((url, idx) => this.#initEndpoint(url, idx));
   }
 
   #getSubscribeQuery() {
@@ -86,7 +99,7 @@ export class Indexer {
       this.#sokets[idx] = this.#initEndpoint(url, idx);
     };
     ws.onerror = (e) => {
-      console.log(e);
+      console.log({ idx }, e);
       ws.close();
     };
     return ws;

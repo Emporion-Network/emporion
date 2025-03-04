@@ -1,10 +1,11 @@
 import type { State } from '@/state';
-import type { Any } from '@common';
+import { aggregateRating, type Any } from '@common';
 import { Hono } from 'hono';
 import { serveStatic } from 'hono/bun';
 import { html, raw } from 'hono/html';
 import { scrollProducts } from '../metadata/scrollProducts';
 import { lang } from '@/middlewares/lang';
+import { getCollectionFromProductId } from '../metadata/getCollection';
 const index = await Bun.file('../frontend/dist/index.html').text();
 
 const tstr = async (lang: string) => {
@@ -101,7 +102,7 @@ const withJSON = async ({
         { 
           "@context":"https://schema.org",
           "@type":"Organization",
-          "name":"Walmart",
+          "name":"Emporion",
           "url":"https://emporion.network",
           "logo":"https://emporion.network/logo.png",
           "sameAs":["https://x.com/EmporionNetwork", "https://github.com/emporion-Network/"]
@@ -192,6 +193,64 @@ const app = new Hono<{ Variables: { state: State } }>()
             };
           }),
         },
+      }],
+    }));
+  })
+  .get('/product', async (c) => {
+    const { p } = c.req.query();
+    const lang = c.var.lang;
+    const ec = c.var.state.blockchain.ec;
+    if (!p || !ec) return c.html(withDefaultHead({ lang }));
+    const collection = await getCollectionFromProductId(p, c.var.state.db);
+    const pdt = collection.find(pdt => pdt.id == p);
+    if (!pdt) return c.html(withDefaultHead({ lang }));
+    const m = await ec.getMark({ addr: pdt.seller });
+    const r = await ec.listRatingsForUser({ addr: pdt.seller, pagination: {} });
+    const bestRating = m.findLastIndex(i => i != 0);
+    const {
+      avg_rating: ratingValue,
+      nb_ratings: ratingCount,
+    } = aggregateRating(m);
+
+    return c.html(withJSON({
+      title: pdt.title[lang],
+      image: pdt.gallery[lang][0],
+      description: pdt.description[lang],
+      lang,
+      json: [{
+        '@context': 'https://schema.org/',
+        '@type': 'ProductGroup',
+        'hasVariant': collection.map(e => ({
+          '@type': 'Product',
+          'name': e.title[lang],
+          'description': e.description[lang],
+          'image': e.gallery[lang],
+          'offers': {
+            '@type': 'Offer',
+            'price': e.price,
+            'priceCurrency': 'USD',
+            'availability': e.listed ? 'https://schema.org/InStock' : 'https://schema.org/SoldOut',
+            'url': `https://emporion.network/product?p=${e.id}`,
+            'seller': {
+              '@type': 'Organization',
+              'name': e.seller,
+              'review': r.map(r => ({
+                '@type': 'Review',
+                'reviewRating': {
+                  '@type': 'Rating',
+                  'ratingValue': r.mark,
+                },
+              })),
+              'aggregateRating': {
+                '@type': 'AggregateRating',
+                ratingValue,
+                ratingCount,
+                bestRating,
+              },
+            },
+          },
+        })),
+
       }],
     }));
   })

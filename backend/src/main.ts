@@ -12,7 +12,6 @@ import statics from '@/services/statics';
 
 import { wsHandler, websocket } from '@/services/ws/ws';
 import { logger } from 'hono/logger';
-import { Indexer } from './state/blockchain';
 import { version } from 'package.json';
 
 const app = new Hono<{ Variables: { state: State } }>();
@@ -37,7 +36,8 @@ const {
   PORT = '3000',
   EMPORION_CONTRACT_ADDRESS = '',
   DOMAIN_NAME = 'emporion.network',
-  WS_RPCS = 'wss://rpc-juno.mib.tech/websocket,wss://juno-rpc.publicnode.com:443/websocket',
+  WS_ENDPOINTS = 'wss://rpc-juno.mib.tech/websocket,wss://juno-rpc.publicnode.com:443/websocket',
+  RPC_ENDPOINTS = '',
   ADDRESS_AUTOCOMPLETE_API_KEY = '',
 } = Bun.env;
 
@@ -66,9 +66,8 @@ const state = new State({
   upsClientId: UPS_CLIENT_ID,
   upsClientSecret: UPS_CLIENT_SECRET,
   addressAutocompleteApiKey: ADDRESS_AUTOCOMPLETE_API_KEY,
-});
-
-const blockchain = new Indexer(WS_RPCS.split(','), state, {
+  wsEndpoints: WS_ENDPOINTS,
+  rpcEndpoints: RPC_ENDPOINTS,
   emporionContractAddress: EMPORION_CONTRACT_ADDRESS,
 });
 
@@ -111,7 +110,7 @@ app
     }, 404);
   });
 
-blockchain.listen();
+// state.blockchain.listen();
 
 export default {
   port: PORT,
