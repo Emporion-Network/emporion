@@ -13,7 +13,6 @@ const app = new Hono<{ Variables: { state: State } }>()
     const metadata = await c.req.json();
     assert(Array.isArray(metadata), 'invalid metadata');
     assert(metadata.length > 0, 'invalid metadata');
-
     const ids = await Promise.all(metadata.map(async (m: ProductMetadata) => {
       assertIsValidMetadata(m);
       m.seller = c.var.user.addr;
