@@ -146,20 +146,24 @@
       );
     }) as ProductMetadata[];
     const toCreate = products.filter((p) => !("id" in p));
-    await user.createProducts(
-      toCreate.map((p) => ({
-        ...p,
-        category,
-        collection: collectionName,
-      })),
-    );
-    await user.updateProducts(
-      toUpdate.map((p) => ({
-        ...p,
-        category,
-        collection: collectionName,
-      })),
-    );
+    if (toCreate.length > 0) {
+      await user.createProducts(
+        toCreate.map((p) => ({
+          ...p,
+          category,
+          collection: collectionName,
+        })),
+      );
+    }
+    if (toUpdate.length > 0) {
+      await user.updateProducts(
+        toUpdate.map((p) => ({
+          ...p,
+          category,
+          collection: collectionName,
+        })),
+      );
+    }
   };
 
   const isValid = $derived.by(() => {
@@ -268,6 +272,13 @@
               onkeydown={() => {}}
               onclick={() => selectProduct(i)}
             >
+              <span class="listed" class:no={!product.listed}>
+                <i class={product.listed ? "ri-eye-line" : "ri-eye-off-line"}
+                ></i>
+                {product.listed
+                  ? t.t("boring_pain_season_clumsy")
+                  : t.t("purple_weak_dry_instance")}
+              </span>
               {#if product.gallery[t.lang][0]}
                 <img src={product.gallery[t.lang][0]} alt="" />
               {:else}
@@ -277,6 +288,7 @@
               <span>
                 {Decimal.fromAtomics(product.price, 6).toString()} USDC
               </span>
+
               <ContextMenu>
                 {#snippet opener({ get, set, ...props })}
                   {/*@ts-ignore*/ null}
@@ -299,11 +311,17 @@
                   </button>
                   {#if "id" in product}
                     <button
-                      class="red"
+                      class={product.listed ? "red" : "greeen"}
                       onclick={() => close() && selectProduct(i)}
                     >
-                      <i class="ri-eye-off-line"></i>
-                      {t.t("active_tangy_wolf_hint")}
+                      <i
+                        class={product.listed
+                          ? "ri-eye-off-line"
+                          : "ri-eye-line"}
+                      ></i>
+                      {product.listed
+                        ? t.t("active_tangy_wolf_hint")
+                        : t.t("orange_power_frigid_pungent")}
                     </button>
                   {:else}
                     <button
@@ -345,8 +363,8 @@
     <div class="product" transition:fly={{ x: -100 }}>
       {@render head(false)}
       <label>
-        <Checkbox value={products[selectedProduct].listed}></Checkbox>
-        {t.t("ideal_whole_mole_win")}
+        <Checkbox bind:value={products[selectedProduct].listed}></Checkbox>
+        {t.t("boring_pain_season_clumsy")}
       </label>
       <Gallery
         {selectedLang}
@@ -489,6 +507,28 @@
         color: var(--neutral-12);
         background-color: var(--neutral-2);
         cursor: pointer;
+        position: relative;
+        .listed {
+          position: absolute;
+          top: 0.5rem;
+          right: 0.5rem;
+          background-color: var(--green-4);
+          border: 1px solid var(--green-6);
+          color: var(--green-12);
+          padding: 0.1rem;
+          display: flex;
+          gap: 0.1rem;
+          justify-content: center;
+          align-items: center;
+          border-radius: 1rem;
+          padding: 0 0.3rem;
+          font-size: 0.8rem;
+          &.no {
+            background-color: var(--neutral-4);
+            border: 1px solid var(--neutral-6);
+            color: var(--neutral-12);
+          }
+        }
         &:hover {
           border-color: var(--neutral-10);
         }
@@ -535,6 +575,12 @@
           color: var(--red-11);
           &:hover {
             color: var(--red-10);
+          }
+        }
+        .green {
+          color: var(--green-11);
+          &:hover {
+            color: var(--green-10);
           }
         }
       }

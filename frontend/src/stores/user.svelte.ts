@@ -10,12 +10,12 @@ class User extends Api {
   wc: Promise<SigningCosmWasmClient | CosmWasmClient>;
   ec: Promise<EmporionClient | EmporionQueryClient>;
   #rpcUrl: string;
-  #contractAddress: string;
-  #stakeAddress: string;
-  #rewardsAddress: string;
-  #nativeDenom: string;
-  #stakeDenom: string;
-  #acceptedDenom: string;
+  readonly contractAddress: string;
+  readonly stakeAddress: string;
+  readonly rewardsAddress: string;
+  readonly nativeDenom: string;
+  readonly stakeDenom: string;
+  readonly acceptedDenom: string;
   address: string | undefined = $state(undefined);
   bank = $state({
     native: '0',
@@ -53,14 +53,14 @@ class User extends Api {
     super(apiRoot, true);
     this.wc = SigningCosmWasmClient.connect(rpcUrl);
     this.#rpcUrl = rpcUrl;
-    this.#contractAddress = contractAddress;
-    this.#stakeAddress = stakeAddress;
-    this.#rewardsAddress = rewardsAddress;
-    this.#nativeDenom = nativeDenom;
-    this.#stakeDenom = stakeDenom;
-    this.#acceptedDenom = acceptedDenom;
+    this.contractAddress = contractAddress;
+    this.stakeAddress = stakeAddress;
+    this.rewardsAddress = rewardsAddress;
+    this.nativeDenom = nativeDenom;
+    this.stakeDenom = stakeDenom;
+    this.acceptedDenom = acceptedDenom;
     // TODO: Find a way to remove ts gymnastics
-    this.ec = this.wc.then(wc => new EmporionQueryClient(wc as Parameters<typeof EmporionQueryClient['bind']>[0], this.#contractAddress));
+    this.ec = this.wc.then(wc => new EmporionQueryClient(wc as Parameters<typeof EmporionQueryClient['bind']>[0], this.contractAddress));
     this.cart = new Storage<ProductMetadata[]>("cart", []);
     const lang = storage<string>('lang').get();
     if (lang) {
@@ -84,10 +84,10 @@ class User extends Api {
       const chainId = await (await this.wc).getChainId();
       const offlineSigner = window.keplr.getOfflineSigner(chainId);
       this.wc = SigningCosmWasmClient.connectWithSigner(this.#rpcUrl, offlineSigner, {
-        gasPrice: GasPrice.fromString(`0.012${this.#nativeDenom}`),
+        gasPrice: GasPrice.fromString(`0.012${this.nativeDenom}`),
       });
       this.address = (await offlineSigner.getAccounts())[0].address;
-      this.ec = this.wc.then(wc => new EmporionClient(wc as Parameters<typeof EmporionClient['bind']>[0], this.address!, this.#contractAddress));
+      this.ec = this.wc.then(wc => new EmporionClient(wc as Parameters<typeof EmporionClient['bind']>[0], this.address!, this.contractAddress));
       if (storage('token').exists()) {
         this.token = storage<{
           token: string
@@ -134,15 +134,15 @@ class User extends Api {
     const wc = await this.wc;
     const params = await (await this.ec).getParams();
     const accepted = (await wc.getBalance(this.address, params.accepted_denom)).amount;
-    const native = (await wc.getBalance(this.address, this.#nativeDenom)).amount;
-    const stakable = (await wc.getBalance(this.address, this.#stakeDenom)).amount;
+    const native = (await wc.getBalance(this.address, this.nativeDenom)).amount;
+    const stakable = (await wc.getBalance(this.address, this.stakeDenom)).amount;
 
-    const staked = (await wc.queryContractSmart(this.#stakeAddress, {
+    const staked = (await wc.queryContractSmart(this.stakeAddress, {
       voting_power_at_height: {
         address: this.address,
       },
     })).power;
-    const unstaking = (await wc.queryContractSmart(this.#stakeAddress, {
+    const unstaking = (await wc.queryContractSmart(this.stakeAddress, {
       claims: {
         address: this.address,
       },
@@ -158,7 +158,7 @@ class User extends Api {
       };
     });
 
-    const rewards = (await wc.queryContractSmart(this.#rewardsAddress, {
+    const rewards = (await wc.queryContractSmart(this.rewardsAddress, {
       pending_rewards: {
         address: this.address,
       },
@@ -186,12 +186,12 @@ class User extends Api {
     try {
       if (!this.address) return;
       const wc = await this.wc as SigningCosmWasmClient;
-      await wc.execute(this.address, this.#stakeAddress, {
+      await wc.execute(this.address, this.stakeAddress, {
         stake: {},
       }, 'auto', '', [
         {
           amount,
-          denom: this.#stakeDenom,
+          denom: this.stakeDenom,
         },
       ]);
       this.updateWalletBalance();
@@ -202,7 +202,7 @@ class User extends Api {
     try {
       if (!this.address) return;
       const wc = await this.wc as SigningCosmWasmClient;
-      await wc.execute(this.address, this.#stakeAddress, {
+      await wc.execute(this.address, this.stakeAddress, {
         unstake: {
           amount,
         },
@@ -221,11 +221,11 @@ class User extends Api {
   async getParams() {
     const wc = await this.wc;
     const ec = await this.ec;
-    let totalStaked: string = (await wc.queryContractSmart(this.#stakeAddress, {
+    let totalStaked: string = (await wc.queryContractSmart(this.stakeAddress, {
       total_power_at_height: {},
     })).power;
 
-    let undistributedRewards: string = await wc.queryContractSmart(this.#rewardsAddress, {
+    let undistributedRewards: string = await wc.queryContractSmart(this.rewardsAddress, {
       undistributed_rewards: { id: 1 },
     });
     let distribution = await ec.getDistribution();
@@ -242,7 +242,7 @@ class User extends Api {
     try {
       if (!this.address) return;
       const wc = await this.wc as SigningCosmWasmClient;
-      await wc.execute(this.address, this.#stakeAddress, {
+      await wc.execute(this.address, this.stakeAddress, {
         claim: {},
       }, "auto");
       this.updateWalletBalance();
@@ -254,7 +254,7 @@ class User extends Api {
     try {
       if (!this.address) return;
       const wc = await this.wc as SigningCosmWasmClient;
-      await wc.execute(this.address, this.#rewardsAddress, {
+      await wc.execute(this.address, this.rewardsAddress, {
         claim: {
           id: 1,
         },
@@ -280,7 +280,7 @@ class User extends Api {
       }, "auto", "", [
         {
           amount: urls.result.reduce((a, _, i) => a.plus(Decimal.fromUserInput(i.toString(), 6)), Decimal.zero(6)).atomics,
-          denom: this.#acceptedDenom,
+          denom: this.acceptedDenom,
         }
       ])
     } catch (e) {

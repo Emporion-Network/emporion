@@ -77,6 +77,7 @@ export class State {
         emporionContractAddress: params.emporionContractAddress,
       },
     });
+    this.blockchain.listen();
   }
 
   #clearExpired() {

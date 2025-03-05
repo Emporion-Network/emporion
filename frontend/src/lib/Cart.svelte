@@ -8,6 +8,7 @@
   import { user } from "@/stores/user.svelte";
   import Range from "./Range.svelte";
   import PostalAddressForm from "./PostalAddressForm.svelte";
+  import type { EmporionClient } from "@ts-client/Emporion.client";
 
   let show = $state(false);
   let t = getTranslator();
@@ -38,6 +39,11 @@
       {} as Record<string, (ProductMetadata & { quantity: number })[]>,
     );
   });
+  let total = $derived.by(() => {
+    return user.cart.value.reduce((acc, c) => {
+      return acc.plus(Decimal.fromAtomics(c.price, 6));
+    }, Decimal.zero(6));
+  });
   let fairSplits: Record<string, number[]> = $state({});
   const getfairSplit = (addr: string) => () => {
     if (fairSplits[addr] == undefined) {
@@ -66,8 +72,43 @@
     const p = user.cart.value.find((x) => x.id == id)!;
     user.cart.value.push(p);
   };
+  let postalAddress = $state({
+    name: "",
+    postalAddress: "",
+  });
 
-  const toAddressPicker = () => {};
+  const valid = () => {
+    return (
+      Object.keys(grouped).length > 0 &&
+      postalAddress.name !== "" &&
+      postalAddress.postalAddress !== "" &&
+      Decimal.fromAtomics(user.bank.accepted, 6).isGreaterThan(total)
+    );
+  };
+  const pay = async () => {
+    const ec = (await user.ec) as EmporionClient;
+    const resp = await ec.createOrder(
+      {
+        orders: Object.entries(grouped).map(([addr, p]) => {
+          return {
+            product_ids: p
+              .map((p) => Array.from({ length: p.quantity }, () => p.id))
+              .flat(),
+            loss_distribution_ratio: fairSplits[addr][0].toFixed(3),
+          };
+        }),
+      },
+      "auto",
+      "",
+      [
+        {
+          denom: user.acceptedDenom,
+          amount: total.atomics,
+        },
+      ],
+    );
+    console.log(resp);
+  };
 </script>
 
 <div class="cart" class:show>
@@ -82,7 +123,10 @@
         <i class="ri-close-line"></i>
       </button>
     </h1>
-    <PostalAddressForm name="" postalAddress="" />
+    <PostalAddressForm
+      bind:name={postalAddress.name}
+      bind:postalAddress={postalAddress.postalAddress}
+    />
     {#each Object.entries(grouped) as [seller, products]}
       {@const total = products.reduce(
         (acc, p) =>
@@ -138,11 +182,11 @@
         <p class="info">
           {t.t("dig_those_coarse_machine")}
         </p>
-        <button class="primary-button">
-          {t.t("beginning_organization_truth_breakfast")}
-        </button>
       </div>
     {/each}
+    <button class="primary-button" disabled={!valid()} onclick={pay}>
+      {t.t("beginning_organization_truth_breakfast")}
+    </button>
   </div>
 </div>
 

@@ -50,7 +50,6 @@
   };
   let tab: "saved" | "new" = $state("new");
   const savedAddrsses = $derived.by(() => {
-    console.log(user.userData?.postalAddresses);
     return (user.userData?.postalAddresses || []).toReversed();
   });
   $effect(() => {
@@ -76,6 +75,18 @@
     postalAddress = p.postalAddress;
     name = p.name;
   };
+  const deleteAddress = (p: PostalAddress) => async (e: MouseEvent) => {
+    e.stopImmediatePropagation();
+    e.preventDefault();
+    if (!user.userData) return;
+    user.updateUserData({
+      postalAddresses: user.userData.postalAddresses.filter(
+        (a) => !(a.name == p.name && a.postalAddress == p.postalAddress),
+      ),
+      positiveProducts: user.userData.positiveProducts,
+      negativeProducts: user.userData.negativeProducts,
+    });
+  };
 </script>
 
 <div class="postal-address">
@@ -99,7 +110,7 @@
         bind:value={getPostalAddress, setPostalAddress}
       />
       {#if completions.length && el.contains(activeElement.el)}
-        <div class="options">
+        <div class="options hide-scrollbar">
           {#each completions as addr}
             <button onclick={select(addr)}>{addr}</button>
           {/each}
@@ -112,7 +123,10 @@
   {:else}
     <div class="saved hide-scrollbar">
       {#each savedAddrsses as p}
-        <button
+        <div
+          tabindex="0"
+          role="button"
+          onkeydown={(e) => e.key == "Enter" && set(p)()}
           onclick={set(p)}
           class:selected={p.name === name && p.postalAddress == postalAddress}
         >
@@ -120,8 +134,18 @@
             {p.name}
             <p>{p.postalAddress}</p>
           </div>
-        </button>
+          <button
+            class="ghost-button"
+            onclick={deleteAddress(p)}
+            aria-labelledby="Dete address"
+          >
+            <i class="ri-delete-bin-line"></i>
+          </button>
+        </div>
       {/each}
+      {#if savedAddrsses.length == 0}
+        <p>{t.t("pessimistic_thorny_street_jubilant")}</p>
+      {/if}
     </div>
   {/if}
 </div>
@@ -136,7 +160,7 @@
       display: flex;
       overflow-y: auto;
       gap: 1rem;
-      button {
+      & > div {
         min-width: max-content;
         padding: 1rem;
         display: flex;
@@ -145,8 +169,8 @@
         color: inherit;
         border-radius: 3px;
         cursor: pointer;
-        align-items: flex-start;
         justify-content: center;
+        align-items: center;
         text-align: left;
         p {
           max-width: 200px;
@@ -154,6 +178,17 @@
         &.selected {
           border: 1px solid var(--main-10);
         }
+      }
+      & > p {
+        text-align: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex: 1;
+        height: 5rem;
+        background-color: var(--neutral-3);
+        border-radius: 3px;
+        color: var(--neutral-11);
       }
     }
     .wpr {
@@ -173,9 +208,7 @@
       border: 1px solid var(--neutral-6);
       overflow-y: auto;
       overscroll-behavior: contain;
-      &::-webkit-scrollbar {
-        display: none;
-      }
+
       button {
         background-color: transparent;
         border: none;
@@ -185,6 +218,10 @@
         align-items: flex-start;
         text-align: justify;
         padding: 0.5rem;
+        &:hover {
+          background-color: var(--neutral-3);
+          cursor: pointer;
+        }
       }
     }
   }

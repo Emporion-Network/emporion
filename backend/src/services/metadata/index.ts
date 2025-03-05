@@ -37,9 +37,8 @@ const app = new Hono<{ Variables: { state: State } }>()
   .post('/update-metadata', async (c) => {
     const state = c.var.state;
     const metadata = await c.req.json();
-    assert(Array.isArray(metadata), 'invalid metadata');
-    assert(metadata.length > 0, 'invalid metadata');
-
+    assert(Array.isArray(metadata), 'invalid metadata 1');
+    assert(metadata.length > 0, 'invalid metadata 2');
     const ids = await Promise.all(metadata.map(async (m: ProductMetadata) => {
       assertIsValidMetadata(m);
       m.seller = c.var.user.addr;
@@ -115,7 +114,6 @@ const app = new Hono<{ Variables: { state: State } }>()
       min_price,
       max_price,
     } = c.req.query();
-
     return c.json({
       error: false,
       result: await scrollProducts({

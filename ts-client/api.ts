@@ -1,4 +1,25 @@
-import { toUUID, type AddressAutocomplete, type Autocomplete, type CheckToken, type FileMetaReq, type GetCollection, type GetCollections, type ReqFiles, type RequestNonce, type RequestToken, type ReqUpdateUserData, type ReqUserData, type ResponseSuccess, type Result, type ScrollProducts, type Translate, type UpdateFileMeta, type UpdateMetadata, type UploadFiles, type UploadMetadata, type UserData } from '../common';
+import {
+  toUUID,
+  type AddressAutocomplete,
+  type Autocomplete,
+  type CheckToken,
+  type FileMetaReq,
+  type GetCollection,
+  type GetCollections,
+  type ReqFiles,
+  type RequestNonce,
+  type RequestToken,
+  type ReqUpdateUserData,
+  type ReqUserData,
+  type ResponseSuccess,
+  type Result,
+  type ScrollProducts,
+  type Translate,
+  type UpdateFileMeta,
+  type UpdateMetadata,
+  type UploadFiles,
+  type UploadMetadata
+} from '../common';
 
 
 /**
