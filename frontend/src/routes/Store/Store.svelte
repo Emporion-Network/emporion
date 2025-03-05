@@ -130,6 +130,7 @@
         padding-left: 2rem;
         padding-right: 2rem;
         flex: 1;
+        text-wrap: nowrap;
       }
     }
     @include media("<=tablet-lg") {

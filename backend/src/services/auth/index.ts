@@ -1,6 +1,6 @@
 import type { State } from '@/state';
 import type { RequestNonce, RequestToken } from '@common';
-import { assert, assertIsDefinedUnsafe, isValidBech } from '@common';
+import { assert, assertIsDefinedUnsafe, assertIsValidUpdateUserData, isValidBech } from '@common';
 import {
   serializeSignDoc,
 } from '@cosmjs/amino';
@@ -95,6 +95,16 @@ const requestToken = new Hono<{ Variables: { state: State } }>()
     return c.json({
       error: false,
       result: await state.db.getUserData(c.var.user.addr),
+    });
+  })
+  .use('/update-user-data', jwt)
+  .post('/update-user-data', async (c) => {
+    const updateData = await c.req.json();
+    assertIsValidUpdateUserData(updateData);
+    const res = await c.var.state.db.updateUserData(c.var.user.addr, updateData);
+    return c.json({
+      error: false,
+      result: res,
     });
   });
 

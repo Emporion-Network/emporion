@@ -1,7 +1,6 @@
-import { type ProductMetadata, type ScrollProducts, stringify, type T, type UserData } from '@common';
+import { type ProductMetadata, type ScrollProducts, stringify, type T, toUUID, type UpdateUserData, type UserData } from '@common';
 import { QdrantClient } from '@qdrant/js-client-rest';
 import { embedDocument } from './embeddings';
-import { randomUUIDv7 } from 'bun';
 
 const mergeTranslated = (a: T<string>): string => {
   return Object.keys(a).reduce((acc, k) => {
@@ -112,9 +111,13 @@ export class Db {
   async #initUserData() {
     const e = await (await this.client.collectionExists(this.UserDataName)).exists;
     if (!e) {
-      this.client.createCollection(this.UserDataName, {
+      await this.client.createCollection(this.UserDataName, {
+        vectors: {
+          size: 1,
+          distance: 'Cosine',
+        },
       });
-      this.client.createPayloadIndex(this.UserDataName, {
+      await this.client.createPayloadIndex(this.UserDataName, {
         field_name: 'addr',
         field_schema: {
           type: 'keyword',
@@ -295,7 +298,7 @@ export class Db {
 
   #newUserData(addr: string): UserData {
     return {
-      id: randomUUIDv7(),
+      id: toUUID(addr),
       addr,
       postalAddresses: [],
       positiveProducts: [],
@@ -304,11 +307,8 @@ export class Db {
     };
   }
 
-  async addPostalAddress(addr: string, deliveryData: {
-    postalAddress: string
-    name: string
-  }) {
-    const old = (await this.client.query(this.UserDataName, {
+  async updateUserData(addr: string, newUserData: UpdateUserData) {
+    let old = (await this.client.query(this.UserDataName, {
       filter: {
         must: [{
           key: 'addr',
@@ -319,14 +319,25 @@ export class Db {
       },
       with_payload: true,
     })).points[0]?.payload as unknown as UserData;
-    old.postalAddresses.push(deliveryData);
-    this.client.upsert(this.UserDataName, {
-      points: [{
-        id: old.id,
-        vector: [],
-        payload: old as unknown as Record<string, unknown>,
-      }],
-    });
+    if (!old) return;
+    old = {
+      ...old,
+      postalAddresses: newUserData.postalAddresses,
+      positiveProducts: newUserData.positiveProducts,
+      negativeProducts: newUserData.negativeProducts,
+    };
+    try {
+      await this.client.upsert(this.UserDataName, {
+        points: [{
+          id: old.id,
+          vector: [0],
+          payload: old as unknown as Record<string, unknown>,
+        }],
+      });
+    } catch (e) {
+      console.log((e as Record<string, string>).data);
+    }
+    return old;
   }
 
   async getUserData(addr: string): Promise<UserData | undefined> {
@@ -340,17 +351,23 @@ export class Db {
         }],
       },
       with_payload: true,
+      consistency: 'all',
     });
     let user = res.points[0]?.payload as unknown as UserData;
     if (!user) {
       user = this.#newUserData(addr);
-      await this.client.upsert(this.UserDataName, {
-        points: [{
-          id: user.id,
-          vector: [],
-          payload: user as unknown as Record<string, unknown>,
-        }],
-      });
+      try {
+        await this.client.upsert(this.UserDataName, {
+          points: [{
+            id: user.id,
+            vector: [0],
+            payload: user as unknown as Record<string, unknown>,
+          }],
+          wait: true,
+        });
+      } catch (e) {
+        console.log((e as unknown as { data: string }).data);
+      }
     }
     return user as UserData;
   }

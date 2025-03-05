@@ -5,10 +5,24 @@
  */
 
 import { fromBech32, toBech32 } from '@cosmjs/encoding';
+import { sha256 } from '@cosmjs/crypto';
+
 
 export const bechToBech = (addr: string, prefix: string) => {
   return toBech32(prefix, fromBech32(addr).data);
 };
+
+export const toUUID = (addr: string) => {
+  const x = fromBech32(addr).data;
+  const bytes = sha256(x).slice(0, 16)
+  return [
+    Buffer.from(bytes.slice(0, 4)).toString('hex'),
+    Buffer.from(bytes.slice(4, 6)).toString('hex'),
+    Buffer.from(bytes.slice(6, 8)).toString('hex'),
+    Buffer.from(bytes.slice(8, 10)).toString('hex'),
+    Buffer.from(bytes.slice(10, 16)).toString('hex')
+  ].join('-');
+}
 
 export function into<T>(_x: unknown): asserts _x is T { /**/ };
 

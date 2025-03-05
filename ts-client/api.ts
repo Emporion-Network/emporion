@@ -1,4 +1,4 @@
-import type { AddressAutocomplete, Autocomplete, CheckToken, FileMetaReq, GetCollection, GetCollections, ReqFiles, RequestNonce, RequestToken, ResponseSuccess, Result, ScrollProducts, Translate, UpdateFileMeta, UpdateMetadata, UploadFiles, UploadMetadata } from '../common';
+import { toUUID, type AddressAutocomplete, type Autocomplete, type CheckToken, type FileMetaReq, type GetCollection, type GetCollections, type ReqFiles, type RequestNonce, type RequestToken, type ReqUpdateUserData, type ReqUserData, type ResponseSuccess, type Result, type ScrollProducts, type Translate, type UpdateFileMeta, type UpdateMetadata, type UploadFiles, type UploadMetadata, type UserData } from '../common';
 
 
 /**
@@ -174,9 +174,16 @@ export class Api {
   }
 
   async getUserData() {
-    return this['get']('/user-data')
+    return this['get' satisfies ReqUserData['method']]<ReqUserData['res']>('/user-data' satisfies ReqUserData['path']);
+  }
+
+  async updateUserData(req: ReqUpdateUserData['req']) {
+    return this['post' satisfies ReqUpdateUserData['method']]<ReqUpdateUserData['res']>('/update-user-data' satisfies ReqUpdateUserData['path'], req);
   }
 }
+
+//@ts-ignore
+window.toUUID = toUUID;
 
 
 

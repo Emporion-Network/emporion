@@ -73,7 +73,7 @@
 <div class="cart" class:show>
   <div class="content">
     <h1>
-      Your cart
+      {t.t("entrance_affect_advertising_break")}
       <button
         aria-labelledby="Close cart"
         class="ghost-button"
@@ -94,7 +94,9 @@
         Decimal.zero(6),
       )}
       <div class="seller">
-        <h2>Seller:<Address address={seller} /></h2>
+        <h2>
+          {t.t("brilliant_vigorous_salty_state")}<Address address={seller} />
+        </h2>
         <div class="products">
           {#each products as p}
             <div class="product">
@@ -114,13 +116,13 @@
           {/each}
         </div>
         <h3 class="total">
-          <span>Total:</span>
+          <span>{t.t("knee_judge_devil_expert")}</span>
           <span>
             {total} USDC
           </span>
         </h3>
         <h3 class="total">
-          <span>In case of dispute</span>
+          <span>{t.t("mysterious_dance_wicked_phrase")}</span>
           <span>
             ≈ {(total.toFloatApproximation() * fairSplits[seller][0]).toFixed(
               2,
@@ -134,12 +136,11 @@
           {/snippet}
         </Range>
         <p class="info">
-          The fiar split is the amount of USDC that you will receive from this
-          seller in case of a dispute. Order with low fair splits are more
-          likely to be rejected by the seller. We recommend to use a fair split
-          of 50% unless the seller is known to accept lower splits.
+          {t.t("dig_those_coarse_machine")}
         </p>
-        <button class="primary-button">Checkout</button>
+        <button class="primary-button">
+          {t.t("beginning_organization_truth_breakfast")}
+        </button>
       </div>
     {/each}
   </div>
@@ -159,6 +160,7 @@
     opacity: 0;
     pointer-events: none;
     transition: opacity 200ms ease-in-out;
+    overscroll-behavior: contain;
     @include media("<=phone") {
       &.show {
         .content {

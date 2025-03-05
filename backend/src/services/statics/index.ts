@@ -188,7 +188,7 @@ const app = new Hono<{ Variables: { state: State } }>()
                 'seller': {
                   '@type': 'Organization',
                   'identifier': e.seller,
-                  'url': e.seller,
+                  'url': `https://emporion.network/seller?s=${e.seller}`,
                 },
               },
             };
@@ -237,7 +237,7 @@ const app = new Hono<{ Variables: { state: State } }>()
             'seller': {
               '@type': 'Organization',
               'identifier': e.seller,
-              'url': '',
+              'url': `https://emporion.network/seller?s=${e.seller}`,
               'review': r.map(r => ({
                 '@type': 'Review',
                 'reviewRating': {
@@ -254,9 +254,7 @@ const app = new Hono<{ Variables: { state: State } }>()
                       bestRating,
                     },
                   }
-                : {
-
-                  }),
+                : {}),
             },
           },
         })),

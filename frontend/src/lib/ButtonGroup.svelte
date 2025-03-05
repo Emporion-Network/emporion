@@ -45,10 +45,12 @@
     height: var(--height-1);
     color: var(--neutral-11);
     background-color: transparent;
-    width: 100px;
+    min-width: max-content;
+    padding: 0 0.5rem;
     border-radius: 3px;
     position: relative;
     outline: none;
+    text-wrap: nowrap;
     &:focus-visible {
       border: 1px solid var(--main-10);
     }

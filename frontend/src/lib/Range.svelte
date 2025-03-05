@@ -41,7 +41,12 @@
   };
 </script>
 
-<svelte:window onmousemove={drag} onmouseup={dragEnd} ontouchmove={drag} />
+<svelte:window
+  onmousemove={drag}
+  onmouseup={dragEnd}
+  ontouchend={dragEnd}
+  ontouchmove={drag}
+/>
 
 <div class="range" bind:this={el}>
   {#each value as v, i}

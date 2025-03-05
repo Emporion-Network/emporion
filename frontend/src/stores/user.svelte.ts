@@ -1,7 +1,7 @@
 import { CosmWasmClient, SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import { Api } from '@ts-client/api';
 import { EmporionClient, EmporionQueryClient } from '@ts-client/Emporion.client';
-import { bechToBech, type FileMetaReq, type FileMetaRes, type ProductMetadata, type Result, type SupportedLanguage, type UploadFiles } from '@common';
+import { bechToBech, type FileMetaReq, type FileMetaRes, type ProductMetadata, type Result, type SupportedLanguage, type UploadFiles, type UserData } from '@common';
 import { GasPrice } from '@cosmjs/stargate';
 import { Storage, storage } from './localStorage.svelte';
 import { Decimal } from "@cosmjs/math"
@@ -29,6 +29,7 @@ class User extends Api {
     rewards: '0',
   });
   cart: Storage<ProductMetadata[]> = $state()!;
+  userData: UserData | undefined = $state();
 
   constructor({
     apiRoot,
@@ -116,6 +117,10 @@ class User extends Api {
         });
       }
       this.cart = new Storage<ProductMetadata[]>(`cart_${this.address}`, []);
+      const req = await this.getUserData();
+      if (!req.error) {
+        this.userData = req.result;
+      }
       await this.updateWalletBalance();
     } catch (e) {
       console.log(e);
@@ -169,6 +174,14 @@ class User extends Api {
     this.bank.stakable = stakable;
   }
 
+  async updateUserData(req: Parameters<Api['updateUserData']>[0]) {
+    const q = await super.updateUserData(req);
+    if (!q.error) {
+      this.userData = q.result;
+    }
+    return q;
+  }
+
   async stake(amount: string) {
     try {
       if (!this.address) return;
@@ -201,6 +214,7 @@ class User extends Api {
   logout() {
     this.address = undefined;
     this.token = '';
+    this.userData = undefined;
     storage('token').clear();
   }
 
