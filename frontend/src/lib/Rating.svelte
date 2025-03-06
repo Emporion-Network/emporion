@@ -115,6 +115,7 @@
       font-size: 0.8em;
       font-weight: 600;
       color: var(--neutral-11);
+      font-family: var(--font-mono);
     }
   }
 </style>

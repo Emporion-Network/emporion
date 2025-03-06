@@ -19,3 +19,4 @@ export type * from './metadata';
 export * from './metadata';
 export * from './utils';
 export * from './user';
+export * from './order';

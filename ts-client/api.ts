@@ -8,7 +8,9 @@ import {
   type GetCollections,
   type ReqCreateOrderData,
   type ReqFiles,
+  type ReqOrderData,
   type ReqProduct,
+  type ReqSetTrackingNumber,
   type RequestNonce,
   type RequestToken,
   type ReqUpdateUserData,
@@ -210,6 +212,14 @@ export class Api {
 
   async createOrderData(req: ReqCreateOrderData['req']) {
     return this['post' satisfies ReqCreateOrderData['method']]<ReqCreateOrderData['res']>('/create-order' satisfies ReqCreateOrderData['path'], req);
+  }
+
+  async getOrderData(req: ReqOrderData['req']) {
+    return this['get' satisfies ReqOrderData['method']]<ReqOrderData['res']>(`/order-data/${req}` satisfies ReqOrderData['path']);
+  }
+
+  async setTrackingNumber(req: ReqSetTrackingNumber['req']) {
+    return this['post' satisfies ReqSetTrackingNumber['method']]<ReqSetTrackingNumber['res']>(`/set-tracking-number` satisfies ReqSetTrackingNumber['path'], req);
   }
 }
 

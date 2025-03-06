@@ -30,10 +30,7 @@ export interface UpdateUserData {
 }
 
 
-export interface CreateOrderData {
-  id: string,
-  postalAddress: PostalAddress,
-}
+
 
 export function assertIsValidPostalAddress(postalAddress: unknown): asserts postalAddress is PostalAddress {
   assertIsDefinedUnsafe<PostalAddress>(postalAddress, 'invalid address');
@@ -65,10 +62,13 @@ export function assertIsValidUpdateUserData(userData: unknown): asserts userData
 
 
 
-export function assertIsValidOrderData(orderData: unknown): asserts orderData is CreateOrderData {
-  assertIsDefinedUnsafe<CreateOrderData>(orderData, 'invalid OrderData');
-  assert(isString(orderData.id), 'invalid id');
-  assertIsValidPostalAddress(orderData.postalAddress);
+export interface OrderData {
+  id: string,
+  seller: string,
+  buyer: string,
+  postalAddress: PostalAddress,
+  trackingNumber: string,
+  messages: [],
 }
 
 export interface ReqUserData {
@@ -84,11 +84,4 @@ export interface ReqUpdateUserData {
   res: Result<UserData>
   method: 'post'
   path: '/update-user-data'
-}
-
-export interface ReqCreateOrderData {
-  req: CreateOrderData,
-  res: Result<{}>,
-  method: 'post',
-  path: '/create-order'
 }

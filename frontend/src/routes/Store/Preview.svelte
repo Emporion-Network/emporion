@@ -31,15 +31,14 @@
     products = await Promise.all(
       req.result.map(async (e) => {
         const p = await ec.getProduct({ id: e.id });
-        if (!m) {
-          m = await ec.getMark({ addr: bechToBech(e.seller, "juno") });
-        }
         return { ...e, price: p.price };
       }),
     );
+    m = await ec.getMark({ addr: bechToBech(products[0].seller, "juno") });
     selectedProductIdx = products.findIndex((p) => p.id == id);
   };
   let product = $derived(products[selectedProductIdx]);
+
   $effect(() => {
     selectedProductIdx;
     untrack(() => {

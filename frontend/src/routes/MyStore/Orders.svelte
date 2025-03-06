@@ -7,12 +7,16 @@
   import type { Order } from "@ts-client/Emporion.types";
   import { Decimal } from "@cosmjs/math";
   import ContextMenu from "@/lib/ContextMenu.svelte";
+  import type { EmporionClient } from "@ts-client/Emporion.client";
 
-  let t = getTranslator();
-  let orders: (Order & {
-    products: ProductMetadata[];
+  type AggragatedOrder = Order & {
+    products: (ProductMetadata & { qty: number })[];
     open: boolean;
-  })[] = $state([]);
+    trackingNumber: string;
+    nbItems: number;
+  };
+  let t = getTranslator();
+  let orders: AggragatedOrder[] = $state([]);
   const loadOrders = async () => {
     if (!user.address) return;
     const ec = await user.ec;
@@ -22,15 +26,31 @@
     });
     orders = await Promise.all(
       o.map(async (o) => {
-        const pdts = (
-          await Promise.all(o.cart.map(async (p) => await user.getProduct(p)))
-        )
+        const map = new Map<string, ProductMetadata & { qty: number }>();
+        const pdts = await Promise.all(
+          o.cart.map(async (p) => await user.getProduct(p)),
+        );
+        const orderData = await user.getOrderData(o.id);
+        pdts
           .filter((e) => !e.error)
-          .map((e) => e.result);
+          .map((e) => e.result)
+          .forEach((p) => {
+            const e = map.get(p.id);
+            if (e) {
+              e.qty++;
+            } else {
+              map.set(p.id, { ...p, qty: 1 });
+            }
+          });
+
         return {
           ...o,
-          products: pdts,
+          nbItems: pdts.length,
+          products: [...map.values()],
           open: false,
+          trackingNumber: orderData.error
+            ? ""
+            : orderData.result.trackingNumber,
         };
       }),
     );
@@ -43,6 +63,40 @@
     cancelled: "purple",
     completed: "green",
     disputed: "red",
+  };
+
+  const statusToLabel: { [key in Status]: string } = {
+    accepted: t.t("independent_playful_towel_idiotic"),
+    pending: t.t("trim_dreary_quote_till"),
+    cancelled: t.t("recommendation_belated_woman_light"),
+    completed: t.t("steal_place_demanding_green"),
+    disputed: t.t("death_worrisome_late_optimal"),
+  };
+
+  const acceptOrder = (order: Order) => async (e: MouseEvent) => {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    const ec = (await user.ec) as EmporionClient;
+    try {
+      await ec.acceptOrder({ orderId: order.id });
+      order.status = "accepted";
+    } catch (e) {}
+  };
+  const rejectOrder = (order: Order) => async (e: MouseEvent) => {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    const ec = (await user.ec) as EmporionClient;
+    try {
+      await ec.cancelOrder({ orderId: order.id });
+      order.status = "cancelled";
+    } catch (e) {}
+  };
+
+  const updateTrackingNb = (o: AggragatedOrder) => async () => {
+    await user.setTrackingNumber({
+      id: o.id,
+      trackingNumber: o.trackingNumber,
+    });
   };
 
   $effect(() => {
@@ -61,6 +115,8 @@
         <span>Buyer</span>
         <span>Date</span>
         <span>Status</span>
+        <span>Tracking Nb.</span>
+        <span>Nb. items</span>
         <span>Total</span>
         <span></span>
       </div>
@@ -74,12 +130,26 @@
         >
           <div class="quickView">
             <span>#{o.id.padStart(6, "0")}</span>
-            <Address address={o.buyer} />
+            <Address address={bechToBech(o.buyer, "cosmos")} />
             <span>{translateDate(t.lang, new Date(Number(o.created_at)))}</span>
             <span>
               <span class="status {statusToColor[o.status]}">
-                {o.status}
+                {statusToLabel[o.status]}
               </span>
+            </span>
+            <span class="tracking">
+              <input
+                class="trackingNb"
+                type="text"
+                onclick={(e) => e.stopPropagation()}
+                bind:value={o.trackingNumber}
+                onchange={updateTrackingNb(o)}
+                placeholder="Tracking nb"
+              />
+              <i class="ri-pencil-line"></i>
+            </span>
+            <span>
+              {o.nbItems}
             </span>
             <span>{Decimal.fromAtomics(o.total, 6)} USDC</span>
             <ContextMenu>
@@ -95,17 +165,28 @@
                 </button>
               {/snippet}
               {#snippet options()}
-                <button class="ctxMenu"> Accept order </button>
-                <button class="ctxMenu"> Reject order </button>
+                {#if o.status == "pending"}
+                  <button class="ctxMenu" onclick={acceptOrder(o)}>
+                    Accept order
+                  </button>
+                  <button class="ctxMenu" onclick={rejectOrder(o)}>
+                    Reject order
+                  </button>
+                {/if}
+                {#if o.status == "accepted"}
+                  <button class="ctxMenu" onclick={rejectOrder(o)}>
+                    Dispute order
+                  </button>
+                {/if}
               {/snippet}
             </ContextMenu>
           </div>
           <div class="grid" class:open={o.open}>
-            {#each [...o.products, ...o.products, ...o.products] as p}
+            {#each o.products as p}
               <div class="product">
                 <img src={p.gallery[t.lang][0]} alt="" />
                 <div class="attributes">
-                  <h3>{p.title[t.lang]}</h3>
+                  <h3>{p.qty}x {p.title[t.lang]}</h3>
                   {#each p.attributes as a}
                     <div>
                       <span>{a.trait_type}</span>
@@ -178,7 +259,7 @@
   }
   .table {
     display: grid;
-    grid-template-columns: repeat(5, 1fr) 2rem;
+    grid-template-columns: repeat(7, 1fr) 2rem;
     --parent-bg: var(--neutral-1);
     .head {
       display: contents;
@@ -246,14 +327,41 @@
           border: none;
           padding-right: 1rem;
         }
+        .tracking {
+          display: flex;
+          padding-right: 1rem;
+          i {
+            color: var(--neutral-10);
+            margin-left: -1.5rem;
+            pointer-events: none;
+          }
+          .trackingNb {
+            outline: none;
+            background-color: var(--neutral-3);
+            color: var(--neutral-12);
+            border-radius: 3px;
+            border: none;
+            padding: 0.1rem;
+            padding-left: 0.5rem;
+            flex: 1;
+            min-width: none;
+            border: 1px solid transparent;
+            &:focus {
+              border: 1px solid var(--main-10);
+            }
+          }
+        }
       }
       .grid {
-        padding: 1rem;
-        display: none;
         grid-template-columns: 1fr 1fr 1fr;
         gap: 1rem;
         grid-column: 1/-1;
+        overflow-y: hidden;
+        height: 0;
+        border-bottom: 1px solid var(--neutral-6);
+        padding: 0 1rem;
         &.open {
+          height: max-content;
           display: grid;
         }
         .product {

@@ -1,6 +1,6 @@
 import type { State } from '@/state';
 import type { RequestNonce, RequestToken } from '@common';
-import { assert, assertIsDefinedUnsafe, assertIsValidOrderData, assertIsValidUpdateUserData, bechToBech, isValidBech } from '@common';
+import { assert, assertIsDefinedUnsafe, isValidBech } from '@common';
 import {
   serializeSignDoc,
 } from '@cosmjs/amino';
@@ -84,43 +84,6 @@ const requestToken = new Hono<{ Variables: { state: State } }>()
   })
   .use('/check_token', jwt)
   .get('/check_token', async (c) => {
-    return c.json({
-      error: false,
-    });
-  })
-  .use('/user-data', jwt)
-  .get('/user-data', async (c) => {
-    const state = c.var.state;
-    return c.json({
-      error: false,
-      result: await state.db.getUserData(c.var.user.addr),
-    });
-  })
-  .use('/update-user-data', jwt)
-  .post('/update-user-data', async (c) => {
-    const updateData = await c.req.json();
-    assertIsValidUpdateUserData(updateData);
-    const res = await c.var.state.db.updateUserData(c.var.user.addr, updateData);
-    return c.json({
-      error: false,
-      result: res,
-    });
-  })
-  .use('/create-order', jwt)
-  .post('/create-order', async (c) => {
-    const orderData = await c.req.json();
-    assertIsValidOrderData(orderData);
-    const buyer = c.var.user.addr;
-    const ec = c.var.state.blockchain.ec;
-    if (!ec) return;
-    const onchin = await ec.getOrder({ id: orderData.id });
-    assert(bechToBech(onchin?.buyer, 'cosmos') == buyer, 'Unothorized');
-    await c.var.state.db.createOrderData({
-      id: orderData.id,
-      seller: bechToBech(onchin.seller, 'cosmos'),
-      buyer,
-      postalAddress: orderData.postalAddress,
-    });
     return c.json({
       error: false,
     });

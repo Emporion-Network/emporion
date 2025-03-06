@@ -9,6 +9,8 @@ import fileUploder from '@/services/files';
 import metadata from '@/services/metadata';
 import autocomplete from '@/services/autocomplete';
 import statics from '@/services/statics';
+import order from '@/services/order';
+import user from '@/services/user';
 
 import { wsHandler, websocket } from '@/services/ws/ws';
 import { logger } from 'hono/logger';
@@ -96,6 +98,8 @@ app
   .route('/api/', autocomplete)
   .route('/api/', metadata)
   .route('/api/', wsHandler)
+  .route('/api/', order)
+  .route('/api/', user)
   .onError((e, c) => {
     return c.json({
       error: true,

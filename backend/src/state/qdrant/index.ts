@@ -1,4 +1,4 @@
-import { type Notification, type PostalAddress, type ProductMetadata, type ScrollProducts, stringify, type T, toUUID, type UpdateUserData, type UserData } from '@common';
+import { type Notification, type OrderData, type PostalAddress, type ProductMetadata, type ScrollProducts, stringify, type T, toUUID, type UpdateUserData, type UserData } from '@common';
 import { QdrantClient } from '@qdrant/js-client-rest';
 import { embedDocument } from './embeddings';
 
@@ -451,5 +451,25 @@ export class Db {
     } catch (e) {
       console.log((e as unknown as { data: string }).data);
     }
+  }
+
+  async getOrderData(id: string) {
+    try {
+      return (await this.client.retrieve(this.OrderDataName, {
+        // @ts-expect-error accepts number and bigint
+        ids: [BigInt(id)],
+        with_payload: true,
+      }))[0]?.payload as unknown as OrderData;
+    } catch (e) {
+      console.log((e as unknown as { data: string }).data);
+    }
+  }
+
+  async updateOrderData(id: string, order: OrderData) {
+    await this.client.overwritePayload(this.OrderDataName, {
+      // @ts-expect-error accepts number and bigint
+      points: [BigInt(id)],
+      payload: order as unknown as Record<string, unknown>,
+    });
   }
 }

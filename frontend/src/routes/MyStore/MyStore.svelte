@@ -6,7 +6,7 @@
   import Rating from "@/lib/Rating.svelte";
   import Reviews from "./Reviews.svelte";
   import { getTranslator } from "@/stores/translate.svelte";
-  import { bechToBech } from "@common";
+  import { aggregateRating, bechToBech } from "@common";
   let t = getTranslator();
 </script>
 
@@ -37,8 +37,10 @@
       </div>
       <div class="rating-detail">
         {#await user.getRating(user.address) then r}
+          {@const rt = aggregateRating(r)}
           <div class="avg">
-            {(r.reduce((a, b, i) => a + b * i, 0) / 5).toFixed(2)}
+            {rt.avg_rating.toFixed(1)}
+            <span>({rt.nb_ratings} ratings)</span>
           </div>
           <div>
             <Rating type="long" nb_ratings={r[0]} avg_rating={0}></Rating>
@@ -140,6 +142,15 @@
         font-weight: 900;
         text-align: center;
         margin-bottom: 1rem;
+        display: flex;
+        flex-direction: column;
+        line-height: 3rem;
+        span {
+          font-size: 0.8rem;
+          font-weight: 500;
+          line-height: 1.3rem;
+          color: var(--neutral-11);
+        }
       }
     }
   }
