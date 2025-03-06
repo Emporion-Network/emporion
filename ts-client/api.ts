@@ -6,7 +6,9 @@ import {
   type FileMetaReq,
   type GetCollection,
   type GetCollections,
+  type ReqCreateOrderData,
   type ReqFiles,
+  type ReqProduct,
   type RequestNonce,
   type RequestToken,
   type ReqUpdateUserData,
@@ -183,6 +185,10 @@ export class Api {
     });
   }
 
+  async getProduct(id: ReqProduct['req']) {
+    return this['get' satisfies ReqProduct['method']]<ReqProduct['res']>(`/product/${id}` satisfies ReqProduct['path'])
+  }
+
   async addressAutocomplete(req: AddressAutocomplete['req']) {
     return this['get' satisfies AddressAutocomplete['method']]<AddressAutocomplete['res']>(`/address-autocomplete?q=${req}` satisfies AddressAutocomplete['path'])
   }
@@ -200,6 +206,10 @@ export class Api {
 
   async updateUserData(req: ReqUpdateUserData['req']) {
     return this['post' satisfies ReqUpdateUserData['method']]<ReqUpdateUserData['res']>('/update-user-data' satisfies ReqUpdateUserData['path'], req);
+  }
+
+  async createOrderData(req: ReqCreateOrderData['req']) {
+    return this['post' satisfies ReqCreateOrderData['method']]<ReqCreateOrderData['res']>('/create-order' satisfies ReqCreateOrderData['path'], req);
   }
 }
 

@@ -38,6 +38,14 @@ $effect.root(() => {
   });
 });
 
+
+export const translateDate = (lang: string, date: Date, options: Intl.DateTimeFormatOptions = {
+  dateStyle: "medium"
+}) => {
+  const formater = new Intl.DateTimeFormat(lang, options)
+  return formater.format(date);
+}
+
 export const getTranslator = () => {
   return {
     get lang() {

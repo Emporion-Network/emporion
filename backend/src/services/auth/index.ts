@@ -1,13 +1,12 @@
 import type { State } from '@/state';
 import type { RequestNonce, RequestToken } from '@common';
-import { assert, assertIsDefinedUnsafe, assertIsValidUpdateUserData, isValidBech } from '@common';
+import { assert, assertIsDefinedUnsafe, assertIsValidOrderData, assertIsValidUpdateUserData, bechToBech, isValidBech } from '@common';
 import {
   serializeSignDoc,
 } from '@cosmjs/amino';
 import { Secp256k1, Secp256k1Signature, sha256, ripemd160 } from '@cosmjs/crypto';
 import {
-  fromBase64,
-  toBech32,
+  fromBase64, toBech32,
 } from '@cosmjs/encoding';
 import { Hono } from 'hono';
 import { Jwt } from 'hono/utils/jwt';
@@ -105,6 +104,25 @@ const requestToken = new Hono<{ Variables: { state: State } }>()
     return c.json({
       error: false,
       result: res,
+    });
+  })
+  .use('/create-order', jwt)
+  .post('/create-order', async (c) => {
+    const orderData = await c.req.json();
+    assertIsValidOrderData(orderData);
+    const buyer = c.var.user.addr;
+    const ec = c.var.state.blockchain.ec;
+    if (!ec) return;
+    const onchin = await ec.getOrder({ id: orderData.id });
+    assert(bechToBech(onchin?.buyer, 'cosmos') == buyer, 'Unothorized');
+    await c.var.state.db.createOrderData({
+      id: orderData.id,
+      seller: bechToBech(onchin.seller, 'cosmos'),
+      buyer,
+      postalAddress: orderData.postalAddress,
+    });
+    return c.json({
+      error: false,
     });
   });
 

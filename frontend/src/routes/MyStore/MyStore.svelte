@@ -6,7 +6,8 @@
   import Rating from "@/lib/Rating.svelte";
   import Reviews from "./Reviews.svelte";
   import { getTranslator } from "@/stores/translate.svelte";
-  let t = getTranslator()
+  import { bechToBech } from "@common";
+  let t = getTranslator();
 </script>
 
 <div class="my-store">
@@ -15,7 +16,7 @@
       <div class="wpr">
         <h1>
           <span>{t.t("born_icy_goldfish_heart")}</span>
-          <Address address={user.address!}></Address>
+          <Address address={bechToBech(user.address!, "cosmos")}></Address>
           <span>👋</span>
         </h1>
         <Rating type="long" nb_ratings={0} avg_rating={0}></Rating>
@@ -74,14 +75,14 @@
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-    @include media('<= phone'){
-      .head{
+    gap: 3rem;
+    @include media("<= phone") {
+      .head {
         flex-direction: column;
-        .numbers{
+        .numbers {
           flex-direction: column;
         }
-        .rating-detail{
+        .rating-detail {
           width: 100%;
           justify-content: center;
           align-items: center;

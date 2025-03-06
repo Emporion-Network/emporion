@@ -1,5 +1,10 @@
 import { assert, assertIsDefinedUnsafe, isString, type Result } from ".";
-import type { BlockchainEvent } from "./blockchain";
+
+
+export interface Notification {
+  type: 'create_order',
+  id: string
+}
 
 export interface UserData {
   postalAddresses: {
@@ -10,8 +15,10 @@ export interface UserData {
   id: string,
   positiveProducts: number[],
   negativeProducts: number[],
-  notifications: BlockchainEvent[],
+  notifications: Notification[],
 }
+
+export type PostalAddress = UserData["postalAddresses"][number];
 
 export interface UpdateUserData {
   postalAddresses: {
@@ -22,14 +29,24 @@ export interface UpdateUserData {
   negativeProducts: number[],
 }
 
+
+export interface CreateOrderData {
+  id: string,
+  postalAddress: PostalAddress,
+}
+
+export function assertIsValidPostalAddress(postalAddress: unknown): asserts postalAddress is PostalAddress {
+  assertIsDefinedUnsafe<PostalAddress>(postalAddress, 'invalid address');
+  assert(isString(postalAddress.name), 'invalid name');
+  assert(isString(postalAddress.postalAddress), 'invalid postalAddress');
+}
+
 export function assertIsValidUpdateUserData(userData: unknown): asserts userData is UpdateUserData {
   assertIsDefinedUnsafe<UpdateUserData>(userData, 'UpdateUserData is undefined');
   assert(Array.isArray(userData.postalAddresses), 'postalAddresses is not valid');
   assert(userData.postalAddresses.length < 100, 'postalAddresses is not valid');
   userData.postalAddresses.forEach((a, i) => {
-    assertIsDefinedUnsafe(a, 'invalid address');
-    assert(isString(a.name), 'invalid name');
-    assert(isString(a.postalAddress), 'invalid postalAddress');
+    assertIsValidPostalAddress(a);
     userData.postalAddresses[i] = {
       name: a.name,
       postalAddress: a.postalAddress
@@ -46,6 +63,14 @@ export function assertIsValidUpdateUserData(userData: unknown): asserts userData
   })
 }
 
+
+
+export function assertIsValidOrderData(orderData: unknown): asserts orderData is CreateOrderData {
+  assertIsDefinedUnsafe<CreateOrderData>(orderData, 'invalid OrderData');
+  assert(isString(orderData.id), 'invalid id');
+  assertIsValidPostalAddress(orderData.postalAddress);
+}
+
 export interface ReqUserData {
   req: never,
   res: Result<UserData>
@@ -59,4 +84,11 @@ export interface ReqUpdateUserData {
   res: Result<UserData>
   method: 'post'
   path: '/update-user-data'
+}
+
+export interface ReqCreateOrderData {
+  req: CreateOrderData,
+  res: Result<{}>,
+  method: 'post',
+  path: '/create-order'
 }

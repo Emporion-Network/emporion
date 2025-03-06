@@ -1,4 +1,4 @@
-import { type ProductMetadata, type ScrollProducts, stringify, type T, toUUID, type UpdateUserData, type UserData } from '@common';
+import { type Notification, type PostalAddress, type ProductMetadata, type ScrollProducts, stringify, type T, toUUID, type UpdateUserData, type UserData } from '@common';
 import { QdrantClient } from '@qdrant/js-client-rest';
 import { embedDocument } from './embeddings';
 
@@ -12,6 +12,7 @@ export class Db {
   private client: QdrantClient;
   private ProductMetadataName = 'products';
   private UserDataName = 'user';
+  private OrderDataName = 'orders';
 
   embedDocument: typeof embedDocument;
 
@@ -26,6 +27,7 @@ export class Db {
       await Promise.all([
         this.#initProductMetadataName(),
         this.#initUserData(),
+        this.#initOrderData(),
       ]);
     } catch (e: unknown) {
       console.error((e as { data: string }).data);
@@ -122,6 +124,18 @@ export class Db {
         field_schema: {
           type: 'keyword',
           lookup: true,
+        },
+      });
+    }
+  }
+
+  async #initOrderData() {
+    const e = await (await this.client.collectionExists(this.OrderDataName)).exists;
+    if (!e) {
+      await this.client.createCollection(this.OrderDataName, {
+        vectors: {
+          size: 1,
+          distance: 'Cosine',
         },
       });
     }
@@ -370,5 +384,72 @@ export class Db {
       }
     }
     return user as UserData;
+  }
+
+  async pushNotification(addr: string, n: Notification) {
+    const res = await this.client.query(this.UserDataName, {
+      filter: {
+        must: [{
+          key: 'addr',
+          match: {
+            value: addr,
+          },
+        }],
+      },
+      with_payload: true,
+      consistency: 'all',
+    });
+    const user = res.points[0]?.payload as unknown as UserData;
+    if (!user) return;
+    user.notifications.push(n);
+    await this.client.upsert(this.UserDataName, {
+      points: [{
+        id: user.id,
+        vector: [0],
+        payload: user as unknown as Record<string, unknown>,
+      }],
+    });
+  }
+
+  #newOrderData({
+    id,
+    seller,
+    buyer,
+    postalAddress,
+  }: {
+    id: string
+    seller: string
+    buyer: string
+    postalAddress: PostalAddress
+  }) {
+    return {
+      id,
+      seller,
+      buyer,
+      postalAddress,
+      trackingNumber: '',
+      messages: [],
+    };
+  }
+
+  async createOrderData(orderData: {
+    id: string
+    seller: string
+    buyer: string
+    postalAddress: PostalAddress
+  }) {
+    try {
+      await this.client.upsert(this.OrderDataName, {
+        points: [{
+          // @ts-expect-error accepts number and bigint
+          id: BigInt(orderData.id),
+          vector: [0],
+          payload: this.#newOrderData(orderData) as unknown as Record<string, unknown>,
+        }],
+        wait: true,
+      });
+    } catch (e) {
+      console.log((e as unknown as { data: string }).data);
+    }
   }
 }

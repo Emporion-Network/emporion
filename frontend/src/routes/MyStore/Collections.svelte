@@ -170,6 +170,11 @@
         padding: 3px;
       }
     }
+    @include media("<= tablet-lg") {
+      .grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
     @include media("<= phone") {
       .grid {
         grid-template-columns: 1fr;

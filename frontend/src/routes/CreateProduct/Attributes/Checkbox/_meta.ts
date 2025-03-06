@@ -3,7 +3,7 @@ import { translatedString } from '../../../../stores/translate.svelte';
 export const defaultValue = {
   display_type: 'checkbox' as const,
   trait_type: '',
-  description: translatedString(),
+  label: translatedString(),
   value: false,
 };
 export type Attribute = typeof defaultValue;
@@ -12,7 +12,7 @@ const bindClone = (a: Attribute) => {
   return {
     get display_type() { return a.display_type; },
     get trait_type() { return a.trait_type; },
-    get description() { return a.description; },
+    get label() { return a.label; },
     value: false,
   };
 };

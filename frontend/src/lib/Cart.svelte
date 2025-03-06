@@ -107,7 +107,19 @@
         },
       ],
     );
-    console.log(resp);
+    const ids = resp.events
+      .find((e) => e.type == "wasm")
+      ?.attributes.find((a) => a.key == "order_ids")
+      ?.value.split(", ");
+    await Promise.all(
+      ids?.map(async (id) => {
+        await user.createOrderData({
+          id,
+          postalAddress,
+        });
+      }) || [],
+    );
+    user.cart.value = [];
   };
 </script>
 

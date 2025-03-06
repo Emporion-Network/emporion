@@ -163,7 +163,7 @@ interface ButtonAttribute {
 interface CheckboxAttribute {
   display_type: 'checkbox'
   trait_type: string
-  description: TranslatedString
+  label: TranslatedString
   value: boolean
 };
 
@@ -237,6 +237,13 @@ export interface UpdateMetadata {
   res: Result<string[]>,
   method: 'post',
   path: '/update-metadata',
+}
+
+export interface ReqProduct {
+  req: string,
+  res: Result<ProductMetadata>,
+  method: 'get',
+  path: `/product/${string}`
 }
 
 
@@ -343,7 +350,7 @@ function assertCheckboxAttribute(v: unknown): asserts v is CheckboxAttribute {
   assert(isBoolean(v.value), 'Invalid trait type');
   assert(v.display_type === 'checkbox', 'Invalid display type');
   assert(isString(v.trait_type), 'Invalid trait type');
-  assertIsValidTranslatedString(v.description);
+  assertIsValidTranslatedString(v.label);
 }
 
 function assertColorAttribute(v: unknown): asserts v is ColorAttribute {

@@ -1,7 +1,7 @@
 import { sha256 } from '@cosmjs/crypto';
 import { TxDecoder } from './event';
 import type { State } from '@/state';
-import { bechToBech, ceheckIsVaildMetadata, type BlockchainEvent } from '@common';
+import { bechToBech, ceheckIsVaildMetadata, type BlockchainEvent, type Notification } from '@common';
 import type { ExecuteMsg } from '../../../../ts-client/Emporion.types';
 import { EmporionQueryClient } from '../../../../ts-client/Emporion.client';
 import { CosmWasmClient } from '@cosmjs/cosmwasm-stargate';
@@ -194,6 +194,20 @@ export class Indexer {
             seller: bechToBech(msg.data.sender, 'cosmos'),
             price: content.price ?? product.price,
           });
+        });
+      }
+      if ('create_order' in data) {
+        const orderIds = evts['wasm.order_ids']['0'].split(', ');
+        data.create_order.orders.map(async (o, i) => {
+          const p = o.product_ids[0];
+          const seller = (await this.#state.db.getProduct(p))?.seller;
+          if (!seller) return;
+          const notification = {
+            type: 'create_order',
+            id: orderIds[i],
+          } satisfies Notification;
+          this.#state.getSocket(seller)?.send(JSON.stringify(notification));
+          await this.#state.db.pushNotification(seller, notification);
         });
       }
     } catch (e) {

@@ -34,10 +34,11 @@ const app = new Hono<{ Variables: { state: State } }>()
   })
   .use('/update-metadata', jwt)
   .post('/update-metadata', async (c) => {
+    console.log('here');
     const state = c.var.state;
     const metadata = await c.req.json();
-    assert(Array.isArray(metadata), 'invalid metadata 1');
-    assert(metadata.length > 0, 'invalid metadata 2');
+    assert(Array.isArray(metadata), 'invalid metadata');
+    assert(metadata.length > 0, 'invalid metadata');
     const ids = await Promise.all(metadata.map(async (m: ProductMetadata) => {
       assertIsValidMetadata(m);
       m.seller = c.var.user.addr;
@@ -101,6 +102,13 @@ const app = new Hono<{ Variables: { state: State } }>()
         result: [],
       });
     }
+  })
+  .get('/product/:id', async (c) => {
+    const id = c.req.param('id');
+    return c.json({
+      error: false,
+      result: await c.var.state.db.getProduct(id),
+    });
   })
   .get('/search', async (c) => {
     const {
