@@ -252,6 +252,7 @@ const app = new Hono<{ Variables: { state: State } }>()
                       ratingValue,
                       ratingCount,
                       bestRating,
+                      'name': e.seller,
                     },
                   }
                 : {}),
