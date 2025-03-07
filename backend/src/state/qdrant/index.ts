@@ -230,12 +230,12 @@ export class Db {
           }
         : {}),
       must: [
-        // {
-        //   key: 'listed',
-        //   match: {
-        //     value: true,
-        //   },
-        // },
+        {
+          key: 'listed',
+          match: {
+            value: true,
+          },
+        },
         ...(params.category
           ? [{
               key: 'category',
