@@ -50,7 +50,7 @@
 <div class="create-product">
   <Form bind:products bind:selectedLang bind:selectedProduct></Form>
   <Preview {products} {selectedLang} bind:selectedProduct></Preview>
-  {#if !didTutorial.get()}
+  {#if !didTutorial.get() && false}
     <Tuto {ondone} bind:products></Tuto>
   {/if}
 </div>
