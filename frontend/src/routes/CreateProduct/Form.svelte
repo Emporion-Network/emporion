@@ -366,7 +366,7 @@
         {/if}
       </button>
       {#if !exists}
-        <p class="info">There is a 0.5 USDC publishing fee</p>
+        <p class="info">{t.t("glass_perception_rapid_damaged")}</p>
       {/if}
     </div>
   {:else}
@@ -431,10 +431,10 @@
   .info {
     padding: 1rem;
     margin: 0 1rem;
-    background-color: var(--orange-3);
-    color: var(--orange-12);
-    border: 1px solid var(--orange-6);
+    color: var(--neutral-11);
     border-radius: 3px;
+    text-align: center;
+    font-size: smaller;
   }
   .form {
     flex: 3;
