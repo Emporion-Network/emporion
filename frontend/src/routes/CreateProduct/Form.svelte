@@ -167,6 +167,12 @@
   };
 
   const isValid = $derived.by(() => {
+    const toCreate = products
+      .filter((p) => !("id" in p))
+      .reduce(
+        (acc, c) => acc.plus(Decimal.fromUserInput("0.5", 6)),
+        Decimal.zero(6),
+      );
     return (
       collectionName !== "" &&
       category.length > 0 &&
@@ -177,7 +183,8 @@
           return true;
         } catch {}
         return false;
-      })
+      }) &&
+      Decimal.fromAtomics(user.bank.accepted, 6) > toCreate
     );
   });
 
@@ -358,6 +365,9 @@
           {t.t("crisp_tough_mammoth_fear")}
         {/if}
       </button>
+      {#if !exists}
+        <p class="info">There is a 0.5 USDC publishing fee</p>
+      {/if}
     </div>
   {:else}
     <div class="product" transition:fly={{ x: -100 }}>
@@ -417,6 +427,14 @@
     @include media(">= phone") {
       display: none;
     }
+  }
+  .info {
+    padding: 1rem;
+    margin: 0 1rem;
+    background-color: var(--orange-3);
+    color: var(--orange-12);
+    border: 1px solid var(--orange-6);
+    border-radius: 3px;
   }
   .form {
     flex: 3;
@@ -515,7 +533,6 @@
           background-color: var(--green-4);
           border: 1px solid var(--green-6);
           color: var(--green-12);
-          padding: 0.1rem;
           display: flex;
           gap: 0.1rem;
           justify-content: center;
