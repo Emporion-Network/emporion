@@ -1,9 +1,9 @@
 <script lang="ts">
   import Address from "@/lib/Address.svelte";
-  import { bechToBech } from "@/lib/utils";
+  import { bechToBech, copyToClipboard } from "@/lib/utils";
   import { getTranslator, translateDate } from "@/stores/translate.svelte";
   import { user } from "@/stores/user.svelte";
-  import type { ProductMetadata } from "@common";
+  import type { PostalAddress, ProductMetadata } from "@common";
   import type { Order } from "@ts-client/Emporion.types";
   import { Decimal } from "@cosmjs/math";
   import ContextMenu from "@/lib/ContextMenu.svelte";
@@ -14,6 +14,7 @@
     open: boolean;
     trackingNumber: string;
     nbItems: number;
+    postalAddress: PostalAddress;
   };
   let t = getTranslator();
   let orders: AggragatedOrder[] = $state([]);
@@ -31,6 +32,9 @@
           o.cart.map(async (p) => await user.getProduct(p)),
         );
         const orderData = await user.getOrderData(o.id);
+        if (orderData.error) {
+          throw Error(`Could not load data`);
+        }
         pdts
           .filter((e) => !e.error)
           .map((e) => e.result)
@@ -42,15 +46,13 @@
               map.set(p.id, { ...p, qty: 1 });
             }
           });
-
         return {
           ...o,
           nbItems: pdts.length,
           products: [...map.values()],
           open: false,
-          trackingNumber: orderData.error
-            ? ""
-            : orderData.result.trackingNumber,
+          trackingNumber: orderData.result.trackingNumber,
+          postalAddress: orderData.result.postalAddress,
         };
       }),
     );
@@ -97,6 +99,11 @@
       id: o.id,
       trackingNumber: o.trackingNumber,
     });
+  };
+
+  const copyText = (text: string) => (e: MouseEvent) => {
+    e.stopPropagation();
+    copyToClipboard(text);
   };
 
   $effect(() => {
@@ -182,6 +189,45 @@
             </ContextMenu>
           </div>
           <div class="grid" class:open={o.open}>
+            <div class="info">
+              <div class="postalAddress">
+                <h3>
+                  {t.t("fitting_turbulent_quirky_education")}
+                  <i class="ri-truck-fill"></i>
+                </h3>
+                <div>
+                  <span>{t.t("far_friendship_untimely_text")}: </span>
+                  <button
+                    class="ghost-button"
+                    onclick={copyText(o.postalAddress.name)}
+                    aria-labelledby={t.t("exam_darling_mealy_steel")}
+                  >
+                    <i class="ri-file-copy-line"></i>
+                  </button>
+                  <span>{o.postalAddress.name}</span>
+                </div>
+                <div>
+                  <span>{t.t("discount_admirable_plant_complex")}:</span>
+                  <button
+                    class="ghost-button"
+                    onclick={copyText(o.postalAddress.postalAddress)}
+                    aria-labelledby={t.t("bouncy_remote_candle_new")}
+                  >
+                    <i class="ri-file-copy-line"></i>
+                  </button>
+                  <span>{o.postalAddress.postalAddress}</span>
+                </div>
+              </div>
+              <div class="buttons">
+                {#if o.status == "pending"}
+                  <button class="primary-button">Accept order</button>
+                  <button class="primary-button">Reject order</button>
+                {/if}
+                {#if o.status === "accepted"}
+                  <button class="primary-button">Dispute order</button>
+                {/if}
+              </div>
+            </div>
             {#each o.products as p}
               <div class="product">
                 <img src={p.gallery[t.lang][0]} alt="" />
@@ -360,6 +406,30 @@
         height: 0;
         border-bottom: 1px solid var(--neutral-6);
         padding: 0 1rem;
+        .info {
+          grid-column: 1/-1;
+          display: flex;
+          .postalAddress {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            div {
+              display: flex;
+              button {
+                margin-left: auto;
+                margin-right: 0.5rem;
+              }
+            }
+          }
+          .buttons {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            gap: 1rem;
+          }
+        }
         &.open {
           height: max-content;
           display: grid;

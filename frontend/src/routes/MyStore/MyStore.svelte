@@ -8,6 +8,17 @@
   import { getTranslator } from "@/stores/translate.svelte";
   import { aggregateRating, bechToBech } from "@common";
   let t = getTranslator();
+  let m = $state(aggregateRating([0, 0, 0, 0, 0, 0]));
+  const updateRating = async () => {
+    const ec = await user.ec;
+    const r = await ec.getMark({ addr: user.address! });
+    m = aggregateRating(r);
+  };
+  $effect(() => {
+    if (user.address) {
+      updateRating();
+    }
+  });
 </script>
 
 <div class="my-store">
@@ -19,7 +30,7 @@
           <Address address={bechToBech(user.address!, "cosmos")}></Address>
           <span>👋</span>
         </h1>
-        <Rating type="long" nb_ratings={0} avg_rating={0}></Rating>
+        <Rating type="long" {...m}></Rating>
         <div class="numbers">
           <div class="number">
             <span>{t.t("chunky_gray_ox_jest")}</span>

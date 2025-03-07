@@ -58,6 +58,12 @@ export const blur = () => {
 }
 
 
+export async function copyToClipboard(text: string) {
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch (err) { }
+}
+
 
 export function findMap<T, R>(arr: T[], cb: (v: T) => R) {
   for (const i of arr) {

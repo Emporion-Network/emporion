@@ -322,13 +322,11 @@ class User extends Api {
     })
   }
 
-  async rateOrder(id: string) {
-    const ec = await this.ec as EmporionClient;
-    ec.upsertRating({
-      comment: "Test: Great expecirence",
-      mark: 4,
-      orderId: id,
-      user: bechToBech(user.address!, 'juno'),
+  async getOrdersFromMe() {
+    const ec = await this.ec;
+    return ec.listOrdersFromUser({
+      addr: this.address!,
+      pagination: {}
     })
   }
 

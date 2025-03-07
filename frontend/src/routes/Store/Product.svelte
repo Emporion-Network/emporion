@@ -46,7 +46,7 @@
         <Rating type="long" {...rating} />
       </div>
       <button class="primary-accent-button" onclick={addToCart(p)}>
-        Add to cart
+        {t.t("curvy_department_senior_couple")}
       </button>
     </div>
   {/if}
