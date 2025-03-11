@@ -377,8 +377,8 @@
       justify-content: center;
       align-items: center;
       gap: 2rem;
-      animation: in 500ms 500ms ease-in forwards;
-      opacity: 0;
+      animation: in 500ms ease-in forwards;
+      opacity: 1;
       z-index: 2;
       width: 100%;
       height: 100%;
