@@ -29,7 +29,7 @@ const uploadFile = new Hono()
     }
     const fileNames = files.map(async (f, i) => {
       const fileName = `${c.var.user.addr}/${randomUUIDv7()}`;
-      meta[i].path = `https://${c.var.state.domainName}/api/files/fileName`;
+      meta[i].path = `https://${c.var.state.domainName}/api/files/${fileName}`;
       const file = c.var.state.fs.file(fileName, {
         type: f.type,
         acl: 'public-read',
