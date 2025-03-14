@@ -336,7 +336,7 @@ class User extends Api {
 
 export const user = new User({
   apiRoot: `${location.protocol}//${location.hostname}:${location.port}/api/`,
-  rpcUrl: 'https://juno-rpc.publicnode.com:443',
+  rpcUrl: 'https://juno-rpc.polkachu.com',
   contractAddress: 'juno18w8zvwp5g7truxq6gjae0anxydpqdvwfgx0t9rudhvtz3wtksdesgc6sm7',
   stakeAddress: 'juno1jz0jvrea3jxzt3xrz3h5f962epsg7ljtlexj02lnue6dftdc520qgckeln',
   rewardsAddress: 'juno1ehg2q7a9pj5pv99wv2tngqts5z5ydc3uadk73805fjxxxyl3qvhq5prf72',
