@@ -123,7 +123,10 @@
   };
 
   const cloneProduct = (productId: number) => {
-    products.push($state.snapshot(products[productId]));
+    const clone = $state.snapshot(products[productId]);
+    //@ts-ignore
+    delete clone.id;
+    products.push(clone);
   };
 
   const selectProduct = (productId: number) => {
