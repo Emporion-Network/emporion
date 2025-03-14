@@ -16,6 +16,10 @@
   const addToCart = (product: ProductMetadata) => () => {
     window.dispatchEvent(new CustomEvent("cart-push", { detail: product }));
   };
+  const redirect = (p: ProductMetadata) => () => {
+    l.goTo(`/product?p=${p.id}`);
+    return false;
+  };
 </script>
 
 <div class="product">
@@ -38,7 +42,7 @@
     <img src={p.gallery[t.lang][0]} alt={p.title[t.lang]} />
     <div class="info">
       <div class="title">
-        <a onclick={() => l.goTo(`/product?p=${p.id}`)} href="#/">
+        <a onclick={redirect(p)} href={`/product?p=${p.id}`}>
           <h2>{p.title[t.lang]}</h2>
         </a>
         <h3>{Decimal.fromAtomics(p.price, 6)} USDC</h3>

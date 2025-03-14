@@ -265,9 +265,12 @@ class User extends Api {
 
   async createProducts(p: Parameters<Api['uploadMetadata']>['0']) {
     try {
+      const params = await this.getParams();
       if (!this.address) return;
-      let urls = await this.uploadMetadata(p);
-      if (urls.error) return;
+      // let urls = await this.uploadMetadata(p);
+      // if (urls.error) return;
+      const urls = { result: p.map(e => "some url") };
+      console.log(this.acceptedDenom, urls.result.reduce((a, _, i) => a.plus(Decimal.fromAtomics(params.publish_fee, 6)), Decimal.zero(6)).atomics)
       const ec = await this.ec as EmporionClient;
       await ec.createBulkProducts({
         products: urls.result.map((url, i) => {
@@ -279,7 +282,7 @@ class User extends Api {
         })
       }, "auto", "", [
         {
-          amount: urls.result.reduce((a, _, i) => a.plus(Decimal.fromUserInput(i.toString(), 6)), Decimal.zero(6)).atomics,
+          amount: urls.result.reduce((a, _, i) => a.plus(Decimal.fromAtomics(params.publish_fee, 6)), Decimal.zero(6)).atomics,
           denom: this.acceptedDenom,
         }
       ])
