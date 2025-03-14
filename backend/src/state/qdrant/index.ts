@@ -165,8 +165,8 @@ export class Db {
   }
 
   async getCollection(id: string) {
-    const seller = (await this.getProduct(id))?.seller;
-    if (!seller) return [];
+    const p = (await this.getProduct(id));
+    if (!p?.seller) return [];
     return (await this.client.queryGroups(this.ProductMetadataName, {
       group_by: 'collection',
       filter: {
@@ -174,7 +174,13 @@ export class Db {
           {
             key: 'seller',
             match: {
-              value: seller,
+              value: p.seller,
+            },
+          },
+          {
+            key: 'collection',
+            match: {
+              value: p.collection,
             },
           },
         ],

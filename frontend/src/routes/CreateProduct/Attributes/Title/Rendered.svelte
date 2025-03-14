@@ -22,8 +22,6 @@
       pref = attributes.map((_, i) => i);
     });
   });
-
-  $inspect(attributes);
 </script>
 
 <h2>{attributes[0]?.value?.[selectedLang]}</h2>
