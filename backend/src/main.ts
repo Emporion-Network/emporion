@@ -71,6 +71,7 @@ const state = new State({
   wsEndpoints: WS_ENDPOINTS,
   rpcEndpoints: RPC_ENDPOINTS,
   emporionContractAddress: EMPORION_CONTRACT_ADDRESS,
+
 });
 
 app
