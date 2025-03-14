@@ -276,7 +276,7 @@
         outline: none;
         display: flex;
         gap: 0.5rem;
-        padding: 0 0.1rem;
+        padding: 0 0.5rem;
         justify-content: start;
         align-items: center;
         cursor: pointer;
