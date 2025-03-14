@@ -158,7 +158,7 @@
               <button
                 class="primary-accent-button"
                 disabled={!selected}
-                onclick={() => onfile(`${user.root}/files/${selected!.path}`)}
+                onclick={() => onfile(selected?.path)}
                 >{t.t("extra_tough_finch_savor")}</button
               >
             </div>
