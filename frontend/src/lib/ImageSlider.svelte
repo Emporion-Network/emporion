@@ -71,6 +71,8 @@
         outline: none;
         color: var(--neutral-12);
         aspect-ratio: 1/1;
+        width: 2rem;
+        height: 2rem;
         border-radius: 3px;
         cursor: pointer;
         &.hide {
@@ -80,6 +82,7 @@
     }
     img {
       max-height: 80vh;
+      min-width: 100%;
       aspect-ratio: 1/1;
       object-fit: contain;
       background-color: var(--neutral-3);
