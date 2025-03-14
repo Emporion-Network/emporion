@@ -209,6 +209,8 @@
         cursor: pointer;
         outline: none;
         display: none;
+        width: 2rem;
+        height: 2rem;
       }
     }
     .main-img {
@@ -234,6 +236,8 @@
       border: none;
       outline: none;
       aspect-ratio: 1/1;
+      width: 2rem;
+      height: 2rem;
       border-radius: 3px;
       align-self: flex-start;
       border-style: solid;
