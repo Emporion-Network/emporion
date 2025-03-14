@@ -128,6 +128,7 @@ export class Indexer {
         const chainIds = evts['wasm.product_ids']['0'].split(', ');
         const inserts = data.create_bulk_products.products.map(async (d, i) => {
           const url = d.meta_data_url;
+          console.log(url);
           const metadata = await (await fetch(url)).json();
           if (!ceheckIsVaildMetadata(metadata)) return;
           const productId = chainIds[i];

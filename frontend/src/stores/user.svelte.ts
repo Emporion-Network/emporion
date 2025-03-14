@@ -267,10 +267,8 @@ class User extends Api {
     try {
       const params = await this.getParams();
       if (!this.address) return;
-      // let urls = await this.uploadMetadata(p);
-      // if (urls.error) return;
-      const urls = { result: p.map(e => "some url") };
-      console.log(this.acceptedDenom, urls.result.reduce((a, _, i) => a.plus(Decimal.fromAtomics(params.publish_fee, 6)), Decimal.zero(6)).atomics)
+      let urls = await this.uploadMetadata(p);
+      if (urls.error) return;
       const ec = await this.ec as EmporionClient;
       await ec.createBulkProducts({
         products: urls.result.map((url, i) => {
