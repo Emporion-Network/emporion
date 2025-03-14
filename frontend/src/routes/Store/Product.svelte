@@ -16,7 +16,9 @@
   const addToCart = (product: ProductMetadata) => () => {
     window.dispatchEvent(new CustomEvent("cart-push", { detail: product }));
   };
-  const redirect = (p: ProductMetadata) => () => {
+  const redirect = (p: ProductMetadata) => (e: MouseEvent) => {
+    e.preventDefault();
+    e.stopImmediatePropagation();
     l.goTo(`/product?p=${p.id}`);
     return false;
   };
