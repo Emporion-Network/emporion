@@ -58,6 +58,8 @@
     return !looseEq(prevProducts, products);
   });
 
+  let referer = $state("");
+
   const addProduct = () => {
     products.push({
       title: translatedString(),
@@ -151,11 +153,14 @@
     const toCreate = products.filter((p) => !("id" in p));
     if (toCreate.length > 0) {
       await user.createProducts(
-        toCreate.map((p) => ({
-          ...p,
-          category,
-          collection: collectionName,
-        })),
+        toCreate.map(
+          (p) => ({
+            ...p,
+            category,
+            collection: collectionName,
+          }),
+          referer,
+        ),
       );
     }
     if (toUpdate.length > 0) {
@@ -356,6 +361,12 @@
           </button>
         </div>
       </Collapsable>
+      <Input
+        type="text"
+        label={t.t("lost_chart_limping_garage")}
+        placeholder={t.t("lost_chart_limping_garage")}
+        bind:value={referer}
+      />
       <button
         onclick={createProducts}
         class="primary-button"

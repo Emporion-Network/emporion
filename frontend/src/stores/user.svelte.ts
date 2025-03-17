@@ -263,7 +263,7 @@ class User extends Api {
     } catch { }
   }
 
-  async createProducts(p: Parameters<Api['uploadMetadata']>['0']) {
+  async createProducts(p: Parameters<Api['uploadMetadata']>['0'], memo = "") {
     try {
       const params = await this.getParams();
       if (!this.address) return;
