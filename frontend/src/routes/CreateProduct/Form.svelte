@@ -445,7 +445,7 @@
     }
   }
   .wpr-side {
-    padding: 0 0.5rem;
+    padding: 0 1rem;
   }
   .info {
     padding: 1rem;
