@@ -361,12 +361,14 @@
           </button>
         </div>
       </Collapsable>
-      <Input
-        type="text"
-        label={t.t("lost_chart_limping_garage")}
-        placeholder={t.t("lost_chart_limping_garage")}
-        bind:value={referer}
-      />
+      <div class="wpr-side">
+        <Input
+          type="text"
+          label={t.t("lost_chart_limping_garage")}
+          placeholder={t.t("lost_chart_limping_garage")}
+          bind:value={referer}
+        />
+      </div>
       <button
         onclick={createProducts}
         class="primary-button"
@@ -441,6 +443,9 @@
     @include media(">= phone") {
       display: none;
     }
+  }
+  .wpr-side {
+    padding: 0 0.5rem;
   }
   .info {
     padding: 1rem;
