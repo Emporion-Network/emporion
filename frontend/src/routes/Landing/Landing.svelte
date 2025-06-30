@@ -72,6 +72,13 @@
         >
           <button>{t.t("fluffy_frail_myna_embrace")}</button>
         </a>
+        <a
+          href="https://streamswap.io/osmosis/streams"
+          target="_blank"
+          rel="noopener"
+        >
+          <button>{"Streamswap"}</button>
+        </a>
       </div>
     </div>
   </div>
