@@ -77,7 +77,7 @@
           target="_blank"
           rel="noopener"
         >
-          <button>{"Streamswap"}</button>
+          <button>{"Buy on Streamswap"}</button>
         </a>
       </div>
     </div>
